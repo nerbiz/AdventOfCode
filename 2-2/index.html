@@ -9,6 +9,7 @@
 
             let position = 0;
             let depth = 0;
+            let aim = 0;
 
             dataArray.forEach(entry => {
                 let [direction, amount] = entry.split(' ');
@@ -17,12 +18,13 @@
                 switch (direction) {
                     case 'forward':
                         position += amount;
+                        depth += (aim * amount);
                         break;
                     case 'down':
-                        depth += amount;
+                        aim += amount;
                         break;
                     case 'up':
-                        depth -= amount;
+                        aim -= amount;
                         break;
                     
                 }
