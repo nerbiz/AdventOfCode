@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <script type="module">
+            import dataArray from './data.js';
+
+            let position = 0;
+            let depth = 0;
+
+            dataArray.forEach(entry => {
+                let [direction, amount] = entry.split(' ');
+                amount = parseInt(amount, 10);
+
+                switch (direction) {
+                    case 'forward':
+                        position += amount;
+                        break;
+                    case 'up':
+                        depth -= amount;
+                        break;
+                    case 'down':
+                        depth += amount;
+                        break;
+                }
+            });
+
+            console.log(position * depth);
+        </script>
+    </body>
+</html>

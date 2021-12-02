@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <script type="module">
+            import dataArray from './data.js';
+
+            let increasedCount = 0;
+            dataArray.forEach((number, index) => {
+                // Skip the first number
+                if (index === 0) {
+                    return;
+                }
+
+                if (number > dataArray[index - 1]) {
+                    increasedCount++;
+                }
+            });
+
+            console.log(increasedCount);
+        </script>
+    </body>
+</html>
