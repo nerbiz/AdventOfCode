@@ -2,11 +2,17 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
     </head>
     <body>
-        <script type="module">
-            import dataArray from './data.js';
+        <p id="answer"></p>
 
+        <script src="data.js"></script>
+        <script>
             let position = 0;
             let depth = 0;
 
@@ -28,7 +34,7 @@
                 }
             });
 
-            console.log(position * depth);
+            document.querySelector('#answer').innerText = position * depth;
         </script>
     </body>
 </html>

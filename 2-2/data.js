@@ -1,4 +1,4 @@
-export default [
+const dataArray = [
     'forward 9',
     'down 9',
     'down 6',

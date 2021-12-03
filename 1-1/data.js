@@ -1,4 +1,4 @@
-export default [
+const dataArray = [
     176,
     184,
     196,
