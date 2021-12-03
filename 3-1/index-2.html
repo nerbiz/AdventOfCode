@@ -18,23 +18,14 @@
             const occurrences = dataArray[0].split('').map(bit => [0, 0]);
 
             // Increase the bit counts
-            dataArray.forEach(binaryString => binaryString.split('')
-                .forEach((bit, index) => occurrences[index][bit]++)
-            );
+            dataArray.forEach(binaryString => binaryString.split('').forEach((bit, index) => occurrences[index][bit]++));
 
             // Determine the gamma and epsilon rates
-            let gammaRate = epsilonRate = '';
-            occurrences.forEach(counters => {
-                // Majority of 1 becomes true, majority of 0 becomes false
-                const status = counters[1] > counters[0];
-                
-                // Convert true/false to 1/0
-                gammaRate += Number(status);
-                epsilonRate += Number(! status);
-            });
+            const gammaRate = occurrences.map(counters => (counters[0] > counters[1]) ? '0' : '1');
+            const epsilonRate = gammaRate.map(bit => (bit === '0') ? '1' : '0').join('');
 
             // Multiply the rates
-            answer.innerText = parseInt(gammaRate, 2) * parseInt(epsilonRate, 2);
+            answer.innerText = parseInt(gammaRate.join(''), 2) * parseInt(epsilonRate, 2);
         </script>
     </body>
 </html>
