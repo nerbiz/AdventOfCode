@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script src="data.js"></script> 
+        <script>
+            // Create the occurrences array with 2 counters per bit position
+            const occurrences = dataArray[0].split('').map(bit => [0, 0]);
+
+            // Increase the bit counts
+            dataArray.forEach(binaryString => binaryString.split('')
+                .forEach((bit, index) => occurrences[index][bit]++)
+            );
+
+            // Determine the gamma and epsilon rates
+            let gammaRate = epsilonRate = '';
+            occurrences.forEach(counters => {
+                // Majority of 1 becomes true, majority of 0 becomes false
+                const status = counters[1] > counters[0];
+                
+                // Use type juggling to convert true/false to 1/0
+                gammaRate += Number(status).toString();
+                epsilonRate += Number(! status).toString();
+            });
+
+            // Multiply the rates
+            answer.innerText = parseInt(gammaRate, 2) * parseInt(epsilonRate, 2);
+        </script>
+    </body>
+</html>
