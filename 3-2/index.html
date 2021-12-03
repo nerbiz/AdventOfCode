@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script src="data.js"></script>
+        <script>
+            const binaryStringLength = dataArray[0].length;
+            let zeroes, ones;
+            // Clone the data array (keep the original)
+            let remainingArray = dataArray.map(item => item);
+            let stringIndex = -1;
+
+            while (++stringIndex < binaryStringLength && remainingArray.length > 1) {
+                zeroes = remainingArray.filter(binaryString => binaryString.charAt(stringIndex) === '0');
+                ones = remainingArray.filter(binaryString => binaryString.charAt(stringIndex) === '1');
+
+                // Decide which part of the array to keep
+                if (ones.length > zeroes.length || ones.length === zeroes.length) {
+                    remainingArray = ones;
+                } else {
+                    remainingArray = zeroes;
+                }
+            }
+
+            const oxygenGeneratorRating = remainingArray[0];
+
+
+
+            remainingArray = dataArray.map(item => item);
+            stringIndex = -1;
+
+            while (++stringIndex < binaryStringLength && remainingArray.length > 1) {
+                zeroes = remainingArray.filter(binaryString => binaryString.charAt(stringIndex) === '0');
+                ones = remainingArray.filter(binaryString => binaryString.charAt(stringIndex) === '1');
+
+                // Decide which part of the array to keep
+                if (zeroes.length < ones.length || zeroes.length === ones.length) {
+                    remainingArray = zeroes;
+                } else {
+                    remainingArray = ones;
+                }
+            }
+
+            co2ScrubberRating = remainingArray[0];
+
+            answer.innerText = parseInt(oxygenGeneratorRating, 2) * parseInt(co2ScrubberRating, 2);
+        </script>
+    </body>
+</html>
