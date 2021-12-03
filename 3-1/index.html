@@ -14,6 +14,7 @@
         <script src="data.js"></script> 
         <script>
             // Create the occurrences array with 2 counters per bit position
+            // Index 0 is the counter for zeroes, index 1 for ones
             const occurrences = dataArray[0].split('').map(bit => [0, 0]);
 
             // Increase the bit counts
@@ -27,9 +28,9 @@
                 // Majority of 1 becomes true, majority of 0 becomes false
                 const status = counters[1] > counters[0];
                 
-                // Use type juggling to convert true/false to 1/0
-                gammaRate += Number(status).toString();
-                epsilonRate += Number(! status).toString();
+                // Convert true/false to 1/0
+                gammaRate += Number(status);
+                epsilonRate += Number(! status);
             });
 
             // Multiply the rates
