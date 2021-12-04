@@ -33,7 +33,7 @@
             // Decides which array to keep (oxygen rules)
             const keepOxygenRules = (zeroes, ones) => 
                 (ones.length > zeroes.length || ones.length === zeroes.length) ? ones : zeroes;
-            
+
             // Decides which array to keep (co2 rules)
             const keepCo2Rules = (zeroes, ones) =>
                 (zeroes.length < ones.length || zeroes.length === ones.length) ? zeroes : ones;

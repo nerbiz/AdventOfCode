@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script src="Board.js"></script>
+        <script src="data.js"></script>
+        <script>
+            const boards = boardsData.map(boardNumbers => new Board(boardNumbers));
+            let win = false;
+
+            for (let i = 0; i < drawnNumbers.length; i++) {
+                if (win === true) {
+                    break;
+                }
+
+                const number = drawnNumbers[i];
+
+                for (let j = 0; j < boards.length; j++) {
+                    const board = boards[j];
+                    
+                    if (board.checkWin(number) === true) {
+                        answer.innerText = board.calculateScore(number);
+                        win = true;
+                        break;
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>
