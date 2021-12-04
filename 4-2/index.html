@@ -15,25 +15,22 @@
         <script src="data.js"></script>
         <script>
             const boards = boardsData.map((boardNumbers, index) => new Board(index, boardNumbers));
-            let win = false;
+            const winningBoards = [];
 
             for (let i = 0; i < drawnNumbers.length; i++) {
-                if (win === true) {
-                    break;
-                }
-
                 const number = drawnNumbers[i];
 
-                for (let j = 0; j < boards.length; j++) {
+                // Loop backwards, because of splicing
+                for (let j = boards.length - 1; j > 0; j--) {
                     const board = boards[j];
                     
                     if (board.checkWin(number) === true) {
-                        answer.innerText = board.calculateScore(number);
-                        win = true;
-                        break;
+                        winningBoards.push(boards.splice(j, 1)[0]);
                     }
                 }
             }
+
+            answer.innerText = winningBoards[winningBoards.length - 1].calculateScore();
         </script>
     </body>
 </html>
