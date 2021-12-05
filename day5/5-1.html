@@ -12,10 +12,10 @@
         <p id="answer"></p>
 
         <script type="module">
-            import FileReader from './FileReader.js';
-            import Parser from './5-1/Parser.js';
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
 
-            const fileReader = new FileReader('./5-1/data.txt', new Parser());
+            const fileReader = new FileReader('./data.txt', new Parser());
             await fileReader.read();
 
             const { coordinates } = fileReader.parse();
@@ -49,15 +49,15 @@
                     }
                 });
             
-                // Find the points that have more than 1 occurrence
-                let counter = 0;
-                for (const point in occurrences) {
-                    if (occurrences[point] > 1) {
-                        counter++;
-                    }
+            // Find the points that have more than 1 occurrence
+            let counter = 0;
+            for (const point in occurrences) {
+                if (occurrences[point] > 1) {
+                    counter++;
                 }
+            }
 
-                answer.innerText = counter;
+            answer.innerText = counter;
         </script>
     </body>
 </html>
