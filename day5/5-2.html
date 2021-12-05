@@ -20,8 +20,7 @@
 
             const coordinates = fileReader.parse();
             const occurrences = {};
-            
-            // Keep only horizontal lines
+
             coordinates.forEach(({from, to}) => {
                 // Get the amount of steps for the loop
                 const loopSteps = (from.x !== to.x)
