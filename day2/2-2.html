@@ -11,13 +11,20 @@
     <body>
         <p id="answer"></p>
 
-        <script src="data.js"></script> 
-        <script>
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            await fileReader.read();
+
+            const commands = fileReader.parse();
+
             let position = 0;
             let depth = 0;
             let aim = 0;
 
-            dataArray.forEach(entry => {
+            commands.forEach(entry => {
                 let [direction, amount] = entry.split(' ');
                 amount = parseInt(amount, 10);
 
