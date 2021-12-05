@@ -11,12 +11,19 @@
     <body>
         <p id="answer"></p>
 
-        <script src="data.js"></script>
-        <script>
-            const binaryStringLength = dataArray[0].length;
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            await fileReader.read();
+
+            const binaryStrings = fileReader.parse();
+
+            const binaryStringLength = binaryStrings[0].length;
             let zeroes, ones;
             // Clone the data array (keep the original)
-            let remainingArray = dataArray.map(item => item);
+            let remainingArray = binaryStrings.map(item => item);
             let stringIndex = -1;
 
             while (++stringIndex < binaryStringLength && remainingArray.length > 1) {
@@ -35,7 +42,7 @@
 
 
 
-            remainingArray = dataArray.map(item => item);
+            remainingArray = binaryStrings.map(item => item);
             stringIndex = -1;
 
             while (++stringIndex < binaryStringLength && remainingArray.length > 1) {
@@ -50,7 +57,7 @@
                 }
             }
 
-            co2ScrubberRating = remainingArray[0];
+            const co2ScrubberRating = remainingArray[0];
 
             answer.innerText = parseInt(oxygenGeneratorRating, 2) * parseInt(co2ScrubberRating, 2);
         </script>

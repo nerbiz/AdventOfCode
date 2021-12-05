@@ -11,14 +11,22 @@
     <body>
         <p id="answer"></p>
 
-        <script src="data.js"></script>
-        <script>
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            await fileReader.read();
+
+            const binaryStrings = fileReader.parse();
+
             // Create the occurrences array with 2 counters per bit position
             // Index 0 is the counter for zeroes, index 1 for ones
-            const occurrences = dataArray[0].split('').map(bit => [0, 0]);
+            const occurrences = binaryStrings[0].split('').map(bit => [0, 0]);
 
             // Increase the bit counts
-            dataArray.forEach(binaryString => binaryString.split('').forEach((bit, index) => occurrences[index][bit]++));
+            binaryStrings.forEach(binaryString => binaryString.split('')
+                .forEach((bit, index) => occurrences[index][bit]++));
 
             // Determine the gamma and epsilon rates
             const gammaRate = occurrences.map(counters => (counters[0] > counters[1]) ? '0' : '1');

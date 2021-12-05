@@ -11,9 +11,16 @@
     <body>
         <p id="answer"></p>
 
-        <script src="data.js"></script>
-        <script>
-            const binaryStringLength = dataArray[0].length;
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            await fileReader.read();
+
+            const binaryStrings = fileReader.parse();
+
+            const binaryStringLength = binaryStrings[0].length;
 
             // Reduce a data array to a single value, accoring to a rules function
             const reduceArray = (inputArray, rulesFunction) => {
@@ -21,8 +28,8 @@
 
                 while (++stringIndex < binaryStringLength && inputArray.length > 1) {
                     // Get parts of the array, where the character at the specified index is 0 or 1
-                    zeroes = inputArray.filter(binaryString => binaryString.charAt(stringIndex) === '0');
-                    ones = inputArray.filter(binaryString => binaryString.charAt(stringIndex) === '1');
+                    const zeroes = inputArray.filter(binaryString => binaryString.charAt(stringIndex) === '0');
+                    const ones = inputArray.filter(binaryString => binaryString.charAt(stringIndex) === '1');
 
                     inputArray = rulesFunction(zeroes, ones);
                 }
@@ -39,8 +46,8 @@
                 (zeroes.length < ones.length || zeroes.length === ones.length) ? zeroes : ones;
 
             // Get the ratings
-            const oxygenGeneratorRating = reduceArray(dataArray, keepOxygenRules);
-            const co2ScrubberRating = reduceArray(dataArray, keepCo2Rules);
+            const oxygenGeneratorRating = reduceArray(binaryStrings, keepOxygenRules);
+            const co2ScrubberRating = reduceArray(binaryStrings, keepCo2Rules);
 
             answer.innerText = parseInt(oxygenGeneratorRating, 2) * parseInt(co2ScrubberRating, 2);
         </script>
