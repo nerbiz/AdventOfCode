@@ -1,14 +1,9 @@
 export default class
 {
-    constructor()
-    {
-        this.parsedData = {};
-    }
-
     /**
      * Parse lines into data
      * @param {array} linesArray An array of lines from a file
-     * @returns {object} Key:value pairs of parsed data
+     * @returns {array}
      */
     parse(linesArray)
     {
@@ -27,8 +22,6 @@ export default class
             });
         });
 
-        this.parsedData = { coordinates };
-
-        return this.parsedData;
+        return coordinates;
     }
 }

@@ -1,14 +1,9 @@
 export default class
 {
-    constructor()
-    {
-        this.parsedData = {};
-    }
-
     /**
      * Parse lines into data
      * @param {array} linesArray An array of lines from a file
-     * @returns {object} Key:value pairs of parsed data
+     * @returns {object}
      */
     parse(linesArray)
     {
@@ -23,7 +18,6 @@ export default class
         linesArray.shift();
 
         let boardNumbers = [];
-
         linesArray.map(line => line.trim())
             .forEach(line => {
                 // When an empty line is reached, a board is complete
@@ -40,8 +34,6 @@ export default class
                 boardNumbers = boardNumbers.concat(numbers);
             });
 
-        this.parsedData = parsedData;
-
-        return this.parsedData;
+        return parsedData;
     }
 }
