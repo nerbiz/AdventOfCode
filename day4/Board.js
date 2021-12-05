@@ -1,4 +1,4 @@
-class Board
+export default class
 {
     /**
      * @param {number} identifier The identifier of the board
@@ -9,6 +9,7 @@ class Board
         this.identifier = identifier;
         this.rows = [];
         this.columns = [];
+        this.winningNumber = null;
 
         // Populate the rows
         for (let i = 0; i < 5; i++) {
@@ -52,6 +53,7 @@ class Board
 
                 // A row or column has been completed
                 if (row.length === 0 || column.length === 0) {
+                    this.winningNumber = number;
                     return true;
                 }
             }
@@ -61,14 +63,13 @@ class Board
     }
 
     /**
-     * @param {number} winningNumber The number that made this board win
      * @returns {number}
      */
-    calculateScore(winningNumber)
+    calculateScore()
     {
         let score = 0;
         this.rows.forEach(row => score += row.reduce((previous, current) => previous + current, 0));
 
-        return score * winningNumber;
+        return score * this.winningNumber;
     }
 }
