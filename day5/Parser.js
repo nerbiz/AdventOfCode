@@ -28,6 +28,7 @@ export default class
         });
 
         this.parsedData = { coordinates };
+
         return this.parsedData;
     }
 }

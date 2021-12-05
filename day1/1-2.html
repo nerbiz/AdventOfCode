@@ -11,17 +11,24 @@
     <body>
         <p id="answer"></p>
 
-        <script src="data.js"></script>
-        <script>
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            await fileReader.read();
+
+            const numbers = fileReader.parse();
+
             let increasedCount = 0;
-            dataArray.forEach((number, index) => {
+            numbers.forEach((number, index) => {
                 // Skip the first number
                 if (index === 0) {
                     return;
                 }
 
-                const sumOne = dataArray[index - 1] + number + dataArray[index + 1];
-                const sumTwo = number + dataArray[index + 1] + dataArray[index + 2];
+                const sumOne = numbers[index - 1] + number + numbers[index + 1];
+                const sumTwo = number + numbers[index + 1] + numbers[index + 2];
 
                 if (sumTwo > sumOne) {
                     increasedCount++;
