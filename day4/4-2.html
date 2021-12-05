@@ -16,7 +16,7 @@
             import Parser from './Parser.js';
             import Board from './Board.js';
 
-            const fileReader = new FileReader('./data.txt', new Parser());
+            const fileReader = new FileReader('./data.txt', new Parser(), false);
             await fileReader.read();
 
             const { drawnNumbers, boardsNumbers } = fileReader.parse();
