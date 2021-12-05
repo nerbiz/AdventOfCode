@@ -20,7 +20,6 @@
             await fileReader.read();
 
             const { drawnNumbers, boardsNumbers } = fileReader.parse();
-            console.log(boardsNumbers);
 
             const boards = boardsNumbers.map((boardNumbers, index) => new Board(index, boardNumbers));
             let win = false;
