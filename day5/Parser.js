@@ -13,12 +13,12 @@ export default class
             const [left, right] = line.split(' -> ');
             
             // Parse the 'from' and 'to' coordinates
-            const [fromX, toX] = left.split(',').map(number => parseInt(number, 10));
-            const [fromY, toY] = right.split(',').map(number => parseInt(number, 10));
+            const [fromX, fromY] = left.split(',').map(number => parseInt(number, 10));
+            const [toX, toY] = right.split(',').map(number => parseInt(number, 10));
 
             coordinates.push({
-                from: {x: fromX, y: toX},
-                to: {x: fromY, y: toY},
+                from: {x: fromX, y: fromY},
+                to: {x: toX, y: toY},
             });
         });
 
