@@ -19,8 +19,50 @@
             await fileReader.read();
 
             let numbersList = fileReader.parse();
-            let totalCount = numbersList.length;
-            let totalDaysLeft = 80;
+            let totalDays = 256;
+
+            // Group the fish that give birth at the same time
+            let occurrences = {};
+            numbersList.forEach(daysLeft => {
+                occurrences[daysLeft] = occurrences[daysLeft] || 0;
+                occurrences[daysLeft]++;
+            });
+
+            // Loop over the days
+            for (let day = 0; day < totalDays; day++) {
+                // The occurrences that will replace the current
+                const newOccurrences = {};
+
+                for (let daysLeft in occurrences) {
+                    daysLeft = parseInt(daysLeft, 10);
+
+                    if (daysLeft === 0) {
+                        // The amount of fish reaching 0 is the amount of fish to add
+                        newOccurrences[8] = newOccurrences[8] || 0;
+                        newOccurrences[8] += occurrences[daysLeft];
+
+                        // Move fish from 0 to 6
+                        newOccurrences[6] = newOccurrences[6] || 0;
+                        newOccurrences[6] += occurrences[daysLeft];
+                    } else {
+                        // Move fish to one lower
+                        newOccurrences[daysLeft - 1] = newOccurrences[daysLeft - 1] || 0;
+                        newOccurrences[daysLeft - 1] += occurrences[daysLeft];
+                    }
+                }
+
+                occurrences = newOccurrences;
+            }
+
+            // Count the total
+            let totalCount = 0;
+            for (let daysLeft in occurrences) {
+                totalCount += occurrences[daysLeft];
+            }
+
+            answer.innerText = totalCount;
+
+            /* let totalCount = numbersList.length;
 
             const counter = (daysUntilSpawn, daysLeft) => {
                 // Add 1, because a spawn will happen 1 day after 0 days remaining
@@ -47,7 +89,7 @@
                 counter(daysUntilSpawn, totalDaysLeft);
             });
 
-            answer.innerText = totalCount;
+            answer.innerText = totalCount; */
         </script>
     </body>
 </html>
