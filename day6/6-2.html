@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            await fileReader.read();
+
+            let numbersList = fileReader.parse();
+            let totalCount = numbersList.length;
+            let totalDaysLeft = 80;
+
+            const counter = (daysUntilSpawn, daysLeft) => {
+                // Add 1, because a spawn will happen 1 day after 0 days remaining
+                daysLeft -= (daysUntilSpawn + 1);
+
+                // There aren't enough days left for spawning
+                if (daysLeft < 0) {
+                    return;
+                }
+
+                // Add the first spawn + remaining spawns
+                const spawnAmount = 1 + Math.floor(daysLeft / 7);
+                
+                // Add to the total count
+                totalCount += spawnAmount;
+
+                for (let i = 0; i < spawnAmount; i++) {
+                    const newDaysLeft = daysLeft - (i * 7);
+                    counter(8, newDaysLeft);
+                }
+            };
+
+            numbersList.forEach(daysUntilSpawn => {
+                counter(daysUntilSpawn, totalDaysLeft);
+            });
+
+            answer.innerText = totalCount;
+        </script>
+    </body>
+</html>
