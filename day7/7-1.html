@@ -19,9 +19,7 @@
             await fileReader.read();
 
             // Sort the positions ascending
-            let positions = fileReader.parse().sort((a, b) =>
-                (a === b) ? 0 : (a < b) ? -1 : 1
-            );
+            const positions = fileReader.parse().sort((a, b) => a - b);
 
             // Calculate the median value
             const middleIndex = positions.length / 2;
@@ -30,10 +28,10 @@
                 : positions[Math.floor(middleIndex)];
 
             // Sum up the steps between each position and the median
-            let totalSteps = 0;
-            positions.forEach(position => totalSteps += Math.abs(position - median));
+            let totalFuelUsed = 0;
+            positions.forEach(position => totalFuelUsed += Math.abs(position - median));
 
-            answer.innerText = totalSteps;
+            answer.innerText = totalFuelUsed;
         </script>
     </body>
 </html>
