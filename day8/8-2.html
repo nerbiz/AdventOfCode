@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            await fileReader.read();
+
+            const notes = fileReader.parse();
+            // Digits 1, 4, 7 and 8 have unique segment sizes
+            const uniqueSizes = {
+                1: 2,
+                4: 4,
+                7: 3,
+                8: 7,
+            };
+
+            // Collection of output values converted to numbers, using pattern translation
+            const outputNumbers = [];
+
+            notes.forEach((note, index) => {
+                let [notedPatterns, outputValues] = note.split(' | ');
+                // Sort the patterns and output values alphabetically
+                notedPatterns = notedPatterns.split(' ').map(pattern => pattern.split('').sort().join(''));
+                outputValues = outputValues.split(' ').map(pattern => pattern.split('').sort().join(''));
+
+                // The noted segments, mapped to the right number
+                const segmentPatterns = {
+                    0: null,
+                    1: null,
+                    2: null,
+                    3: null,
+                    4: null,
+                    5: null,
+                    6: null,
+                    7: null,
+                    8: null,
+                    9: null,
+                };
+
+                // Set the unique numbers
+                for (let number in uniqueSizes) {
+                    segmentPatterns[number] = notedPatterns.filter(pattern => pattern.length === uniqueSizes[number])[0];
+                }
+
+                const segmentSignals = {
+                    top: null,
+                    topLeft: null,
+                    topRight: null,
+                    middle: null,
+                    bottomLeft: null,
+                    bottomRight: null,
+                    bottom: null,
+                };
+                
+                // The top signal is the difference between segments 1 and 7
+                segmentSignals.top = segmentPatterns['7'].split('')
+                    .filter(character => segmentPatterns['4'].indexOf(character) === -1)[0];
+
+                // To make 9, add the top signal to 4, only bottom remaining
+                const nineWithoutBottom = (segmentPatterns['4'] + segmentSignals.top).split('').sort().join('');
+                // Find all the 6-length patterns
+                notedPatterns.filter(segment => segment.length === 6)
+                    .forEach(pattern => {
+                        // Remove characters from '9 without bottom' from the 6-length patterns
+                        // If only 1 remains, it's the bottom signal of 9
+                        const difference = pattern.split('').filter(character => nineWithoutBottom.indexOf(character) === -1);
+
+                        if (difference.length === 1) {
+                            segmentPatterns['9'] = pattern;
+                            segmentSignals.bottom = difference[0];
+                        }
+                    });
+                
+                // To make 3, add the bottom signal to 7, only middle remaining
+                const threeWithoutMiddle = (segmentPatterns['7'] + segmentSignals.bottom).split('').sort().join('');
+                // Find all the 5-length patterns
+                notedPatterns.filter(segment => segment.length === 5)
+                    .forEach(pattern => {
+                        // Remove characters from '3 without bottom' from the 5-length patterns
+                        // If only 1 remains, it's the bottom signal of 3
+                        const difference = pattern.split('').filter(character => threeWithoutMiddle.indexOf(character) === -1);
+
+                        if (difference.length === 1) {
+                            segmentPatterns['3'] = pattern;
+                            segmentSignals.middle = difference[0];
+                        }
+                    });
+                
+                // 8 without the middle is 0
+                segmentPatterns['0'] = segmentPatterns['8'].split('')
+                    .filter(character => character !== segmentSignals.middle)
+                    .join('');
+                
+                // Using top, middle and bottom, the only difference between 5 and 6 is bottom-left
+                // Find patterns that contain top, middle and bottom
+                const topMiddleBottomPatterns = notedPatterns.filter(pattern => {
+                    // Keep only 5-length or 6-length patterns
+                    return ((pattern.length === 5 || pattern.length === 6)
+                        // Top, middle and bottom need to appear in the pattern
+                        && pattern.indexOf(segmentSignals.top) !== -1
+                        && pattern.indexOf(segmentSignals.middle) !== -1
+                        && pattern.indexOf(segmentSignals.bottom) !== -1
+                        // 3 and 9 are already determined
+                        && pattern !== segmentPatterns['3']
+                        && pattern !== segmentPatterns['9']);
+                });
+                
+                // Find the 6-length pattern that differs only 1 character from a 5-length pattern
+                const tmbFiveLength = topMiddleBottomPatterns.filter(pattern => pattern.length === 5);
+                const tmbSixLength = topMiddleBottomPatterns.filter(pattern => pattern.length === 6);
+                tmbSixLength.forEach(sixLength => {
+                    tmbFiveLength.forEach(fiveLength => {
+                        // Remove characters in the 5-length pattern from the 6-length pattern
+                        // If only 1 remains, it's the bottom-left signal of 6
+                        // And the 5-length pattern is 5
+                        const difference = sixLength.split('').filter(character => fiveLength.indexOf(character) === -1);
+
+                        if (difference.length === 1) {
+                            segmentPatterns['5'] = fiveLength;
+                            segmentPatterns['6'] = sixLength;
+                            segmentSignals.bottomLeft = difference[0];
+                        }
+                    });
+                });
+
+                // Using top, middle, bottom and bottom-left, only top-right remains in 2
+                segmentPatterns['2'] = notedPatterns.filter(pattern => {
+                    return (pattern.length === 5
+                        // 3 is already determined
+                        && pattern !== segmentPatterns['3']
+                        // Top, middle, bottom and bottom-left need to appear in the pattern
+                        && pattern.indexOf(segmentSignals.top) !== -1
+                        && pattern.indexOf(segmentSignals.middle) !== -1
+                        && pattern.indexOf(segmentSignals.bottom) !== -1
+                        && pattern.indexOf(segmentSignals.bottomLeft) !== -1);
+                })[0];
+
+                // Determine the output values
+                outputNumbers.push(
+                    outputValues.map(value => {
+                        for (let number in segmentPatterns) {
+                            if (value === segmentPatterns[number]) {
+                                return number;
+                            }
+                        }
+                    }).join('')
+                );
+            });
+
+            // Sum up all the output numbers
+            answer.innerText = outputNumbers.map(number => parseInt(number, 10))
+                .reduce((sum, number) => sum + number, 0);
+        </script>
+    </body>
+</html>
