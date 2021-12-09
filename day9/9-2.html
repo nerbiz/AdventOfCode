@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <textarea style="font-size: 25px; width: 500px; height: 150px;">
+            2199943210
+            3987894921
+            9856789892
+            8767896789
+            9899965678
+        </textarea>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Utilities from '../Utilities.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            await fileReader.read();
+
+            const heightMap = fileReader.parse();
+            const lowestPoints = [];
+
+            // Loop over all X,Y coordinates
+            for (let y = 0; y < heightMap.length; y++) {
+                for (let x = 0; x < heightMap[0].length; x++) {
+                    const current = parseInt(heightMap[y][x], 10);
+                    
+                    // Add the value, if it's lower than all adjacent values
+                    // Non-existing coordinates (undefined) evaluate to true, because no check is possible
+                    // A 9 can never be the lowest point
+                    if (current !== 9
+                        && (heightMap[y - 1] === undefined || current < heightMap[y - 1][x])
+                        && (heightMap[y + 1] === undefined || current < heightMap[y + 1][x])
+                        && (heightMap[y][x - 1] === undefined || current < heightMap[y][x - 1])
+                        && (heightMap[y][x + 1] === undefined || current < heightMap[y][x + 1])) {
+                        lowestPoints.push({x, y, value: current});
+                    }
+                }
+            }
+
+
+
+            const allBasins = [];
+
+            lowestPoints.forEach(point => {
+                console.group('>>>>> Point', point);
+
+                const basin = [];
+                let xIndexesForNextRow = [point.x];
+
+                for (let yIndex = point.y; yIndex < heightMap.length; yIndex++) {
+                    const row = heightMap[yIndex];
+                    const basinRow = {
+                        yIndex,
+                        xIndexes: []
+                    };
+
+                    console.log('Row', basinRow.yIndex, row, 'Collected indexes', basinRow.xIndexes);
+
+                    /*
+                     * To do: also check rows above
+                     */
+
+                    // Loop backwards, because forward would mess up with splice()
+                    for (let i = xIndexesForNextRow.length - 1; i > -1; i--) {
+                        const xIndex = xIndexesForNextRow[i];
+
+                        // Don't check indexes that are already in the basin
+                        if (basinRow.xIndexes.indexOf(xIndex) !== -1) {
+                            console.log('Index', xIndex, 'is already collected --> skip to next X');
+                            continue;
+                        }
+
+                        console.log('Checking with index', xIndex);
+                        // Skip if there's a 9 at the X index
+                        if (row[xIndex] === '9') {
+                            console.log('Row', yIndex, 'index', xIndex, 'is a 9 --> skip to next X');
+                            // Remove the X index for the next row
+                            xIndexesForNextRow.splice(xIndexesForNextRow.indexOf(xIndex), 1);
+                            continue;
+                        }
+
+                        // Add the current X index
+                        console.log('Value is', row[xIndex], '--> add index', xIndex);
+                        basinRow.xIndexes.push(xIndex);
+
+                        // Collect indexes to the left and right of the X index, where the value isn't 9
+                        let index = xIndex;
+                        console.log('To left from index', index);
+                        while (--index > -1 && row[index] !== '9') {
+                            console.log('Add index', index);
+                            basinRow.xIndexes.push(index);
+                        }
+                        index = xIndex;
+                        console.log('To right from index', index);
+                        while(++index < row.length && row[index] !== '9') {
+                            console.log('Add', index);
+                            basinRow.xIndexes.push(index);
+                        }
+
+                        basinRow.xIndexes = Utilities.arrayUnique(basinRow.xIndexes).sort();
+                        console.log('>>> X index', xIndex, 'done', basinRow.xIndexes);
+                        console.log('');
+                    }
+
+                    if (xIndexesForNextRow.length === 0) {
+                        console.log('Basin is completely done');
+                        break;
+                    }
+
+                    basin.push(basinRow);
+                    // Clone the indexes array, because they go by reference
+                    xIndexesForNextRow = basinRow.xIndexes.map(item => item);
+                    console.log('>>>>> Row', yIndex, 'done, Indexes for next row', xIndexesForNextRow);
+                    console.log('');
+                }
+
+                allBasins.push(basin);
+                console.groupEnd();
+            });
+
+            console.log(allBasins.map(basin => {
+                return basin.map(properties => properties.xIndexes.join(' '));
+            }));
+
+            // answer.innerText = lowestPoints.reduce((sum, current) => sum + current + 1, 0);
+        </script>
+    </body>
+</html>
