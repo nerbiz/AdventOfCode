@@ -18,57 +18,25 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             await fileReader.read();
 
-            const heightMapLines = fileReader.parse();
-            const linesAmount = heightMapLines.length;
-            const lineLength = heightMapLines[0].length;
-
-            /**
-             * Finds adjacent values of a location
-             * @param {number} x The X coordinate in the heightMap
-             * @param {number} y The Y coordinate in the heightMap
-             * @param {boolean} sorted Whether to return sorted (ascending)
-             * @returns {array}
-             */
-            function getAdjacentValues(x, y, sorted) {
-                sorted = (sorted === undefined) ? true : false;
-
-                // Value is null if there is no adjacent location at the coordinate
-                const values = [
-                    // Up
-                    (y > 0)
-                        ? parseInt(heightMapLines[y - 1][x], 10)
-                        : null,
-                    // Down
-                    (y < linesAmount - 1)
-                        ? parseInt(heightMapLines[y + 1][x], 10)
-                        : null,
-                    // Left
-                    (x > 0)
-                        ? parseInt(heightMapLines[y][x - 1], 10)
-                        : null,
-                    // Right
-                    (x < lineLength - 1)
-                        ? parseInt(heightMapLines[y][x + 1], 10)
-                        : null,
-                ].filter(value => value !== null);
-
-                return (sorted) ? values.sort() : values;
-            }
-
+            const heightMap = fileReader.parse();
             const lowestPoints = [];
 
             // Loop over all X,Y coordinates
-            for (let y = 0; y < linesAmount; y++) {
-                for (let x = 0; x < lineLength; x++) {
-                    const current = parseInt(heightMapLines[y][x], 10);
+            for (let y = 0; y < heightMap.length; y++) {
+                for (let x = 0; x < heightMap[0].length; x++) {
+                    const current = parseInt(heightMap[y][x], 10);
                     
                     // A 9 can never be the lowest point
                     if (current === 9) {
                         continue;
                     }
 
-                    const adjacentValues = getAdjacentValues(x, y);
-                    if (current < adjacentValues[0]) {
+                    // Add the value, if it's lower than all adjacent values
+                    // Non-existing coordinates (undefined) evaluate to true, because no check is possible
+                    if ((heightMap[y - 1] === undefined || current < heightMap[y - 1][x])
+                        && (heightMap[y + 1] === undefined || current < heightMap[y + 1][x])
+                        && (heightMap[y][x - 1] === undefined || current < heightMap[y][x - 1])
+                        && (heightMap[y][x + 1] === undefined || current < heightMap[y][x + 1])) {
                         lowestPoints.push(current);
                     }
                 }
