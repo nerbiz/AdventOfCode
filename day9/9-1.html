@@ -26,14 +26,11 @@
                 for (let x = 0; x < heightMap[0].length; x++) {
                     const current = parseInt(heightMap[y][x], 10);
                     
-                    // A 9 can never be the lowest point
-                    if (current === 9) {
-                        continue;
-                    }
-
                     // Add the value, if it's lower than all adjacent values
                     // Non-existing coordinates (undefined) evaluate to true, because no check is possible
-                    if ((heightMap[y - 1] === undefined || current < heightMap[y - 1][x])
+                    // A 9 can never be the lowest point
+                    if (current !== 9
+                        && (heightMap[y - 1] === undefined || current < heightMap[y - 1][x])
                         && (heightMap[y + 1] === undefined || current < heightMap[y + 1][x])
                         && (heightMap[y][x - 1] === undefined || current < heightMap[y][x - 1])
                         && (heightMap[y][x + 1] === undefined || current < heightMap[y][x + 1])) {
