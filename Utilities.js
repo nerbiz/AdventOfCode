@@ -6,7 +6,8 @@ export default class
      * @param {number} last 
      * @returns {array}
      */
-    static range(first, last) {
+    static range(first, last)
+    {
         return [...Array(last + 1).keys()].slice(first);
     }
 
@@ -17,7 +18,8 @@ export default class
      * @param {number} start The index to start the search at
      * @returns {array}
      */
-    static indexesOf(array, search, start) {
+    static indexesOf(array, search, start)
+    {
         start = (start === undefined) ? 0 : start;
         const indexes = [];
         let index;
@@ -35,7 +37,8 @@ export default class
      * @param {array} array The input array
      * @returns {array}
      */
-    static arrayUnique(array) {
+    static arrayUnique(array)
+    {
         const unique = [];
 
         for (let i = 0; i < array.length; i++) {
