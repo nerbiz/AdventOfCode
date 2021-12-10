@@ -16,9 +16,7 @@
             import Parser from './Parser.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            await fileReader.read();
-
-            const binaryStrings = fileReader.parse();
+            const binaryStrings = await fileReader.parse();
 
             // Create the occurrences array with 2 counters per bit position
             // Index 0 is the counter for zeroes, index 1 for ones

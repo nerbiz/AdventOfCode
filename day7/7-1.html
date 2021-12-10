@@ -16,10 +16,8 @@
             import Parser from './Parser.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            await fileReader.read();
-
             // Sort the positions ascending
-            const positions = fileReader.parse().sort((a, b) => a - b);
+            const positions = (await fileReader.parse()).sort((a, b) => a - b);
 
             // Calculate the median value
             const middleIndex = positions.length / 2;

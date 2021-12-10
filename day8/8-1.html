@@ -16,9 +16,7 @@
             import Parser from './Parser.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            await fileReader.read();
-
-            const notes = fileReader.parse();
+            const notes = await fileReader.parse();
             // Digits 1, 4, 7 and 8 have unique segment sizes
             const uniqueSegmentSizes = [2, 3, 4, 7];
 

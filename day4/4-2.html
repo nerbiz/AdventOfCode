@@ -17,9 +17,7 @@
             import Board from './Board.js';
 
             const fileReader = new FileReader('./data.txt', new Parser(), false);
-            await fileReader.read();
-
-            const { drawnNumbers, boardsNumbers } = fileReader.parse();
+            const { drawnNumbers, boardsNumbers } = await fileReader.parse();
 
             const boards = boardsNumbers.map((boardNumbers, index) => new Board(index, boardNumbers));
             const winningBoards = [];

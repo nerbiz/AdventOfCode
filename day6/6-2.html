@@ -16,9 +16,7 @@
             import Parser from './Parser.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            await fileReader.read();
-
-            let numbersList = fileReader.parse();
+            let numbersList = await fileReader.parse();
             let totalDays = 256;
 
             // Group the fish that give birth at the same time

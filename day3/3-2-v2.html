@@ -16,9 +16,7 @@
             import Parser from './Parser.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            await fileReader.read();
-
-            const binaryStrings = fileReader.parse();
+            const binaryStrings = await fileReader.parse();
 
             const binaryStringLength = binaryStrings[0].length;
 

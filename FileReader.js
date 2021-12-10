@@ -10,33 +10,22 @@ export default class
         this.filePath = filePath;
         this.parser = parser;
         this.trim = (trim === undefined) ? true : trim;
-        this.fileContents = null;
-        this.fileLines = null;
     }
 
     /**
-     * Read the input file
+     * Read and parse the input file
      * @returns {void}
      */
-    async read()
+    async parse()
     {
-        this.fileContents = await fetch(this.filePath)
+        let fileContents = await fetch(this.filePath)
             .then(response => response.text());
 
         // Trim the file contents if needed
         if (this.trim) {
-            this.fileContents = this.fileContents.trim();
+            fileContents = fileContents.trim();
         }
 
-        this.fileLines = this.fileContents.split("\n");
-    }
-
-    /**
-     * Parse the lines of the input file
-     * @returns {object} Key:value pairs of parsed data
-     */
-    parse()
-    {
-        return this.parser.parse(this.fileLines);
+        return this.parser.parse(fileContents.split("\n"));
     }
 }

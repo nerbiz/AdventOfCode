@@ -16,9 +16,7 @@
             import Parser from './Parser.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            await fileReader.read();
-
-            const commands = fileReader.parse();
+            const commands = await fileReader.parse();
 
             let position = 0;
             let depth = 0;
