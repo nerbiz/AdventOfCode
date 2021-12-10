@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+            import Board from './Board.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser(), false);
+            await fileReader.read();
+
+            const { drawnNumbers, boardsNumbers } = fileReader.parse();
+            const boards = boardsNumbers.map((boardNumbers, index) => new Board(index, boardNumbers));
+
+            drawNumbers: for (let number of drawnNumbers) {
+                for (let board of boards) {
+                    if (board.checkWin(number) === true) {
+                        answer.innerText = board.calculateScore(number);
+                        break drawNumbers;
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>
