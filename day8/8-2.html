@@ -162,7 +162,7 @@
 
             // Sum up all the output numbers
             answer.innerText = outputNumbers.map(number => parseInt(number, 10))
-                .reduce((sum, number) => sum + number, 0);
+                .reduce((sum, number) => (sum + number), 0);
         </script>
     </body>
 </html>

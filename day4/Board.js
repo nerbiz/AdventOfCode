@@ -68,7 +68,7 @@ export default class
     calculateScore()
     {
         let score = 0;
-        this.rows.forEach(row => score += row.reduce((previous, current) => previous + current, 0));
+        this.rows.forEach(row => score += row.reduce((previous, current) => (previous + current), 0));
 
         return score * this.winningNumber;
     }

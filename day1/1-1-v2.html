@@ -21,7 +21,7 @@
             const numbers = fileReader.parse();
 
             answer.innerText = numbers.reduce((increased, current, index) =>
-                increased + (current > numbers[index - 1]), 0);
+                (increased + (current > numbers[index - 1])), 0);
         </script>
     </body>
 </html>
