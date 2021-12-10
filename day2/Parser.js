@@ -7,6 +7,11 @@ export default class
      */
     parse(linesArray)
     {
-        return linesArray;
+        return linesArray.map(line => {
+            let [direction, amount] = line.split(' ');
+            amount = parseInt(amount, 10);
+
+            return {direction, amount};
+        });
     }
 }

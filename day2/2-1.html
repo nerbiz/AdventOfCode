@@ -21,19 +21,16 @@
             let position = 0;
             let depth = 0;
 
-            commands.forEach(entry => {
-                let [direction, amount] = entry.split(' ');
-                amount = parseInt(amount, 10);
-
-                switch (direction) {
+            commands.forEach(command => {
+                switch (command.direction) {
                     case 'forward':
-                        position += amount;
+                        position += command.amount;
                         break;
                     case 'down':
-                        depth += amount;
+                        depth += command.amount;
                         break;
                     case 'up':
-                        depth -= amount;
+                        depth -= command.amount;
                         break;
                     
                 }
