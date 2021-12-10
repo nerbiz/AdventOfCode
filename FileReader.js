@@ -14,7 +14,7 @@ export default class
 
     /**
      * Read and parse the input file
-     * @returns {void}
+     * @returns {any}
      */
     async parse()
     {
