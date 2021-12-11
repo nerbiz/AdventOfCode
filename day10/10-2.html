@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const chunkLines = await fileReader.parse();
+
+            // The scores for the invalid closing characters
+            const delimiterScores = {
+                '(': 1,
+                '[': 2,
+                '{': 3,
+                '<': 4,
+            };
+
+            // Checks for any existing closing delimiter
+            const closingRegex = /[\)\]\}\>]/;
+            // Checks for any adjacent delimiter pairs
+            const adjacentRegex = /\(\)|\[\]|\{\}|\<\>/;
+
+            const scores = chunkLines
+                // Replace invalid lines with null
+                .map(line => {
+                    while (adjacentRegex.exec(line) !== null) {
+                        line = line.replaceAll('()', '')
+                            .replaceAll('[]', '')
+                            .replaceAll('{}', '')
+                            .replaceAll('<>', '');
+                    }
+
+                    // Only opening delimiters should remain, for a line to be valid
+                    return (closingRegex.exec(line) === null) ? line : null;
+                })
+                // Filter out invalid lines
+                .filter(line => line !== null)
+                // Reverse the remaining valid lines (converted to array)
+                .map(line => line.split('').reverse())
+                // Calculate the score per line
+                .map(line => {
+                    let lineScore = 0;
+
+                    line.forEach(delimiter => {
+                        lineScore *= 5;
+                        lineScore += delimiterScores[delimiter];
+                    });
+
+                    return lineScore;
+                })
+                // Sort ascending
+                .sort((a, b) => a - b);
+
+            // Output the middle score (median)
+            answer.innerText = scores[Math.floor(scores.length / 2)];
+        </script>
+    </body>
+</html>

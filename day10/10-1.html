@@ -27,7 +27,9 @@
             };
 
             let score = 0;
+            // Checks for any existing closing delimiter
             const closingRegex = /[\)\]\}\>]/;
+            // Checks for any adjacent delimiter pairs
             const adjacentRegex = /\(\)|\[\]|\{\}|\<\>/;
 
             chunkLines.forEach(line => {
