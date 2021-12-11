@@ -49,4 +49,38 @@ export default class
 
         return unique;
     }
+
+    /**
+     * Like map(), but for 2D arrays
+     * @param {array} array
+     * @param {function} callback A function to apply on every item
+     * @returns {array}
+     */
+    static map2D(array, callback)
+    {
+        return array.map((row, yIndex) =>
+            row.map((item, xIndex) => callback(item, xIndex, yIndex)));
+    }
+
+    /**
+     * Like forEach(), but for 2D arrays
+     * @param {array} array
+     * @param {function} callback A function to apply on every item
+     * @returns {array}
+     */
+     static forEach2D(array, callback)
+     {
+         return array.forEach((row, yIndex) =>
+             row.forEach((item, xIndex) => callback(item, xIndex, yIndex)));
+     }
+
+    /**
+     * Clone a value, useful for arrays and objects
+     * @param {any} value The original value
+     * @returns {any} A clone of the value
+     */
+     static clone(value)
+     {
+         return JSON.parse(JSON.stringify(value));
+     }
 }
