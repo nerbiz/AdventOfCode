@@ -168,7 +168,8 @@
 
 
 
-            /* (function makeBasinGraph(allBasins) {
+            //*
+            (function (allBasins) {
                 const basinMap = heightMap.map(item => item);
 
                 allBasins.forEach(basin => {
@@ -183,7 +184,8 @@
                 });
 
                 console.log(basinMap.join("\n"));
-            })(allBasins); */
+            })(allBasins);
+            //*/
 
 
 
@@ -194,6 +196,7 @@
             }));
 
             // 812820 is too low
+            // 786780
 
             const largestBasins = allBasins
                 .map(basin => {
