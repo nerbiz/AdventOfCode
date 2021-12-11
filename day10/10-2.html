@@ -49,16 +49,7 @@
                 // Reverse the remaining valid lines (converted to array)
                 .map(line => line.split('').reverse())
                 // Calculate the score per line
-                .map(line => {
-                    let lineScore = 0;
-
-                    line.forEach(delimiter => {
-                        lineScore *= 5;
-                        lineScore += delimiterScores[delimiter];
-                    });
-
-                    return lineScore;
-                })
+                .map(line => line.reduce((lineScore, delimiter) => ((lineScore * 5) + delimiterScores[delimiter]), 0))
                 // Sort ascending
                 .sort((a, b) => a - b);
 
