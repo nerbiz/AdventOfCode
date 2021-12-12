@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../Utilities.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const connections = await fileReader.parse();
+
+            // Create an array of cave objects
+            let caves = [];
+            Utilities.map2D(connections, caveName => {
+                // Add the cave if it doesn't exist yet
+                if (caves.find(cave => cave.name === caveName) === undefined) {
+                    caves.push({
+                        name: caveName,
+                        isSmall: (caveName === caveName.toLowerCase()),
+                        connections: [],
+                    });
+                }
+            });
+
+            // Add all the cave connections
+            connections.forEach(connection => {
+                const caveOne = caves.find(cave => cave.name === connection[0]);
+                const caveTwo = caves.find(cave => cave.name === connection[1]);
+                caveOne.connections.push(caveTwo);
+                caveTwo.connections.push(caveOne);
+            });
+
+            // Will contain all possible paths
+            const paths = [];
+
+            const traverseCaves = (fromCave, path) => {
+                path = (path === undefined) ? [] : path;
+
+                // Add the current cave to the path
+                path.push(fromCave.name);
+
+                // A path is completed
+                if (fromCave.name === 'end') {
+                    paths.push(path);
+                    return;
+                }
+
+                // Traverse over the connected caves
+                for (let i = 0; i < fromCave.connections.length; i++) {
+                    const cave = fromCave.connections[i];
+
+                    // Skip an already traversed cave, unless it's large
+                    if (path.includes(cave.name) && cave.isSmall) {
+                        continue;
+                    }
+
+                    // Use a clone, to avoid reference bugs
+                    traverseCaves(cave, Utilities.clone(path));
+                }
+            };
+
+            const startCave = caves.find(cave => cave.name === 'start');
+            traverseCaves(startCave);
+
+            answer.innerText = paths.length;
+        </script>
+    </body>
+</html>
