@@ -43,12 +43,18 @@
             // Will contain all possible paths
             const paths = [];
 
-            const traverseCave = (fromCave, path) => {
+            const traverseCave = (fromCave, path, traversedTwice) => {
                 path = (path === undefined) ? [] : path;
+                traversedTwice = (traversedTwice === undefined) ? false : traversedTwice;
 
-                // Skip an already traversed cave, unless it's large
+                // If the cave is small and has been traversed before, see if a second time is allowed
                 if (path.includes(fromCave.name) && fromCave.isSmall) {
-                    return;
+                    // The start and end cave can never be traversed twice
+                    if (traversedTwice === true || ['start', 'end'].includes(fromCave.name)) {
+                        return;
+                    }
+
+                    traversedTwice = true;
                 }
 
                 // Add the current cave to the path
@@ -62,8 +68,8 @@
 
                 // Traverse over the connected caves
                 for (let i = 0; i < fromCave.connections.length; i++) {
-                    // Use a clone, to avoid reference bugs
-                    traverseCave(fromCave.connections[i], Utilities.clone(path));
+                    // Use a clone of the path, to avoid reference bugs
+                    traverseCave(fromCave.connections[i], Utilities.clone(path), traversedTwice);
                 }
             };
 
