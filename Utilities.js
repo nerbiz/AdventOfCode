@@ -14,19 +14,19 @@ export default class
     /**
      * Like indexOf(), but finds all the indexes
      * @param {array} array The input array/string
-     * @param {any} search The item to search for
-     * @param {number} start The index to start the search at
+     * @param {any} searchElement The item to search for
+     * @param {number} fromIndex The index to start the search at
      * @returns {array}
      */
-    static indexesOf(array, search, start)
+    static indexesOf(array, searchElement, fromIndex)
     {
-        start = (start === undefined) ? 0 : start;
+        fromIndex = (fromIndex === undefined) ? 0 : fromIndex;
         const indexes = [];
         let index;
         
-        while ((index = array.indexOf(search, start)) !== -1) {
+        while ((index = array.indexOf(searchElement, fromIndex)) !== -1) {
             indexes.push(index);
-            start = index + 1;
+            fromIndex = index + 1;
         }
 
         return indexes;
@@ -59,7 +59,7 @@ export default class
     static map2D(array, callback)
     {
         return array.map((row, yIndex) =>
-            row.map((item, xIndex) => callback(item, xIndex, yIndex)));
+            row.map((element, xIndex) => callback(element, xIndex, yIndex, array)));
     }
 
     /**
@@ -71,7 +71,7 @@ export default class
      static forEach2D(array, callback)
      {
          return array.forEach((row, yIndex) =>
-             row.forEach((item, xIndex) => callback(item, xIndex, yIndex)));
+             row.forEach((item, xIndex) => callback(item, xIndex, yIndex, array)));
      }
 
     /**
