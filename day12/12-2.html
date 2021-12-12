@@ -49,8 +49,8 @@
 
                 // If the cave is small and has been traversed before, see if a second time is allowed
                 if (path.includes(cave.name) && cave.isSmall) {
-                    // The start and end cave can never be traversed twice
-                    if (traversedTwice === true || ['start', 'end'].includes(cave.name)) {
+                    // The start cave can never be traversed twice
+                    if (traversedTwice === true || cave.name === 'start') {
                         return;
                     }
 
