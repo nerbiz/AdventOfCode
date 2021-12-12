@@ -71,7 +71,7 @@ export default class
      static forEach2D(array, callback)
      {
          return array.forEach((row, yIndex) =>
-             row.forEach((item, xIndex) => callback(item, xIndex, yIndex, array)));
+             row.forEach((element, xIndex) => callback(element, xIndex, yIndex, array)));
      }
 
     /**
