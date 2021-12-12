@@ -21,7 +21,7 @@
 
             // Create an array of cave objects
             let caves = [];
-            Utilities.map2D(connections, caveName => {
+            Utilities.forEach2D(connections, caveName => {
                 // Add the cave if it doesn't exist yet
                 if (caves.find(cave => cave.name === caveName) === undefined) {
                     caves.push({
