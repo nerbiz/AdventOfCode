@@ -43,9 +43,7 @@
             // Will contain all possible paths
             const paths = [];
 
-            const traverseCave = (cave, path) => {
-                path = (path === undefined) ? [] : path;
-
+            const traverseCave = (cave, path = []) => {
                 // Skip an already traversed cave, unless it's large
                 if (path.includes(cave.name) && cave.isSmall) {
                     return;

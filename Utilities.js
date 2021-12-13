@@ -18,9 +18,8 @@ export default class
      * @param {number} fromIndex The index to start the search at
      * @returns {array}
      */
-    static indexesOf(array, searchElement, fromIndex)
+    static indexesOf(array, searchElement, fromIndex = 0)
     {
-        fromIndex = (fromIndex === undefined) ? 0 : fromIndex;
         const indexes = [];
         let index;
         

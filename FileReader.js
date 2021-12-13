@@ -5,11 +5,11 @@ export default class
      * @param {object} parser An object handling the file parsing
      * @param {boolean} trim Whether to trim the file contents
      */
-    constructor(filePath, parser, trim)
+    constructor(filePath, parser, trim = true)
     {
         this.filePath = filePath;
         this.parser = parser;
-        this.trim = (trim === undefined) ? true : trim;
+        this.trim = trim;
     }
 
     /**
@@ -22,7 +22,7 @@ export default class
             .then(response => response.text());
 
         // Trim the file contents if needed
-        if (this.trim) {
+        if (this.trim === true) {
             fileContents = fileContents.trim();
         }
 
