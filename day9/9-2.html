@@ -19,48 +19,48 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const heightMap = await fileReader.parse();
 
-            // Will contain 'x,y' strings
-            const usedCoordinates = [];
+            // Convert all values to point objects
+            Utilities.forEach2D(heightMap, (value, x, y) => {
+                heightMap[y][x] = {
+                    x, y, value, coordinates: x + ',' + y,
+                };
+            });
+
+            // Will contain points that are processed
+            const usedPoints = [];
 
             // Will contain all the found basins
             const allBasins = [];
-
-            const makePoint = (x, y) => ({
-                x,
-                y,
-                value: heightMap[y][x],
-                coordinates: x + ',' + y,
-            });
 
             const getAdjacentPoints = point => {
                 return [
                     // Up
                     (heightMap[point.y - 1] !== undefined && heightMap[point.y - 1][point.x] !== undefined)
-                        ? makePoint(point.x, point.y - 1)
+                        ? heightMap[point.y - 1][point.x]
                         : null,
                     // Down
                     (heightMap[point.y + 1] !== undefined && heightMap[point.y + 1][point.x] !== undefined)
-                        ? makePoint(point.x, point.y + 1)
+                        ? heightMap[point.y + 1][point.x]
                         : null,
                     // Left
                     (heightMap[point.y][point.x - 1] !== undefined)
-                        ? makePoint(point.x - 1, point.y)
+                        ? heightMap[point.y][point.x - 1]
                         : null,
                     // Right
                     (heightMap[point.y][point.x + 1] !== undefined)
-                        ? makePoint(point.x + 1, point.y)
+                        ? heightMap[point.y][point.x + 1]
                         : null,
                 ];
             };
 
             const growBasin = (point, basin) => {
                 // Skip already used points
-                if (usedCoordinates.includes(point.coordinates)) {
+                if (usedPoints.includes(point)) {
                     return basin;
                 }
 
                 // Register the point as used
-                usedCoordinates.push(point.coordinates);
+                usedPoints.push(point);
 
                 // Skip if the value is 9
                 if (point.value === 9) {
@@ -80,9 +80,8 @@
                 return basin;
             };
 
-            // Loop over all X,Y coordinates
-            Utilities.forEach2D(heightMap, (value, x, y) => {
-                const point = makePoint(x, y);
+            // Loop over all the points in the map
+            Utilities.forEach2D(heightMap, point => {
                 const basin = growBasin(point, []);
 
                 if (basin.length > 1) {
