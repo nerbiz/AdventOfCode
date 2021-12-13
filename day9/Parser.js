@@ -7,6 +7,7 @@ export default class
      */
     parse(linesArray)
     {
-        return linesArray;
+        return linesArray.map(line => line.split('')
+            .map(number => parseInt(number, 10)));
     }
 }

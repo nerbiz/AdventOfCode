@@ -14,28 +14,25 @@
         <script type="module">
             import FileReader from '../FileReader.js';
             import Parser from './Parser.js';
+            import Utilities from '../Utilities.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const heightMap = await fileReader.parse();
             const lowestPoints = [];
 
             // Loop over all X,Y coordinates
-            for (let y = 0; y < heightMap.length; y++) {
-                for (let x = 0; x < heightMap[0].length; x++) {
-                    const current = parseInt(heightMap[y][x], 10);
-                    
-                    // Add the value, if it's lower than all adjacent values
-                    // Non-existing coordinates (undefined) evaluate to true, because no check is possible
-                    // A 9 can never be the lowest point
-                    if (current !== 9
-                        && (heightMap[y - 1] === undefined || current < heightMap[y - 1][x])
-                        && (heightMap[y + 1] === undefined || current < heightMap[y + 1][x])
-                        && (heightMap[y][x - 1] === undefined || current < heightMap[y][x - 1])
-                        && (heightMap[y][x + 1] === undefined || current < heightMap[y][x + 1])) {
-                        lowestPoints.push(current);
-                    }
+            Utilities.forEach2D(heightMap, (current, x, y) => {
+                // Add the value, if it's lower than all adjacent values
+                // Non-existing coordinates (undefined) evaluate to true, because no check is possible
+                // A 9 can never be the lowest point
+                if (current !== 9
+                    && (heightMap[y - 1] === undefined || current < heightMap[y - 1][x])
+                    && (heightMap[y + 1] === undefined || current < heightMap[y + 1][x])
+                    && (heightMap[y][x - 1] === undefined || current < heightMap[y][x - 1])
+                    && (heightMap[y][x + 1] === undefined || current < heightMap[y][x + 1])) {
+                    lowestPoints.push(current);
                 }
-            }
+            });
 
             answer.innerText = lowestPoints.reduce((sum, current) => (sum + current + 1), 0);
         </script>
