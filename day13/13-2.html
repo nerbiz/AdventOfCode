@@ -37,7 +37,7 @@
             folds.forEach(fold => {
                 // Decide to fold up or left
                 if (fold.y !== undefined) {
-                    // Get the lines before and after the fold (fold line itself excluded)
+                    // Get the parts before and after the fold (fold line itself excluded)
                     afterFold = dotsMap.slice(fold.y + 1);
                     dotsMap = dotsMap.slice(0, fold.y);
 
@@ -49,7 +49,7 @@
                     // Increase the size and reverse the part after the fold
                     afterFold = afterFold.concat(filler).reverse();
                 } else {
-                    // Get the lines before and after the fold (fold line itself excluded)
+                    // Get the parts before and after the fold (fold line itself excluded)
                     afterFold = dotsMap.map(row => row.slice(fold.x + 1));
                     dotsMap = dotsMap.map(row => row.slice(0, fold.x));
 
