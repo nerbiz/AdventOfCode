@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../Utilities.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const heightMap = await fileReader.parse();
+
+            // Will contain 'x,y' strings
+            const usedCoordinates = [];
+
+            // Will contain all the found basins
+            const allBasins = [];
+
+            const makePoint = (x, y) => ({
+                x,
+                y,
+                value: heightMap[y][x],
+                coordinates: x + ',' + y,
+            });
+
+            const getAdjacentPoints = point => {
+                return [
+                    // Up
+                    (heightMap[point.y - 1] !== undefined && heightMap[point.y - 1][point.x] !== undefined)
+                        ? makePoint(point.x, point.y - 1)
+                        : null,
+                    // Down
+                    (heightMap[point.y + 1] !== undefined && heightMap[point.y + 1][point.x] !== undefined)
+                        ? makePoint(point.x, point.y + 1)
+                        : null,
+                    // Left
+                    (heightMap[point.y][point.x - 1] !== undefined)
+                        ? makePoint(point.x - 1, point.y)
+                        : null,
+                    // Right
+                    (heightMap[point.y][point.x + 1] !== undefined)
+                        ? makePoint(point.x + 1, point.y)
+                        : null,
+                ];
+            };
+
+            const growBasin = (point, basin) => {
+                // Skip already used points
+                if (usedCoordinates.includes(point.coordinates)) {
+                    return basin;
+                }
+
+                // Register the point as used
+                usedCoordinates.push(point.coordinates);
+
+                // Skip if the value is 9
+                if (point.value === 9) {
+                    return basin;
+                }
+
+                // Add the point to the basin
+                basin.push(point);
+
+                // Loop over the adjacent points to grow the basin
+                getAdjacentPoints(point)
+                    .filter(point => point !== null)
+                    .forEach(point => {
+                        basin = growBasin(point, basin);
+                    });
+                
+                return basin;
+            };
+
+            // Loop over all X,Y coordinates
+            Utilities.forEach2D(heightMap, (value, x, y) => {
+                const point = makePoint(x, y);
+                const basin = growBasin(point, []);
+
+                if (basin.length > 1) {
+                    allBasins.push(basin);
+                }
+            });
+
+            answer.innerText = allBasins
+                // Sort by size (descending)
+                .sort((a, b) => b.length - a.length)
+                // Take the 3 largest
+                .slice(0, 3)
+                // Multiply the sizes
+                .reduce((total, basin) => (total * basin.length), 1);
+        </script>
+    </body>
+</html>
