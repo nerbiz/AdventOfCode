@@ -21,9 +21,7 @@
 
             // Convert all values to point objects
             Utilities.forEach2D(heightMap, (value, x, y) => {
-                heightMap[y][x] = {
-                    x, y, value, coordinates: x + ',' + y,
-                };
+                heightMap[y][x] = {x, y, value};
             });
 
             // Will contain points that are processed
