@@ -71,9 +71,7 @@
                 // Loop over the adjacent points to grow the basin
                 getAdjacentPoints(point)
                     .filter(point => point !== null)
-                    .forEach(point => {
-                        basin = growBasin(point, basin);
-                    });
+                    .forEach(point => growBasin(point, basin));
                 
                 return basin;
             };
