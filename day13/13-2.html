@@ -4,12 +4,14 @@
         <meta charset="UTF-8">
         <style>
             #answer {
-                font-size: 25px;
+                font-size: 20px;
+                width: 550px;
+                height: 170px;
             }
         </style>
     </head>
     <body>
-        <p id="answer"></p>
+        <textarea id="answer"></textarea>
 
         <script type="module">
             import FileReader from '../FileReader.js';
@@ -32,8 +34,7 @@
 
             let afterFold;
 
-            // Use only the first fold instruction
-            folds.slice(0, 1).forEach(fold => {
+            folds.forEach(fold => {
                 // Decide to fold up or left
                 if (fold.y !== undefined) {
                     // Get the lines before and after the fold (fold line itself excluded)
@@ -68,7 +69,11 @@
                 });
             });
 
-            answer.innerText = dotsMap.reduce((sum, row) => (sum + row.filter(dot => dot !== null).length), 0);
+            dotsMap
+                .map(row => row
+                    .map(point => (point === null) ? ' ' : '#')
+                    .join(''))
+                .forEach(line => answer.value += line + "\n");
         </script>
     </body>
 </html>
