@@ -8,7 +8,7 @@ export default class
     parse(linesArray)
     {
         return {
-            polymer: linesArray.shift().split(''),
+            polymer: linesArray.shift(),
             rules: linesArray.slice(1).map(row => {
                 const [pair, insert] = row.split(' -> ');
                 return {pair, insert};

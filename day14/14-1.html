@@ -17,10 +17,11 @@
             import Utilities from '../Utilities.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            const {polymer, rules} = await fileReader.parse();
+            let {polymer, rules} = await fileReader.parse();
+            polymer = polymer.split('');
             const rounds = 10;
-
             let index, pair, rule;
+
             for (let round = 0; round < rounds; round++) {
                 // Loop over the polymer characters
                 for (index = 0; index < polymer.length; index++) {
@@ -45,16 +46,12 @@
             const valuesCount = Utilities.arrayCountValues(polymer);
             let lowest = Number.MAX_SAFE_INTEGER;
             let highest = 0;
-            for (const value in valuesCount) {
-                if (valuesCount[value] < lowest) {
-                    lowest = valuesCount[value];
-                }
 
-                if (valuesCount[value] > highest) {
-                    highest = valuesCount[value];
-                }
+            for (const value in valuesCount) {
+                lowest = Math.min(lowest, valuesCount[value]);
+                highest = Math.max(highest, valuesCount[value]);
             }
-            
+
             answer.innerText = highest - lowest;
         </script>
     </body>
