@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../Utilities.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {polymer, rules} = await fileReader.parse();
+            polymer = polymer.split('');
+            const rounds = 10;
+
+            for (let round = 0; round < rounds; round++) {
+                // Insert a lowercase character between all pairs
+                // Because lowercase won't match in the following replacements
+                rules.forEach(rule => {
+                    // Use while, because in 'AAA' only the first 'AA' is matched
+                    while (polymer.includes(rule.pair)) {
+                        const replacement = rule.pair[0] + rule.insert.toLowerCase() + rule.pair[1]
+                        polymer = polymer.replaceAll(rule.pair, replacement);
+                    }
+                });
+
+                polymer = polymer.toUpperCase();
+            }
+
+            // Find the most and least occurring character amount
+            const valuesCount = Utilities.arrayCountValues(polymer);
+            let lowest = Number.MAX_SAFE_INTEGER;
+            let highest = 0;
+
+            for (const value in valuesCount) {
+                lowest = Math.min(lowest, valuesCount[value]);
+                highest = Math.max(highest, valuesCount[value]);
+            }
+
+            answer.innerText = highest - lowest;
+        </script>
+    </body>
+</html>
