@@ -50,6 +50,23 @@ export default class
     }
 
     /**
+     * Counts the occurrences of values in an array
+     * @param {array} array The array to count values of
+     * @returns {object}
+     */
+    static arrayCountValues(array)
+    {
+        const occurrences = {};
+
+        for (let i = 0; i < array.length; i++) {
+            occurrences[array[i]] = occurrences[array[i]] || 0;
+            occurrences[array[i]]++;
+        }
+
+        return occurrences;
+    }
+
+    /**
      * Like map(), but for 2D arrays
      * @param {array} array
      * @param {function} callback A function to apply on every item
@@ -70,7 +87,7 @@ export default class
      static forEach2D(array, callback)
      {
          return array.forEach((row, yIndex) =>
-             row.forEach((element, xIndex) => callback(element, xIndex, yIndex, array)));
+            row.forEach((element, xIndex) => callback(element, xIndex, yIndex, array)));
      }
 
     /**
