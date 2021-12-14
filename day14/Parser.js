@@ -7,12 +7,14 @@ export default class
      */
     parse(linesArray)
     {
-        return {
-            polymer: linesArray.shift(),
-            rules: linesArray.slice(1).map(row => {
-                const [pair, insert] = row.split(' -> ');
-                return {pair, insert};
-            }),
-        };
+        const polymer = linesArray.shift();
+        const insertionRules = {};
+
+        linesArray.slice(1).forEach(line => {
+            const [pair, insert] = line.split(' -> ');
+            insertionRules[pair] = insert;
+        });
+
+        return {polymer, insertionRules};
     }
 }

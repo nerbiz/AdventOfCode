@@ -17,20 +17,19 @@
             import Utilities from '../Utilities.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            let {polymer, rules} = await fileReader.parse();
-            polymer = polymer.split('');
+            let {polymer, insertionRules} = await fileReader.parse();
             const rounds = 10;
 
             for (let round = 0; round < rounds; round++) {
-                // Insert a lowercase character between all pairs
-                // Because lowercase won't match in the following replacements
-                rules.forEach(rule => {
+                // Insert a character between all pairs
+                for (const pair in insertionRules) {
                     // Use while, because in 'AAA' only the first 'AA' is matched
-                    while (polymer.includes(rule.pair)) {
-                        const replacement = rule.pair[0] + rule.insert.toLowerCase() + rule.pair[1]
-                        polymer = polymer.replaceAll(rule.pair, replacement);
+                    while (polymer.includes(pair)) {
+                        // Use lowercase, so it won't match again in this round
+                        const replacement = pair[0] + insertionRules[pair].toLowerCase() + pair[1];
+                        polymer = polymer.replaceAll(pair, replacement);
                     }
-                });
+                }
 
                 polymer = polymer.toUpperCase();
             }

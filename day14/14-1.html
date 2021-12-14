@@ -17,26 +17,24 @@
             import Utilities from '../Utilities.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            let {polymer, rules} = await fileReader.parse();
+            let {polymer, insertionRules} = await fileReader.parse();
             polymer = polymer.split('');
             const rounds = 10;
-            let index, pair, rule;
 
             for (let round = 0; round < rounds; round++) {
                 // Loop over the polymer characters
-                for (index = 0; index < polymer.length; index++) {
+                for (let index = 0; index < polymer.length; index++) {
                     // There is no character before the first, no pair possible
                     if (index === 0) {
                         continue;
                     }
 
                     // Create a characters pair
-                    pair = polymer[index - 1] + polymer[index];
+                    const pair = polymer[index - 1] + polymer[index];
 
-                    // If a rule for the pair exists,
-                    // Insert a character and increase the index 1 more the next loop
-                    if ((rule = rules.find(rule => rule.pair === pair)) !== undefined) {
-                        polymer.splice(index, 0, rule.insert);
+                    // Insert a character, if a rule for it exists
+                    if (insertionRules[pair] !== undefined) {
+                        polymer.splice(index, 0, insertionRules[pair]);
                         index++;
                     }
                 }
