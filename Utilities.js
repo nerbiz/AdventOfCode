@@ -67,6 +67,23 @@ export default class
     }
 
     /**
+     * Splits an array into chunks
+     * @param {array} array
+     * @param {number} chunkSize 
+     * @returns {array}
+     */
+    static arrayChunk(array, chunkSize)
+    {
+        const chunks = [];
+        
+        for (let count = 0; count < array.length; count += chunkSize) {
+            chunks.push(array.slice(count, count + chunkSize));
+        }
+
+        return chunks;
+    }
+
+    /**
      * Like map(), but for 2D arrays
      * @param {array} array
      * @param {function} callback A function to apply on every item
