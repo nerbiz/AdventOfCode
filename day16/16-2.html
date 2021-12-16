@@ -18,7 +18,6 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const binaryMessage = await fileReader.parse();
-            let versionsSum = 0;
 
             const getNextPacket = (startIndex = 0) => {
                 let nextIndex = startIndex;
@@ -31,9 +30,6 @@
                     typeId: parseInt(typeIdBinary, 2),
                     subPackets: [],
                 };
-
-                // Increase the version sum
-                versionsSum += packet.version;
 
                 // The packet contains a literal value
                 if (packet.typeId === 4) {
@@ -94,9 +90,43 @@
             };
 
             // Start the packet tree parsing
-            getNextPacket();
+            const {packet: rootPacket} = getNextPacket();
 
-            answer.innerText = versionsSum;
+            const calculate = packet => {
+                const subValues = packet.subPackets.map(packet => {
+                    return (packet.typeId === 4)
+                        ? packet.literalValue
+                        : calculate(packet);
+                });
+
+                switch (packet.typeId) {
+                    // Sum
+                    case 0:
+                        return subValues.reduce((total, value) => (total + value), 0);
+                    // Multiply
+                    case 1:
+                        return subValues.reduce((total, value) => (total * value), 1);
+                    // Minimum
+                    case 2:
+                        return Math.min(...subValues);
+                    // Maximum
+                    case 3:
+                        return Math.max(...subValues);
+                    // Greater than
+                    case 5:
+                        return Number(subValues[0] > subValues[1]);
+                    // Less than
+                    case 6:
+                        return Number(subValues[0] < subValues[1]);
+                    // Equal to
+                    case 7:
+                        return Number(subValues[0] === subValues[1]);
+                    default:
+                        break;
+                }
+            };
+
+            answer.innerText = calculate(rootPacket);
         </script>
     </body>
 </html>
