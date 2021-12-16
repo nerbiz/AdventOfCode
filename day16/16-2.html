@@ -57,14 +57,12 @@
                         packet.subBitLength = parseInt(lengthBinary, 2);
 
                         // Get the subpackets, using the bit length limit
-                        let totalBitsUsed = 0;
-                        while (totalBitsUsed < packet.subBitLength) {
-                            const {packet: subPacket, bitsUsed} = getNextPacket(nextIndex + totalBitsUsed);
-                            totalBitsUsed += bitsUsed;
+                        const subPacketStart = nextIndex;
+                        while (nextIndex < (subPacketStart + packet.subBitLength)) {
+                            const {packet: subPacket, bitsUsed} = getNextPacket(nextIndex);
+                            nextIndex += bitsUsed;
                             packet.subPackets.push(subPacket);
                         }
-
-                        nextIndex += totalBitsUsed;
                     }
 
                     // The type is 'sub-packets amount'
@@ -72,14 +70,11 @@
                         const amountBinary = binaryMessage.slice(nextIndex, nextIndex += 11);
                         packet.subPacketsAmount = parseInt(amountBinary, 2);
 
-                        let totalBitsUsed = 0;
                         while (packet.subPackets.length < packet.subPacketsAmount) {
-                            const {packet: subPacket, bitsUsed} = getNextPacket(nextIndex + totalBitsUsed);
-                            totalBitsUsed += bitsUsed;
+                            const {packet: subPacket, bitsUsed} = getNextPacket(nextIndex);
+                            nextIndex += bitsUsed;
                             packet.subPackets.push(subPacket);
                         }
-
-                        nextIndex += totalBitsUsed;
                     }
                 }
 
