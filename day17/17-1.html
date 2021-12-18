@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const target = await fileReader.parse();
+
+            /*
+            X needs to be minimized, for Y to be maximized: the shorter the curve, the higher the curve.
+            So find the first X velocity that makes X higher than xMin of the target.
+            */
+            let xVelocity = 0, endX;
+            do {
+                // The X position is the triagular number of the velocity
+                endX = ++xVelocity * (xVelocity + 1) / 2;
+            } while (endX < target.xMin);
+
+            /*
+            The Y velocity always returns to the same value, after any amount of steps.
+            The next step is (velocity = velocity * -1), which is 0.
+            Then the next step is ((velocity + 1) * -1), which needs to be within the target.
+            So the maximum velocity is the target yMin + 1, as absolute number.
+            */
+            const yVelocity = Math.abs(target.yMin + 1);
+
+            // The highest Y value is the triangular number of the velocity
+            const highestY = yVelocity * (yVelocity + 1) / 2;
+
+            answer.innerText = highestY;
+        </script>
+    </body>
+</html>
