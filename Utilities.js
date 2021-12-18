@@ -8,7 +8,15 @@ export default class
      */
     static range(first, last)
     {
-        return [...Array(last + 1).keys()].slice(first);
+        const min = Math.min(first, last);
+        const max = Math.max(first, last);
+        const range = [];
+
+        for (let i = min; i <= max; i++) {
+            range.push(i);
+        }
+        
+        return range;
     }
 
     /**
