@@ -16,7 +16,7 @@
             import Parser from './Parser.js';
             import Utilities from '../Utilities.js';
 
-            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const fileReader = new FileReader('./data.txt', new Parser());
             const target = await fileReader.parse();
 
             let solutions = [
@@ -42,7 +42,7 @@
 
             // Calculate the other min/max velocities for at least 2 steps
             const xMaxVelocity = Math.floor(target.xMax / 2);
-            const yMinVelocity = (target.yMin / 2) + 1;
+            const yMinVelocity = Math.floor(target.yMin / 2) + 1;
             const yMaxVelocity = Math.abs(target.yMin + 1);
 
             const xRange = Utilities.range(xMinVelocity, xMaxVelocity);
@@ -56,63 +56,108 @@
             console.log('X range', xRange);
             console.log('Y range', yRange);
 
+            console.groupCollapsed('Find X steps');
+
             const xValidSteps = xRange.map(x => {
+                console.log('X', x);
                 let sum = 0, steps = 0, decreaser = x + 1;
                 const validSteps = [];
 
-                while (sum <= target.xMax && --decreaser > 0) {
+                while (sum <= target.xMax && --decreaser >= 0) {
                     sum += decreaser;
                     steps++;
 
                     // Target is reached, add the valid step amount
                     if (sum >= target.xMin && sum <= target.xMax) {
-                        validSteps.push(steps);
+                        console.log('Add steps', steps, 'X is then', sum);
+                        validSteps.push(decreaser === 0 ? Infinity : steps);
                     }
                 }
 
-                // If the velocity reached 0, X stays in the end position infinitely
-                if (decreaser === 0) {
-                    validSteps.push(Infinity);
-                }
+                console.log('X', x, 'valid steps', validSteps);
+                console.log('-'.repeat(30));
 
                 return {x, validSteps};
             });
 
-            console.log(Utilities.clone(xValidSteps).map(steps => {
-                steps.validSteps = steps.validSteps.join(', ');
-                return steps;
-            }));
+            console.groupEnd();
+            console.groupCollapsed('Find Y steps');
 
-            yRange.forEach(y => {
-                let sum = 0, steps = 0, decreaser = y + 1;
-                let xVelocities = [];
+            const yValidSteps = yRange.map(y => {
+                console.log('Y', y);
+                let sum = 0, steps, decreaser;
+                // let xVelocities = [];
+                const validSteps = [];
 
-                while (sum >= target.yMin) {
-                    sum += --decreaser;
+                // A positive Y goes back to zero after (y * 2) + 1 steps,
+                // Y goes negative after that, so no need to check steps before that
+                if (y > 0) {
+                    steps = (y * 2) + 1;
+                    decreaser = y * -1;
+                } else {
+                    steps = 0;
+                    decreaser = y + 1;
+                }
+
+                while ((sum += --decreaser) >= target.yMin) {
                     steps++;
 
                     // Target is reached, couple with X velocities that match the step amount
                     if (sum >= target.yMin && sum <= target.yMax) {
-                        // Find X velocities that take the same amount of steps as Y
-                        xValidSteps.forEach(xSteps => {
-                            // The X velocity takes the same amount of steps as Y
-                            if (xSteps.validSteps.includes(steps)) {
-                                xVelocities.push(xSteps.x);
-                            }
-                            
-                            // If the X velocity takes less steps than Y, it needs to include infinity
-                            // i.e. the X value stays the same infinitely
-                            const rationalSteps = xSteps.validSteps.filter(step => step !== Infinity);
-                            if (Math.max(...rationalSteps) < steps && xSteps.validSteps.includes(Infinity)) {
-                                xVelocities.push(xSteps.x);
-                            }
-                        });
+                        console.log('Add steps', steps, 'Y is then', sum);
+                        validSteps.push(steps);
                     }
                 }
 
-                // Add x,y pairs
-                Utilities.arrayUnique(xVelocities).forEach(x => possibilities.push([x, y]));
+                // console.log('X velocities', Utilities.arrayUnique(xVelocities));
+                console.log('Y', y, 'valid steps', validSteps);
+                console.log('-'.repeat(30));
+
+                return {y, validSteps};
             });
+
+            console.groupEnd();
+
+            console.log('Valid X steps', Utilities.clone(xValidSteps).map(steps => {
+                steps.validSteps = steps.validSteps.join(', ');
+                return steps;
+            }));
+
+            console.log('Valid Y steps', Utilities.clone(yValidSteps).map(steps => {
+                steps.validSteps = steps.validSteps.join(', ');
+                return steps;
+            }));
+
+            // Make X,Y pairs
+            xValidSteps.forEach(xSteps => {
+                const yCollection = [];
+                console.log(xSteps);                
+
+                // Check for Y velocities that reach the target in an equal amount of steps
+                xSteps.validSteps.forEach(stepAmount => {
+                    yValidSteps.filter(ySteps => ySteps.validSteps.includes(stepAmount))
+                        .forEach(ySteps => yCollection.push(ySteps.y));
+                });
+
+                // Some X velocities result in the proper X position infitely
+                // Check for Y velocities that take at least that amount of steps
+                if (xSteps.validSteps.includes(Infinity)) {
+                    const validSteps = xSteps.validSteps.filter(stepAmount => stepAmount !== Infinity);
+                    const minimumSteps = Math.max(...validSteps);
+
+                    const ySteps = yValidSteps
+                        .filter(ySteps => ySteps.validSteps
+                            .filter(stepAmount => stepAmount >= minimumSteps)
+                            .length > 0)
+                        .forEach(ySteps => yCollection.push(ySteps.y));
+                }
+
+                Utilities.arrayUnique(yCollection).forEach(y => possibilities.push([xSteps.x, y]))
+            });
+
+
+
+
 
             console.log('Solutions', solutions
                 // .sort((a, b) => a[0] - b[0]);
@@ -128,6 +173,8 @@
                 // .sort((a, b) => a[0] - b[0]);
                 .sort((a, b) => a[1] - b[1]);
             console.log('Remaining', remaining);
+
+            console.log(target);
 
             // 1103 is too low
             answer.innerText = possibilities.length;
