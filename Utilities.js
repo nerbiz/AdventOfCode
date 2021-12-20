@@ -92,6 +92,56 @@ export default class
     }
 
     /**
+     * Find an item deeply nested in an array, by a list of indexes
+     * @param {array} array The array to search in
+     * @param {array} indexes Indexes to search with, recursively
+     * @returns {any} Returns undefined if the item doesn't exist
+     */
+    static arrayDeepIndex(array, indexes)
+    {
+        let found = array;
+
+        for (const index of indexes) {
+            if (found[index] === undefined) {
+                return undefined;
+            }
+
+            found = found[index];
+        }
+
+        return found;
+    }
+
+    /**
+     * Insert/replace a value deeply into a multidimensional array
+     * @param {array} array The array to set a value in
+     * @param {array} indexes Indexes leading to the insertion point
+     * @param {any} value The value to insert at that deep index
+     * @returns {array}
+     */
+    static arraySetDeep(array, indexes, value)
+    {
+        let traverser = array;
+
+        for (let i = 0; i < indexes.length; i++) {
+            const index = indexes[i];
+
+            // At the last index, place the value
+            if (i === indexes.length - 1) {
+                traverser[index] = value;
+                return array;
+            }
+
+            // Create a child array if it doesn't exist
+            if (! Array.isArray(traverser[index])) {
+                traverser[index] = [];
+            }
+
+            traverser = traverser[index];
+        }
+    }
+
+    /**
      * Like map(), but for 2D arrays
      * @param {array} array
      * @param {function} callback A function to apply on every item
