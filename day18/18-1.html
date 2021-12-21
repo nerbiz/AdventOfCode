@@ -16,26 +16,9 @@
             import Parser from './Parser.js';
             import Utilities from '../Utilities.js';
 
-            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const fileReader = new FileReader('./data.txt', new Parser());
             let snailfishLines = await fileReader.parse();
             let currentLine;
-
-            const showJson = (inputArray, indent = 4, withIndexes = false) => {
-                const array = Utilities.clone(inputArray);
-
-                if (! withIndexes) {
-                    array.flat(100).forEach(number => delete number.deepIndexes);
-                }
-
-                let json = JSON.stringify(array, null, indent);
-
-                if (! withIndexes) {
-                    json = json.replace(/\{"value":(\d+)\}/g, '$1');
-                }
-
-                console.log(json);
-                console.log('-'.repeat(50));
-            };
 
             /**
              * Join two lines into a new array
@@ -184,16 +167,39 @@
                 // Join the first 2 lines
                 currentLine = joinLines(snailfishLines.shift(), snailfishLines.shift());
                 let hasChanged;
-                
+
+                // Reduce the line for as long as needed
                 do {
                     hasChanged = reduceLine(currentLine);
                 } while (hasChanged === true);
 
-                showJson(currentLine, 0);
-
                 // Prepend the combined/reduced line
                 snailfishLines.unshift(currentLine);
             }
+            
+            const lastLine = snailfishLines.shift();
+            let magnitude;
+
+            // Find the numbers per depth and calculate their magnitude
+            for (let depth = 4; depth > -1; depth--) {
+                const numbers = lastLine.flat(100).filter(number => number.deepIndexes.length === depth);
+                let pairLeft, pairRight;
+
+                while (numbers.length > 0) {
+                    pairLeft = numbers.shift();
+                    pairRight = numbers.shift();
+                    magnitude = (3 * pairLeft.value) + (2 * pairRight.value);
+
+                    // Replace the pair by its magnitude
+                    const pairDeepIndexes = pairLeft.deepIndexes.slice(0, -1);
+                    Utilities.arraySetDeep(lastLine, pairDeepIndexes, {
+                        value: magnitude,
+                        deepIndexes: pairDeepIndexes,
+                    }, true);
+                }
+            }
+
+            answer.innerText = magnitude;
         </script>
     </body>
 </html>
