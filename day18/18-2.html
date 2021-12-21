@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../Utilities.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let snailfishLines = await fileReader.parse();
+            let currentLine;
+
+            /**
+             * Join two lines into a new array
+             * @param {array} lineOne
+             * @param {array} lineTwo
+             * @returns {array}
+             */
+            const joinLines = (lineOne, lineTwo) => {
+                return [lineOne, lineTwo].map((line, index) => {
+                    // Prepend the new index to the indexes of all the numbers
+                    line.flat(100).forEach(number => number.deepIndexes.unshift(index));
+                    return line;
+                });
+            };
+
+            /**
+             * Find a number to the left or right of a given number
+             * @param {object} fromNumber A number object: {value, deepIndexes}
+             * @param {string} direction 'left' or 'right'
+             * @returns {object}
+             */
+            const findNextNumber = (fromNumber, direction) => {
+                const number = Utilities.clone(fromNumber);
+
+                // When searching to the left, use index 0, otherwise 1 for right
+                let searchIndex = Number(direction === 'right');
+
+                // Remove the last index, because that is of the number itself
+                number.deepIndexes.pop();
+
+                // Traverse up the tree
+                let foundValue, removedIndex;
+                while(number.deepIndexes.length > 0) {
+                    removedIndex = number.deepIndexes.pop();
+
+                    // Don't move back to the index that was just removed
+                    if (removedIndex === searchIndex) {
+                        continue;
+                    }
+
+                    // Return the item, if it is a regular value
+                    number.deepIndexes = number.deepIndexes.concat(searchIndex);
+                    foundValue = Utilities.arrayDeepIndex(currentLine, number.deepIndexes);
+                    if (foundValue.value !== undefined) {
+                        return foundValue;
+                    }
+
+                    // If the item is not a regular value, it's a pair (array)
+                    // Swap the 0/1 value of the search index.
+                    // Because when searching left (index 0) and there's a pair, find the right-most (index 1)
+                    searchIndex = Number(! searchIndex);
+
+                    // Get the next item, as long as it's not a regular number
+                    while (true) {
+                        number.deepIndexes = number.deepIndexes.concat(searchIndex);
+                        foundValue = Utilities.arrayDeepIndex(currentLine, number.deepIndexes);
+
+                        if (foundValue.value !== undefined) {
+                            return foundValue;
+                        }
+                    }
+                }
+
+                return undefined;
+            };
+
+            /**
+             * Explode a number pair
+             * @param {object} pairLeftNumber A pair's left number object
+             * @returns {void}
+             */
+            const explodePair = pairLeftNumber => {
+                // Find the pair's right number
+                const siblingDeepIndexes = pairLeftNumber.deepIndexes.slice(0, -1).concat(1);
+                const sibling = Utilities.arrayDeepIndex(currentLine, siblingDeepIndexes);
+
+                // Add the pair's left value to a value to the left
+                const leftNumber = findNextNumber(pairLeftNumber, 'left');
+                if (leftNumber !== undefined) {
+                    leftNumber.value += pairLeftNumber.value;
+                }
+
+                // Add the pair's right value to a value to the right
+                const rightNumber = findNextNumber(sibling, 'right');
+                if (rightNumber !== undefined) {
+                    rightNumber.value += sibling.value;
+                }
+
+                // Replace the pair itself with a 0
+                const pairDeepIndexes = pairLeftNumber.deepIndexes.slice(0, -1);
+                Utilities.arraySetDeep(currentLine, pairDeepIndexes, {
+                    value: 0,
+                    deepIndexes: pairDeepIndexes,
+                });
+            };
+
+            /**
+             * Split a regular value
+             * @param {object} number The number to split
+             * @returns {void}
+             */
+            const splitNumber = number => {
+                const newPair = [
+                    {
+                        value: Math.floor(number.value / 2),
+                        deepIndexes: number.deepIndexes.concat(0),
+                    },
+                    {
+                        value: Math.ceil(number.value / 2),
+                        deepIndexes: number.deepIndexes.concat(1),
+                    },
+                ];
+
+                // Replace the number by the new pair
+                Utilities.arraySetDeep(currentLine, number.deepIndexes, newPair);
+            };
+
+            /**
+             * Reduce a line
+             * @param {array} line
+             * @returns {boolean} Whether the line has changed
+             */
+            const reduceLine = line => {
+                const flattenedLine = line.flat(100);
+
+                // Explode the first pair that is 5 deep (if any)
+                const tooDeep = flattenedLine.find(number => number.deepIndexes.length === 5);
+                if (tooDeep !== undefined) {
+                    explodePair(tooDeep);
+                    return true;
+                }
+
+                // Split the first number that is 10 or greater (if any)
+                const tooHigh = flattenedLine.find(number => number.value >= 10);
+                if (tooHigh !== undefined) {
+                    splitNumber(tooHigh);
+                    return true;
+                }
+
+                return false;
+            };
+
+            /**
+             * Calculate the magnitude of a line
+             * @param {array} line
+             * @returns {number}
+             */
+            const calculateMagnitude = line => {
+                let magnitude;
+
+                // Find the numbers per depth and calculate their magnitude
+                for (let depth = 4; depth > -1; depth--) {
+                    const numbers = line.flat(100).filter(number => number.deepIndexes.length === depth);
+                    let pairLeft, pairRight;
+
+                    while (numbers.length > 0) {
+                        pairLeft = numbers.shift();
+                        pairRight = numbers.shift();
+                        magnitude = (3 * pairLeft.value) + (2 * pairRight.value);
+
+                        // Replace the pair by its magnitude
+                        const pairDeepIndexes = pairLeft.deepIndexes.slice(0, -1);
+                        Utilities.arraySetDeep(line, pairDeepIndexes, {
+                            value: magnitude,
+                            deepIndexes: pairDeepIndexes,
+                        }, true);
+                    }
+                }
+
+                return magnitude;
+            };
+
+            let highestMagnitude = 0;
+            let hasChanged;
+
+            snailfishLines.forEach((line, index) => {
+                // Join the line with each of the other lines
+                snailfishLines.filter(otherLine => otherLine !== line)
+                    .forEach((otherLine, otherIndex) => {
+                        const lineOne = Utilities.clone(line);
+                        const lineTwo = Utilities.clone(otherLine);
+                        currentLine = joinLines(lineOne, lineTwo);
+
+                        // Reduce the line for as long as needed
+                        do {
+                            hasChanged = reduceLine(currentLine);
+                        } while (hasChanged === true);
+
+                        // Update the highest magnitude if the current is higher
+                        highestMagnitude = Math.max(
+                            highestMagnitude,
+                            calculateMagnitude(currentLine)
+                        );
+                    });
+            });
+
+            answer.innerText = highestMagnitude;
+        </script>
+    </body>
+</html>
