@@ -159,19 +159,19 @@ export default class
      * @param {function} callback A function to apply on every item
      * @returns {array}
      */
-     static forEach2D(array, callback)
-     {
-         return array.forEach((row, yIndex) =>
+    static forEach2D(array, callback)
+    {
+        array.forEach((row, yIndex) =>
             row.forEach((element, xIndex) => callback(element, xIndex, yIndex, array)));
-     }
+    }
 
     /**
      * Clone a value, useful for arrays and objects
      * @param {any} value The original value
      * @returns {any} A clone of the value
      */
-     static clone(value)
-     {
-         return JSON.parse(JSON.stringify(value));
-     }
+    static clone(value)
+    {
+        return JSON.parse(JSON.stringify(value));
+    }
 }
