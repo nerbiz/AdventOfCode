@@ -28,11 +28,47 @@ export default class Array2d extends Array
 {
 
     /**
-     * @param {array} array A 1-dimensional array
+     * Create a 2D array from a 1D array
+     * @param {array} array
+     * @param {number} rowLength The maximum length of each row
+     * @returns {Array2d}
      */
     static from1d(array, rowLength)
     {
-        // For instance, an array of 20 items, divide into 4 rows of 5 items
+        const rows = [];
+
+        // Split the input array into rows
+        for (let i = 0; i < array.length; i += rowLength) {
+            rows.push(array.slice(i, i + rowLength));
+        }
+
+        return new Array2d(rows);
+    }
+
+    /**
+     * Calculate the distance between 2 points
+     * @param {number|Array2dItem} fromX
+     * @param {number|Array2dItem} fromY
+     * @param {number|Array2dItem} toX
+     * @param {number} toY
+     * @returns {number}
+     */
+    static getDistance(fromX, fromY, toX, toY)
+    {
+        if (toX instanceof Array2dItem) {
+            toX = toX.x;
+            toY = toX.y;
+        } else if (fromY instanceof Array2dItem) {
+            toX = fromY.x;
+            toY = fromY.y;
+            fromY = fromX.y;
+            fromX = fromX.x;
+        }
+
+        return Math.sqrt(
+            Math.abs(toX - fromX) ** 2
+            + Math.abs(toY - fromY) ** 2
+        );
     }
 
     /**
@@ -144,75 +180,103 @@ export default class Array2d extends Array
     }
 
     /**
-     * Get (part of) all rows
-     * @param {number} startIndex Slice start index
-     * @param {number} endIndex Index before which to end the slice
-     * @returns {array}
+     * Get horizontally and vertically connected items
+     * @param {number|Array2dItem} x
+     * @param {number} y
+     * @param {boolean} named Whether to return named pairs
+     * @returns {array|object}
      */
-    getRows(startIndex = 0, endIndex = undefined)
+    getAdjacentItems(x, y, named = false)
     {
-        return this.slice(startIndex, endIndex);
-    }
-
-    /**
-     * Get (a part of) a row
-     * @param {number} y The row index
-     * @param {number} startIndex Slice start index
-     * @param {number} endIndex Index before which to end the slice
-     * @param {any} fallback A default value, if the item doesn't exist
-     * @returns {array}
-     */
-    getRow(y, startIndex = 0, endIndex = undefined, fallback = undefined)
-    {
-        if (this[y] === undefined) {
-            return fallback;
+        if (x instanceof Array2dItem) {
+            y = x.y;
+            x = x.x;
         }
 
-        return this.at(y).slice(startIndex, endIndex);
+        const items = {
+            up: this.getItem(x, y - 1),
+            down: this.getItem(x, y + 1),
+            left: this.getItem(x - 1, y),
+            right: this.getItem(x + 1, y),
+        };
+
+        // Filter out undefined items
+        for (const key in items) {
+            if (items[key] === undefined) {
+                delete items[key];
+            }
+        }
+
+        return (named)
+            ? items
+            : Object.values(items);
     }
 
     /**
-     * Get (part of) all columns
-     * @param {number} startIndex Slice start index
-     * @param {number} endIndex Index before which to end the slice
+     * Get horizontally, vertically and diagonally connected items
+     * @param {number|Array2dItem} x
+     * @param {number} y
+     * @param {boolean} named Whether to return named pairs
+     * @returns {array|object}
+     */
+    getSurroundingItems(x, y, named = false)
+    {
+        if (x instanceof Array2dItem) {
+            y = x.y;
+            x = x.x;
+        }
+
+        const items = {
+            upLeft: this.getItem(x - 1, y - 1),
+            up: this.getItem(x, y - 1),
+            upRight: this.getItem(x + 1, y - 1),
+            left: this.getItem(x - 1, y),
+            right: this.getItem(x + 1, y),
+            downLeft: this.getItem(x - 1, y + 1),
+            down: this.getItem(x, y + 1),
+            downRight: this.getItem(x + 1, y + 1),
+        };
+
+        // Filter out undefined items
+        for (const key in items) {
+            if (items[key] === undefined) {
+                delete items[key];
+            }
+        }
+
+        return (named)
+            ? items
+            : Object.values(items);
+    }
+
+    /**
+     * Get all columns
      * @returns {array}
      */
-    getColumns(startIndex = 0, endIndex = undefined)
+    getColumns()
     {
         const columns = [];
 
-        if (this.length > 0) {
-            this.at(0).forEach((item, x) => {
-                columns.push(
-                    this.reduce((column, row) => column.concat(row[x]), [])
-                );
-            });
+        if (this.length === 0) {
+            return columns;
         }
 
-        if (endIndex === undefined) {
-            endIndex = columns.length;
-        }
+        // Loop over the length of the first row
+        this.at(0).forEach((item, x) => {
+            columns.push(this.reduce((column, row) => column.concat(row[x]), []));
+        });
 
-        return columns.slice(startIndex, endIndex);
+        return columns;
     }
 
     /**
-     * Get (a part of) a column
+     * Get a single column
      * @param {number} x The column index
-     * @param {number} startIndex Slice start index
-     * @param {number} endIndex Index before which to end the slice
-     * @param {any} fallback A default value, if the item doesn't exist
      * @returns {array}
      */
-    getColumn(x, startIndex = 0, endIndex = undefined, fallback = undefined)
+    getColumn(x)
     {
-        const columns = this.getColumns();
-
-        if (columns[x] === undefined) {
-            return fallback;
-        }
-
-        return columns.at(x).slice(startIndex, endIndex);
+        return this.getColumns().at(x);
     }
 
     /**
@@ -227,6 +291,15 @@ export default class Array2d extends Array
         return (flatten)
             ? new Array(...allValues.flat())
             : allValues;
+    }
+
+    /**
+     * Returns the amount of items
+     * @returns {number}
+     */
+    countItems()
+    {
+        return this.getAllValues(true).length;
     }
 
     /**
