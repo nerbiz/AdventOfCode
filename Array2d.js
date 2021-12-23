@@ -26,7 +26,6 @@ export class Array2dItem
 
 export default class Array2d extends Array
 {
-
     /**
      * Create a 2D array from a 1D array
      * @param {array} array
@@ -102,27 +101,24 @@ export default class Array2d extends Array
                         .map((item, x) => new Array2dItem(x, y))
                 );
             }
+        } else if (
+            values.length === 1
+            && Array.isArray(values[0])
+            && Array.isArray(values[0][0])
+        ) {
+            // An existing 2D array is given
+            newArray = values[0];
+        } else {
+            // An N amount of arrays have been given
+            newArray = values;
         }
 
-        // An existing 2D array is given
-        else if (values.length === 1 && Array.isArray(values[0]) && Array.isArray(values[0][0])) {
-            newArray = values[0].map((row, y) => row.map((item, x) =>
-                // Only convert if needed
-                (item instanceof Array2dItem)
-                    ? item
-                    : new Array2dItem(x, y, item)
-            ));
-        }
-
-        // An N amount of arrays have been given
-        else {
-            newArray = values.map((row, y) => row.map((item, x) =>
-                // Only convert if needed
-                (item instanceof Array2dItem)
-                    ? item
-                    : new Array2dItem(x, y, item)
-            ));
-        }
+        // Convert values to objects if needed
+        newArray = newArray.map((row, y) => row.map((value, x) =>
+            (value instanceof Array2dItem)
+                ? value
+                : new Array2dItem(x, y, value)
+        ));
 
         super(...newArray);
     }
@@ -316,19 +312,46 @@ export default class Array2d extends Array
     }
 
     /**
-     * Set a value in the array
+     * Insert a new item
      * @param {number} x
      * @param {number} y
      * @param {any} value
+     * @param {object} extraData
      * @returns {Array2d}
      */
-    set(x, y, value)
+    setItem(x, y, value, extraData)
     {
         if (this[y] === undefined) {
             this[y] = [];
         }
 
         this[y][x] = new Array2dItem(x, y, value);
+
+        return this;
+    }
+
+    /**
+     * Update an existing item
+     * @param {number} x
+     * @param {number} y
+     * @param {any} value
+     * @param {object} extraData
+     * @returns {Array2d}
+     */
+    updateItem(x, y, value, extraData)
+    {
+        const existingItem = this.getItem(x, y);
+
+        // Create a new item, if it doesn't exist
+        if (existingItem === undefined) {
+            return this.setItem(x, y, value, extraData);
+        }
+
+        // Update the item
+        existingItem.value = value;
+        for (const key in extraData) {
+            existingItem[key] = extraData[key];
+        }
 
         return this;
     }
