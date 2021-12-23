@@ -26,6 +26,15 @@ export class Array2dItem
 
 export default class Array2d extends Array
 {
+
+    /**
+     * @param {array} array A 1-dimensional array
+     */
+    static from1d(array, rowLength)
+    {
+        // For instance, an array of 20 items, divide into 4 rows of 5 items
+    }
+
     /**
      * @param {...any} values
      * index 0 can be:
@@ -80,27 +89,6 @@ export default class Array2d extends Array
         }
 
         super(...newArray);
-
-        // Define the columns
-        Object.defineProperty(this, 'columns', {
-            value: [],
-            enumerable: false,
-            writable: false,
-        });
-
-        this.at(0).forEach((item, x) => {
-            this.columns.push(
-                this.reduce((column, row) => column.concat(row[x]), [])
-            );
-        });
-    }
-
-    /**
-     * @param {array} array A 1-dimensional array
-     */
-    static from1d(array, rowLength)
-    {
-        // For instance, an array of 20 items, divide into 4 rows of 5 items
     }
 
     /**
@@ -144,31 +132,15 @@ export default class Array2d extends Array
      * @param {any} fallback A default value, if the item doesn't exist
      * @returns {any}
      */
-    get(x, y, fallback = undefined)
+    getItem(x, y, fallback = undefined)
     {
         if (this[y] === undefined) {
             return fallback;
         }
 
         return (this[y][x] !== undefined)
-            ? this[y][x].value
+            ? this[y][x]
             : fallback;
-    }
-
-    /**
-     * Get (a part of) a row
-     * @param {number} y The row index
-     * @param {number} startIndex Slice start index
-     * @param {number} endIndex Index before which to end the slice
-     * @returns {array}
-     */
-    getRow(y, startIndex = 0, endIndex = undefined)
-    {
-        if (this[y] === undefined) {
-            throw new Error('Row at index ' + y + ' does not exist');
-        }
-
-        return this.at(y).slice(startIndex, endIndex);
     }
 
     /**
@@ -177,25 +149,26 @@ export default class Array2d extends Array
      * @param {number} endIndex Index before which to end the slice
      * @returns {array}
      */
-    getRows(startIndex = 0, endIndex = this.length)
+    getRows(startIndex = 0, endIndex = undefined)
     {
         return this.slice(startIndex, endIndex);
     }
 
     /**
-     * Get (a part of) a column
-     * @param {number} x The column index
+     * Get (a part of) a row
+     * @param {number} y The row index
      * @param {number} startIndex Slice start index
      * @param {number} endIndex Index before which to end the slice
+     * @param {any} fallback A default value, if the item doesn't exist
      * @returns {array}
      */
-    getColumn(x, startIndex = 0, endIndex = undefined)
+    getRow(y, startIndex = 0, endIndex = undefined, fallback = undefined)
     {
-        if (this.columns[x] === undefined) {
-            throw new Error('Column at index ' + x + ' does not exist');
+        if (this[y] === undefined) {
+            return fallback;
         }
 
-        return this.columns.at(x).slice(startIndex, endIndex);
+        return this.at(y).slice(startIndex, endIndex);
     }
 
     /**
@@ -204,9 +177,42 @@ export default class Array2d extends Array
      * @param {number} endIndex Index before which to end the slice
      * @returns {array}
      */
-    getColumns(startIndex = 0, endIndex = this.columns.length)
+    getColumns(startIndex = 0, endIndex = undefined)
     {
-        return this.columns.slice(startIndex, endIndex);
+        const columns = [];
+
+        if (this.length > 0) {
+            this.at(0).forEach((item, x) => {
+                columns.push(
+                    this.reduce((column, row) => column.concat(row[x]), [])
+                );
+            });
+        }
+
+        if (endIndex === undefined) {
+            endIndex = columns.length;
+        }
+
+        return columns.slice(startIndex, endIndex);
+    }
+
+    /**
+     * Get (a part of) a column
+     * @param {number} x The column index
+     * @param {number} startIndex Slice start index
+     * @param {number} endIndex Index before which to end the slice
+     * @param {any} fallback A default value, if the item doesn't exist
+     * @returns {array}
+     */
+    getColumn(x, startIndex = 0, endIndex = undefined, fallback = undefined)
+    {
+        const columns = this.getColumns();
+
+        if (columns[x] === undefined) {
+            return fallback;
+        }
+
+        return columns.at(x).slice(startIndex, endIndex);
     }
 
     /**
@@ -219,7 +225,7 @@ export default class Array2d extends Array
         const allValues = this.map(row => row.map(item => item.value));
 
         return (flatten)
-            ? allValues.flat()
+            ? new Array(...allValues.flat())
             : allValues;
     }
 
@@ -246,11 +252,19 @@ export default class Array2d extends Array
      * @param {array} values
      * @returns {boolean}
      */
-    contains(values)
+    containsAll(values)
     {
-        const allValues = this.getAllValues(true);
+        return values.every(value => this.getAllValues(true).includes(value));
+    }
 
-        return values.every(value => allValues.includes(value));
+    /**
+     * Checks whether any of the given values exist in the array
+     * @param {array} values
+     * @returns {boolean}
+     */
+    containsAny(values)
+    {
+        return values.some(value => this.getAllValues(true).includes(value));
     }
 
     /**
@@ -258,7 +272,7 @@ export default class Array2d extends Array
      * @param {function} callback
      * @returns {Array2d}
      */
-    replaceAll(callback)
+    map2d(callback)
     {
         return this.map((row, y) =>
             row.map((item, x) => callback(item, x, y, this)));
@@ -269,10 +283,34 @@ export default class Array2d extends Array
      * @param {function} callback
      * @returns {Array2d}
      */
-    forAll(callback)
+    forEach2d(callback)
     {
         this.forEach((row, y) =>
             row.forEach((item, x) => callback(item, x, y, this)));
+    }
+
+    /**
+     * Keep items based on a callback for every item
+     * @param {function} callback
+     * @returns {Array2d}
+     */
+    filter2d(callback, flatten = false)
+    {
+        return this
+            .map((row, y) => row.filter((item, x) => callback(item, x, y, this)))
+            .getAllValues(flatten);
+    }
+
+    /**
+     * Remove items based on a callback for every item
+     * @param {function} callback
+     * @returns {Array2d}
+     */
+    reject2d(callback, flatten = false)
+    {
+        return this
+            .map((row, y) => row.filter((item, x) => ! callback(item, x, y, this)))
+            .getAllValues(flatten);
     }
 
     /**
