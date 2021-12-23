@@ -179,10 +179,11 @@ export default class Array2d extends Array
      * Get horizontally and vertically connected items
      * @param {number|Array2dItem} x
      * @param {number} y
+     * @param {boolean} removeUndefined Whether to keep/delete undefined items
      * @param {boolean} named Whether to return named pairs
      * @returns {array|object}
      */
-    getAdjacentItems(x, y, named = false)
+    getAdjacentItems(x, y, removeUndefined = false, named = false)
     {
         if (x instanceof Array2dItem) {
             y = x.y;
@@ -197,9 +198,11 @@ export default class Array2d extends Array
         };
 
         // Filter out undefined items
-        for (const key in items) {
-            if (items[key] === undefined) {
-                delete items[key];
+        if (removeUndefined === true) {
+            for (const key in items) {
+                if (items[key] === undefined) {
+                    delete items[key];
+                }
             }
         }
 
@@ -212,10 +215,11 @@ export default class Array2d extends Array
      * Get horizontally, vertically and diagonally connected items
      * @param {number|Array2dItem} x
      * @param {number} y
+     * @param {boolean} removeUndefined Whether to keep/delete undefined items
      * @param {boolean} named Whether to return named pairs
      * @returns {array|object}
      */
-    getSurroundingItems(x, y, named = false)
+    getSurroundingItems(x, y, removeUndefined = false, named = false)
     {
         if (x instanceof Array2dItem) {
             y = x.y;
@@ -233,10 +237,12 @@ export default class Array2d extends Array
             downRight: this.getItem(x + 1, y + 1),
         };
 
-        // Filter out undefined items
-        for (const key in items) {
-            if (items[key] === undefined) {
-                delete items[key];
+        if (removeUndefined === true) {
+            // Filter out undefined items
+            for (const key in items) {
+                if (items[key] === undefined) {
+                    delete items[key];
+                }
             }
         }
 
@@ -351,6 +357,60 @@ export default class Array2d extends Array
         existingItem.value = value;
         for (const key in extraData) {
             existingItem[key] = extraData[key];
+        }
+
+        return this;
+    }
+
+    /**
+     * Expand the 2D array horizontally
+     * @param {number} amount < 0 means to the left, > 0 means to the right
+     * @param {any} value A value to set in the new items
+     * @returns {Array2d}
+     */
+    expandHorizontally(amount, value)
+    {
+        this.forEach((row, y) => {
+            if (amount < 0) {
+                // Prepend every row with 1 or more items
+                for (let i = 0; i < Math.abs(amount); i++) {
+                    row.forEach(item => item.x++);
+                    row.unshift(new Array2dItem(0, y, value));
+                }
+            } else {
+                // Append every row with 1 or more items
+                for (let i = 0; i < amount; i++) {
+                    row.push(new Array2dItem(row.length, y, value));
+                }
+            }
+        });
+
+        return this;
+    }
+
+    /**
+     * Expand the 2D array vertically
+     * @param {number} amount < 0 means to the top, > 0 means to the bottom
+     * @param {any} value A value to set in the new items
+     * @returns {Array2d}
+     */
+    expandVertically(amount, value)
+    {
+        // Create a new row with the same length as the current first row
+        const newRow = Array(this[0].length)
+            .fill(undefined)
+            .map((item, x) => {
+                const y = (amount < 0) ? 0 : this.length;
+                return new Array2dItem(x, y, value);
+            });
+
+        if (amount < 0) {
+            // Prepend the new row
+            this.forEach2d(item => item.y++);
+            this.unshift(newRow);
+        } else {
+            // Append the new row
+            this.push(newRow);
         }
 
         return this;
