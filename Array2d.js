@@ -89,35 +89,35 @@ export default class Array2d extends Array
         let newArray;
 
         if (Number.isInteger(values[0])) {
-            // Based on 1D array length
+            // Create empty rows based on the given rows amount
             newArray = new Array(values[0])
                 .fill(undefined)
                 .map(row => []);
 
-            // Based on 2D array length
+            // Fill the rows with items, based on the given items amount
             if (Number.isInteger(values[1])) {
-                newArray = newArray.map((row, y) => {
-                    return new Array(values[1])
+                newArray = newArray.map((row, y) =>
+                    new Array(values[1])
                         .fill(undefined)
-                        .map((item, x) => {
-                            return new Array2dItem(x, y);
-                        });
-                });
+                        .map((item, x) => new Array2dItem(x, y))
+                );
             }
         }
 
-        // Based on 2D array
+        // An existing 2D array is given
         else if (values.length === 1 && Array.isArray(values[0]) && Array.isArray(values[0][0])) {
             newArray = values[0].map((row, y) => row.map((item, x) =>
+                // Only convert if needed
                 (item instanceof Array2dItem)
                     ? item
                     : new Array2dItem(x, y, item)
             ));
         }
 
-        // Based on N amount of arrays passed as arguments
+        // An N amount of arrays have been given
         else {
             newArray = values.map((row, y) => row.map((item, x) =>
+                // Only convert if needed
                 (item instanceof Array2dItem)
                     ? item
                     : new Array2dItem(x, y, item)
@@ -247,6 +247,19 @@ export default class Array2d extends Array
         return (named)
             ? items
             : Object.values(items);
+    }
+
+    /**
+     * Get a part of the 2D array
+     * @param {number} startX
+     * @param {number} startY
+     * @param {number} endX The X index before which to stop slicing
+     * @param {number} endY The Y index before which to stop slicing
+     */
+    getSlice(startX, startY, endX, endY)
+    {
+        return this.slice(startY, endY)
+            .map(row => row.slice(startX, endX));
     }
 
     /**
