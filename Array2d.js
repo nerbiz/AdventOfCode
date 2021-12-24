@@ -366,21 +366,22 @@ export default class Array2d extends Array
      * Expand the 2D array horizontally
      * @param {number} amount < 0 means to the left, > 0 means to the right
      * @param {any} value A value to set in the new items
+     * @param {object} extraData
      * @returns {Array2d}
      */
-    expandHorizontally(amount, value)
+    expandHorizontally(amount, value, extraData)
     {
         this.forEach((row, y) => {
             if (amount < 0) {
                 // Prepend every row with 1 or more items
                 for (let i = 0; i < Math.abs(amount); i++) {
                     row.forEach(item => item.x++);
-                    row.unshift(new Array2dItem(0, y, value));
+                    row.unshift(new Array2dItem(0, y, value, extraData));
                 }
             } else {
                 // Append every row with 1 or more items
                 for (let i = 0; i < amount; i++) {
-                    row.push(new Array2dItem(row.length, y, value));
+                    row.push(new Array2dItem(row.length, y, value, extraData));
                 }
             }
         });
@@ -392,9 +393,10 @@ export default class Array2d extends Array
      * Expand the 2D array vertically
      * @param {number} amount < 0 means to the top, > 0 means to the bottom
      * @param {any} value A value to set in the new items
+     * @param {object} extraData
      * @returns {Array2d}
      */
-    expandVertically(amount, value)
+    expandVertically(amount, value, extraData)
     {
         if (amount < 0) {
             // Prepend the new row
@@ -402,7 +404,7 @@ export default class Array2d extends Array
                 this.forEach2d(item => item.y++);
                 this.unshift(
                     Array(this[0].length).fill(undefined)
-                        .map((item, x) => new Array2dItem(x, 0, value))
+                        .map((item, x) => new Array2dItem(x, 0, value, extraData))
                 );
             }
         } else {
@@ -410,12 +412,29 @@ export default class Array2d extends Array
             for (let i = 0; i < amount; i++) {
                 this.push(
                     Array(this[0].length).fill(undefined)
-                        .map((item, x) => new Array2dItem(x, this.length, value))
+                        .map((item, x) => new Array2dItem(x, this.length, value, extraData))
                 );
             }
         }
 
         return this;
+    }
+
+    /**
+     * Expand the 2D array on all 4 sides
+     * @param {number} amount The amount to add in each direction
+     * @param {any} value A value to set in the new items
+     * @param {object} extraData Extra data for the items
+     * @returns {Array2d}
+     */
+    expandAllSides(amount, value, extraData)
+    {
+        const amountNegative = amount * -1;
+
+        return this.expandHorizontally(amountNegative, value, extraData)
+            .expandHorizontally(amount, value, extraData)
+            .expandVertically(amountNegative, value, extraData)
+            .expandVertically(amount, value, extraData);
     }
 
     /**
