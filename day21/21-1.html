@@ -33,7 +33,9 @@
             playLoop: while (true) {
                 for (let playerNumber = 1; playerNumber <= 2; playerNumber++) {
                     // Roll the dice for the player
-                    let diceSum = ++diceValue + ++diceValue + ++diceValue;
+                    let diceSum = (diceValue++ % maxDiceNumber) + 1
+                        + (diceValue++ % maxDiceNumber) + 1
+                        + (diceValue++ % maxDiceNumber) + 1;
                     diceRolls += 3;
 
                     // Update the position and score of the player
