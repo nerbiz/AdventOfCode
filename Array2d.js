@@ -179,11 +179,10 @@ export default class Array2d extends Array
      * Get horizontally and vertically connected items
      * @param {number|Array2dItem} x
      * @param {number} y
-     * @param {boolean} removeUndefined Whether to keep/delete undefined items
      * @param {boolean} named Whether to return named pairs
      * @returns {array|object}
      */
-    getAdjacentItems(x, y, removeUndefined = false, named = false)
+    getAdjacentItems(x, y, named = false)
     {
         if (x instanceof Array2dItem) {
             y = x.y;
@@ -197,15 +196,6 @@ export default class Array2d extends Array
             right: this.getItem(x + 1, y),
         };
 
-        // Filter out undefined items
-        if (removeUndefined === true) {
-            for (const key in items) {
-                if (items[key] === undefined) {
-                    delete items[key];
-                }
-            }
-        }
-
         return (named)
             ? items
             : Object.values(items);
@@ -215,11 +205,10 @@ export default class Array2d extends Array
      * Get horizontally, vertically and diagonally connected items
      * @param {number|Array2dItem} x
      * @param {number} y
-     * @param {boolean} removeUndefined Whether to keep/delete undefined items
      * @param {boolean} named Whether to return named pairs
      * @returns {array|object}
      */
-    getSurroundingItems(x, y, removeUndefined = false, named = false)
+    getSurroundingItems(x, y, named = false)
     {
         if (x instanceof Array2dItem) {
             y = x.y;
@@ -236,15 +225,6 @@ export default class Array2d extends Array
             down: this.getItem(x, y + 1),
             downRight: this.getItem(x + 1, y + 1),
         };
-
-        if (removeUndefined === true) {
-            // Filter out undefined items
-            for (const key in items) {
-                if (items[key] === undefined) {
-                    delete items[key];
-                }
-            }
-        }
 
         return (named)
             ? items
@@ -484,9 +464,11 @@ export default class Array2d extends Array
      */
     filter2d(callback, flatten = false)
     {
-        return this
-            .map((row, y) => row.filter((item, x) => callback(item, x, y, this)))
-            .getAllValues(flatten);
+        const result = this.map((row, y) => row.filter((item, x) => callback(item, x, y, this)));
+
+        return (flatten)
+            ? new Array(...result.flat())
+            : result;
     }
 
     /**
@@ -496,9 +478,11 @@ export default class Array2d extends Array
      */
     reject2d(callback, flatten = false)
     {
-        return this
-            .map((row, y) => row.filter((item, x) => ! callback(item, x, y, this)))
-            .getAllValues(flatten);
+        const result = this.map((row, y) => row.filter((item, x) => ! callback(item, x, y, this)));
+
+        return (flatten)
+            ? new Array(...result.flat())
+            : result;
     }
 
     /**
