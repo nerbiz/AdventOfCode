@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const positions = await fileReader.parse();
+            const maxPosition = 10;
+            const maxDiceNumber = 100;
+            const scores = {
+                1: 0,
+                2: 0,
+            };
+
+            let diceValue = 0;
+            let diceRolls = 0;
+            let losingPlayer;
+
+            // Loop until someone wins
+            playLoop: while (true) {
+                for (let playerNumber = 1; playerNumber <= 2; playerNumber++) {
+                    // Roll the dice for the player
+                    let diceSum = ++diceValue + ++diceValue + ++diceValue;
+                    diceRolls += 3;
+
+                    // Update the position and score of the player
+                    positions[playerNumber] = ((positions[playerNumber] + diceSum - 1) % maxPosition) + 1;
+                    scores[playerNumber] += positions[playerNumber];
+
+                    // The player won
+                    if (scores[playerNumber] >= 1000) {
+                        losingPlayer = (playerNumber % 2) + 1;
+                        break playLoop;
+                    }
+                }
+            }
+
+            answer.innerText = scores[losingPlayer] * diceRolls;
+        </script>
+    </body>
+</html>
