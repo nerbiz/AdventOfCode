@@ -331,7 +331,7 @@ export default class Array2d extends Array
             this[y] = [];
         }
 
-        this[y][x] = new Array2dItem(x, y, value);
+        this[y][x] = new Array2dItem(x, y, value, extraData);
 
         return this;
     }
@@ -396,21 +396,23 @@ export default class Array2d extends Array
      */
     expandVertically(amount, value)
     {
-        // Create a new row with the same length as the current first row
-        const newRow = Array(this[0].length)
-            .fill(undefined)
-            .map((item, x) => {
-                const y = (amount < 0) ? 0 : this.length;
-                return new Array2dItem(x, y, value);
-            });
-
         if (amount < 0) {
             // Prepend the new row
-            this.forEach2d(item => item.y++);
-            this.unshift(newRow);
+            for (let i = 0; i < Math.abs(amount); i++) {
+                this.forEach2d(item => item.y++);
+                this.unshift(
+                    Array(this[0].length).fill(undefined)
+                        .map((item, x) => new Array2dItem(x, 0, value))
+                );
+            }
         } else {
             // Append the new row
-            this.push(newRow);
+            for (let i = 0; i < amount; i++) {
+                this.push(
+                    Array(this[0].length).fill(undefined)
+                        .map((item, x) => new Array2dItem(x, this.length, value))
+                );
+            }
         }
 
         return this;
