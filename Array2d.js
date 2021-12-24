@@ -429,11 +429,9 @@ export default class Array2d extends Array
      */
     expandAllSides(amount, value, extraData)
     {
-        const amountNegative = amount * -1;
-
-        return this.expandHorizontally(amountNegative, value, extraData)
+        return this.expandHorizontally(amount * -1, value, extraData)
             .expandHorizontally(amount, value, extraData)
-            .expandVertically(amountNegative, value, extraData)
+            .expandVertically(amount * -1, value, extraData)
             .expandVertically(amount, value, extraData);
     }
 
