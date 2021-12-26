@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../Utilities.js';
+            import Array2d from '../Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let riskMap = await fileReader.parse();
+            riskMap = new Array2d(riskMap);
+
+            const startPoint = riskMap.getItem(0, 0);
+            let lowestRisk = Number.MAX_SAFE_INTEGER;
+
+            const findLowestRisk = (point, currentRisk) => {
+                currentRisk += point.value;
+
+                // Stop looking if the current risk is higher than the lowest
+                if (currentRisk > lowestRisk) {
+                    return;
+                }
+
+                // Update the lowest risk value and stop looking when the end is reached
+                if (point.x === riskMap.length - 1 && point.y === riskMap[0].length - 1) {
+                    lowestRisk = currentRisk;
+
+                    return;
+                }
+
+                const adjacent = point.getAdjacentItems(true);
+
+                ['down', 'right'].forEach(direction => {
+                    if (adjacent[direction] !== undefined) {
+                        findLowestRisk(adjacent[direction], currentRisk);
+                    }
+                });
+            };
+
+            findLowestRisk(startPoint, 0);
+            
+            // Subtract the value of the starting point from the lowest risk
+            lowestRisk -= startPoint.value;
+
+            answer.innerText = lowestRisk;
+        </script>
+    </body>
+</html>
