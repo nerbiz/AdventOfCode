@@ -71,6 +71,19 @@ export default class Array2d extends Array
     }
 
     /**
+     * Initialize with extra data for every item
+     * @param {object} extraData
+     * @param  {...any} values See constructor
+     * @returns {Array2d}
+     */
+    static withExtraData(extraData, ...values)
+    {
+        Array2d.extraData = extraData;
+
+        return new Array2d(...values);
+    }
+
+    /**
      * @param {...any} values
      * index 0 can be:
      *   - Amount of (empty) rows
@@ -98,7 +111,7 @@ export default class Array2d extends Array
                 newArray = newArray.map((row, y) =>
                     new Array(values[1])
                         .fill(undefined)
-                        .map((item, x) => new Array2dItem(x, y))
+                        .map((item, x) => new Array2dItem(x, y, null, Array2d.extraData))
                 );
             }
         } else if (
@@ -117,8 +130,11 @@ export default class Array2d extends Array
         newArray = newArray.map((row, y) => row.map((value, x) =>
             (value instanceof Array2dItem)
                 ? value
-                : new Array2dItem(x, y, value)
+                : new Array2dItem(x, y, value, Array2d.extraData)
         ));
+
+        // Empty the static extra data
+        Array2d.extraData = undefined;
 
         super(...newArray);
     }
