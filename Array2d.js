@@ -488,6 +488,18 @@ export default class Array2d extends Array
     }
 
     /**
+     * Reduce all items to a single value, using a callback for every item
+     * @param {function} callback
+     * @param {any} initialValue
+     * @returns {any}
+     */
+    reduce2d(callback, initialValue)
+    {
+        return this.flat()
+            .reduce((accumulator, item) => callback(accumulator, item, item.x, item.y, this), initialValue);
+    }
+
+    /**
      * Remove items based on a callback for every item
      * @param {function} callback
      * @returns {Array2d}
