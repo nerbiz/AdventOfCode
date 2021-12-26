@@ -5,13 +5,15 @@ export class Array2dItem
      * @param {number} y
      * @param {any} value
      * @param {object} extraData
+     * @param {Array2d} parent The Array2d this item is part of
      * @constructor
      */
-    constructor(x, y, value = undefined, extraData = {})
+    constructor(x, y, value, extraData = {}, parent)
     {
         this.x = x;
         this.y = y;
         this.value = value;
+        this.parent = parent;
 
         for (const key in extraData) {
             // Allow dynamic properties using a callback
@@ -19,6 +21,57 @@ export class Array2dItem
                 ? extraData[key](x, y)
                 : extraData[key];
         }
+    }
+
+    /**
+     * @param {Array2d} parent 
+     * @returns {Array2dItem}
+     */
+    setParent(parent)
+    {
+        this.parent = parent;
+
+        return this;
+    }
+
+    /**
+     * @returns {Array2d}
+     */
+    getParent()
+    {
+        return this.parent;
+    }
+
+    /**
+     * @see Array2d.getDistance
+     */
+    getDistance(toX, toY)
+    {
+        return Array2d.getDistance(this, toX, toY);
+    }
+
+    /**
+     * @see Array2d.getAdjacentItems
+     */
+    getAdjacentItems(named = false)
+    {
+        if (this.parent === undefined) {
+            throw new Error('THe item needs a parent to get its adjacent items');
+        }
+
+        return this.parent.getAdjacentItems(this, null, named);
+    }
+
+    /**
+     * @see Array2d.getSurroundingItems
+     */
+    getSurroundingItems(named = false)
+    {
+        if (this.parent === undefined) {
+            throw new Error('THe item needs a parent to get its surrounding items');
+        }
+
+        return this.parent.getSurroundingItems(this, null, named);
     }
 }
 
@@ -60,6 +113,11 @@ export default class Array2d extends Array
         } else if (fromY instanceof Array2dItem) {
             toX = fromY.x;
             toY = fromY.y;
+            fromY = fromX.y;
+            fromX = fromX.x;
+        } else if (fromX instanceof Array2dItem) {
+            toY = toX;
+            toX = fromY;
             fromY = fromX.y;
             fromX = fromX.x;
         }
@@ -137,6 +195,9 @@ export default class Array2d extends Array
         Array2d.extraData = undefined;
 
         super(...newArray);
+
+        // Set the parent array in all items
+        this.forEach2d(item => item.setParent(this));
     }
 
     /**
@@ -145,13 +206,16 @@ export default class Array2d extends Array
      */
     clone()
     {
+        // To avoid a circular reference error, first remove the parent from all items
+        this.forEach2d(item => item.parent = null);
+
         const clone = JSON.parse(JSON.stringify(this))
-            .map((row, y) => row.map((item, x) => {
-                // Recreate the extraData object
+            .map(row => row.map(item => {
+                // Recreate the extra data object
                 const extraData = {};
                 for (const key in item) {
                     // Skip default properties
-                    if (['x', 'y', 'value'].includes(key)) {
+                    if (['x', 'y', 'value', 'parent'].includes(key)) {
                         continue;
                     }
 
@@ -161,7 +225,14 @@ export default class Array2d extends Array
                 return new Array2dItem(item.x, item.y, item.value, extraData);
             }));
 
-        return new Array2d(clone);
+        // Set the parent property of the original items again
+        this.forEach2d(item => item.parent = this);
+
+        // Set the new parent in the new items
+        const newArray2d = new Array2d(clone);
+        newArray2d.forEach2d(item => item.parent = newArray2d);
+
+        return newArray2d;
     }
 
     /**
@@ -327,7 +398,7 @@ export default class Array2d extends Array
             this[y] = [];
         }
 
-        this[y][x] = new Array2dItem(x, y, value, extraData);
+        this[y][x] = new Array2dItem(x, y, value, extraData, this);
 
         return this;
     }
@@ -372,12 +443,12 @@ export default class Array2d extends Array
                 // Prepend every row with 1 or more items
                 for (let i = 0; i < Math.abs(amount); i++) {
                     row.forEach(item => item.x++);
-                    row.unshift(new Array2dItem(0, y, value, extraData));
+                    row.unshift(new Array2dItem(0, y, value, extraData, this));
                 }
             } else {
                 // Append every row with 1 or more items
                 for (let i = 0; i < amount; i++) {
-                    row.push(new Array2dItem(row.length, y, value, extraData));
+                    row.push(new Array2dItem(row.length, y, value, extraData, this));
                 }
             }
         });
@@ -400,7 +471,7 @@ export default class Array2d extends Array
                 this.forEach2d(item => item.y++);
                 this.unshift(
                     Array(this[0].length).fill(undefined)
-                        .map((item, x) => new Array2dItem(x, 0, value, extraData))
+                        .map((item, x) => new Array2dItem(x, 0, value, extraData, this))
                 );
             }
         } else {
@@ -408,7 +479,7 @@ export default class Array2d extends Array
             for (let i = 0; i < amount; i++) {
                 this.push(
                     Array(this[0].length).fill(undefined)
-                        .map((item, x) => new Array2dItem(x, this.length, value, extraData))
+                        .map((item, x) => new Array2dItem(x, this.length, value, extraData, this))
                 );
             }
         }
