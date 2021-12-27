@@ -73,6 +73,26 @@ export class Array2dItem
 
         return this.parent.getSurroundingItems(this, null, named);
     }
+
+    /**
+     * Prepare this object for JSON.stringify()
+     * @returns {object}
+     */
+    toJSON()
+    {
+        // The properties to skip in JSON
+        const skip = ['parent'];
+        const forJson = {};
+
+        // Set the properties to include in JSON
+        for (const property in this) {
+            if (! skip.includes(property)) {
+                forJson[property] = this[property];
+            }
+        }
+
+        return forJson;
+    }
 }
 
 
@@ -206,9 +226,6 @@ export default class Array2d extends Array
      */
     clone()
     {
-        // To avoid a circular reference error, first remove the parent from all items
-        this.forEach2d(item => item.parent = null);
-
         const clone = JSON.parse(JSON.stringify(this))
             .map(row => row.map(item => {
                 // Recreate the extra data object
@@ -224,9 +241,6 @@ export default class Array2d extends Array
 
                 return new Array2dItem(item.x, item.y, item.value, extraData);
             }));
-
-        // Set the parent property of the original items again
-        this.forEach2d(item => item.parent = this);
 
         // Set the new parent in the new items
         const newArray2d = new Array2d(clone);
