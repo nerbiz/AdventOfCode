@@ -43,6 +43,14 @@ export class Array2dItem
     }
 
     /**
+     * @see Array2d.getSteps
+     */
+    getSteps(toX, toY, separately = false)
+    {
+        return Array2d.getSteps(this, toX, toY, null, separately);
+    }
+
+    /**
      * @see Array2d.getDistance
      */
     getDistance(toX, toY)
@@ -56,7 +64,7 @@ export class Array2dItem
     getAdjacentItems(named = false)
     {
         if (this.parent === undefined) {
-            throw new Error('THe item needs a parent to get its adjacent items');
+            throw new Error('The item needs a parent to get its adjacent items');
         }
 
         return this.parent.getAdjacentItems(this, null, named);
@@ -68,7 +76,7 @@ export class Array2dItem
     getSurroundingItems(named = false)
     {
         if (this.parent === undefined) {
-            throw new Error('THe item needs a parent to get its surrounding items');
+            throw new Error('The item needs a parent to get its surrounding items');
         }
 
         return this.parent.getSurroundingItems(this, null, named);
@@ -118,14 +126,15 @@ export default class Array2d extends Array
     }
 
     /**
-     * Calculate the distance between 2 points
+     * Calculate the amount of steps between 2 points
      * @param {number|Array2dItem} fromX
      * @param {number|Array2dItem} fromY
      * @param {number|Array2dItem} toX
      * @param {number} toY
+     * @param {boolean} separately Whether to return X and Y steps separately
      * @returns {number}
      */
-    static getDistance(fromX, fromY, toX, toY)
+    static getSteps(fromX, fromY, toX, toY, separately = false)
     {
         if (toX instanceof Array2dItem) {
             toX = toX.x;
@@ -142,10 +151,29 @@ export default class Array2d extends Array
             fromX = fromX.x;
         }
 
-        return Math.sqrt(
-            Math.abs(toX - fromX) ** 2
-            + Math.abs(toY - fromY) ** 2
-        );
+        const steps = {
+            x: Math.abs(toX - fromX),
+            y: Math.abs(toY - fromY),
+        };
+
+        return (separately === true)
+            ? steps
+            : steps.x + steps.y;
+    }
+
+    /**
+     * Calculate the distance between 2 points
+     * @param {number|Array2dItem} fromX
+     * @param {number|Array2dItem} fromY
+     * @param {number|Array2dItem} toX
+     * @param {number} toY
+     * @returns {number}
+     */
+    static getDistance(fromX, fromY, toX, toY)
+    {
+        const {x, y} = this.getSteps(fromX, fromY, toX, toY, true);
+
+        return Math.sqrt(x ** 2 + y ** 2);
     }
 
     /**
