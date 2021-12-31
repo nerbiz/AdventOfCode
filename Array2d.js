@@ -249,6 +249,46 @@ export default class Array2d extends Array
     }
 
     /**
+     * Make a new Array2d, where a new one is joined with the current
+     * @param {Array2d} joinArray
+     * @return {Array2d}
+     */
+    joinRight(joinArray)
+    {
+        return this.map((row, index) => row.concat(joinArray[index]));
+    }
+
+    /**
+     * Make a new Array2d, where a new one is joined with the current
+     * @param {Array2d} joinArray
+     * @return {Array2d}
+     */
+    joinLeft(joinArray)
+    {
+        return this.map((row, index) => joinArray[index].concat(row));
+    }
+
+    /**
+     * Make a new Array2d, where a new one is joined with the current
+     * @param {Array2d} joinArray
+     * @return {Array2d}
+     */
+    joinUp(joinArray)
+    {
+        return joinArray.concat(this);
+    }
+
+    /**
+     * Make a new Array2d, where a new one is joined with the current
+     * @param {Array2d} joinArray
+     * @return {Array2d}
+     */
+    joinDown(joinArray)
+    {
+        return this.concat(joinArray);
+    }
+
+    /**
      * Create a clone of the current object
      * @returns {Array2d}
      */
