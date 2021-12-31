@@ -19,41 +19,36 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             let riskMap = await fileReader.parse();
-            riskMap = new Array2d(riskMap);
+
+            riskMap = Array2d.withExtraData({
+                distance: Infinity,
+                previous: undefined,
+            }, riskMap);
 
             const startPoint = riskMap.getItem(0, 0);
-            let lowestRisk = Number.MAX_SAFE_INTEGER;
+            const endPoint = riskMap.getItem(riskMap.length - 1, riskMap[0].length - 1);
 
-            const findLowestRisk = (point, currentRisk) => {
-                currentRisk += point.value;
+            const unvisitedQueue = riskMap.flat();
+            startPoint.distance = 0;
 
-                // Stop looking if the current risk is higher than the lowest
-                if (currentRisk > lowestRisk) {
-                    return;
-                }
+            while (unvisitedQueue.length > 0) {
+                const nearestPoint = unvisitedQueue
+                    .sort((a, b) => a.distance - b.distance)
+                    .shift();
 
-                // Update the lowest risk value and stop looking when the end is reached
-                if (point.x === riskMap.length - 1 && point.y === riskMap[0].length - 1) {
-                    lowestRisk = currentRisk;
+                nearestPoint.getAdjacentItems()
+                    .filter(adjacent => adjacent !== undefined && unvisitedQueue.includes(adjacent))
+                    .forEach(adjacent => {
+                        // Update the distance to the adjacent item, if it's smaller
+                        const newDistance = nearestPoint.distance + adjacent.value;
+                        if (newDistance < adjacent.distance) {
+                            adjacent.distance = newDistance;
+                            adjacent.previous = nearestPoint;
+                        }
+                    });
+            }
 
-                    return;
-                }
-
-                const adjacent = point.getAdjacentItems(true);
-
-                ['down', 'right'].forEach(direction => {
-                    if (adjacent[direction] !== undefined) {
-                        findLowestRisk(adjacent[direction], currentRisk);
-                    }
-                });
-            };
-
-            findLowestRisk(startPoint, 0);
-            
-            // Subtract the value of the starting point from the lowest risk
-            lowestRisk -= startPoint.value;
-
-            answer.innerText = lowestRisk;
+            answer.innerText = endPoint.distance;
         </script>
     </body>
 </html>
