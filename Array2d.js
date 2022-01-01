@@ -249,42 +249,56 @@ export default class Array2d extends Array
     }
 
     /**
-     * Make a new Array2d, where a new one is joined with the current
+     * Make a new Array2d, where a new one is attached to the current
      * @param {Array2d} joinArray
      * @return {Array2d}
      */
     attachRight(joinArray)
     {
+        // Update the indexes, before attaching
+        joinArray = joinArray.clone();
+        joinArray.forEach2d(item => item.x += this[0].length);
+
         return this.map((row, index) => row.concat(joinArray[index]));
     }
 
     /**
-     * Make a new Array2d, where a new one is joined with the current
+     * Make a new Array2d, where a new one is attached to the current
      * @param {Array2d} joinArray
      * @return {Array2d}
      */
     attachLeft(joinArray)
     {
+        // Update the indexes, before attaching
+        this.forEach2d(item => item.x += joinArray[0].length);
+
         return this.map((row, index) => joinArray[index].concat(row));
     }
 
     /**
-     * Make a new Array2d, where a new one is joined with the current
+     * Make a new Array2d, where a new one is attached to the current
      * @param {Array2d} joinArray
      * @return {Array2d}
      */
     attachUp(joinArray)
     {
+        // Update the indexes, before attaching
+        this.forEach2d(item => item.y += joinArray.length);
+
         return joinArray.concat(this);
     }
 
     /**
-     * Make a new Array2d, where a new one is joined with the current
+     * Make a new Array2d, where a new one is attached to the current
      * @param {Array2d} joinArray
      * @return {Array2d}
      */
     attachDown(joinArray)
     {
+        // Update the indexes, before attaching
+        joinArray = joinArray.clone();
+        joinArray.forEach2d(item => item.y += this.length);
+
         return this.concat(joinArray);
     }
 
