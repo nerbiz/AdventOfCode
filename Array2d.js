@@ -8,7 +8,7 @@ export class Array2dItem
      * @param {Array2d} parent The Array2d this item is part of
      * @constructor
      */
-    constructor(x, y, value, customData = {}, parent)
+    constructor(x, y, value, customData = {}, parent = undefined)
     {
         this.x = x;
         this.y = y;
@@ -366,7 +366,7 @@ export default class Array2d extends Array
      * @param {any} fallback A default value, if the item doesn't exist
      * @returns {any}
      */
-    getItem(x, y, fallback)
+    getItem(x, y, fallback = undefined)
     {
         if (this[y] === undefined) {
             return fallback;
@@ -507,7 +507,7 @@ export default class Array2d extends Array
      * @param {object} customData
      * @returns {Array2d}
      */
-    setItem(x, y, value, customData)
+    setItem(x, y, value, customData = {})
     {
         if (this[y] === undefined) {
             this[y] = [];
@@ -526,7 +526,7 @@ export default class Array2d extends Array
      * @param {object} customData
      * @returns {Array2d}
      */
-    updateItem(x, y, value, customData)
+    updateItem(x, y, value, customData = {})
     {
         const existingItem = this.getItem(x, y);
 
@@ -551,7 +551,7 @@ export default class Array2d extends Array
      * @param {object} customData
      * @returns {Array2d}
      */
-    expandHorizontally(amount, value, customData)
+    expandHorizontally(amount, value = undefined, customData = {})
     {
         this.forEach((row, y) => {
             if (amount < 0) {
@@ -578,7 +578,7 @@ export default class Array2d extends Array
      * @param {object} customData
      * @returns {Array2d}
      */
-    expandVertically(amount, value, customData)
+    expandVertically(amount, value = undefined, customData)
     {
         if (amount < 0) {
             // Prepend the new row
@@ -609,7 +609,7 @@ export default class Array2d extends Array
      * @param {object} customData Extra data for the items
      * @returns {Array2d}
      */
-    expandAllSides(amount, value, customData)
+    expandAllSides(amount, value = undefined, customData)
     {
         return this.expandHorizontally(amount * -1, value, customData)
             .expandHorizontally(amount, value, customData)
@@ -662,6 +662,7 @@ export default class Array2d extends Array
     /**
      * Keep items based on a callback for every item
      * @param {function} callback
+     * @param {boolean} flatten
      * @returns {Array2d}
      */
     filter2d(callback, flatten = false)
@@ -674,20 +675,9 @@ export default class Array2d extends Array
     }
 
     /**
-     * Reduce all items to a single value, using a callback for every item
-     * @param {function} callback
-     * @param {any} initialValue
-     * @returns {any}
-     */
-    reduce2d(callback, initialValue)
-    {
-        return this.flat()
-            .reduce((accumulator, item) => callback(accumulator, item, item.x, item.y, this), initialValue);
-    }
-
-    /**
      * Remove items based on a callback for every item
      * @param {function} callback
+     * @param {boolean} flatten
      * @returns {Array2d}
      */
     reject2d(callback, flatten = false)
@@ -697,6 +687,18 @@ export default class Array2d extends Array
         return (flatten)
             ? new Array(...result.flat())
             : result;
+    }
+
+    /**
+     * Reduce all items to a single value, using a callback for every item
+     * @param {function} callback
+     * @param {any} initialValue
+     * @returns {any}
+     */
+    reduce2d(callback, initialValue = undefined)
+    {
+        return this.flat()
+            .reduce((accumulator, item) => callback(accumulator, item, item.x, item.y, this), initialValue);
     }
 
     /**
