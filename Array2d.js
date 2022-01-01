@@ -253,7 +253,7 @@ export default class Array2d extends Array
      * @param {Array2d} joinArray
      * @return {Array2d}
      */
-    joinRight(joinArray)
+    attachRight(joinArray)
     {
         return this.map((row, index) => row.concat(joinArray[index]));
     }
@@ -263,7 +263,7 @@ export default class Array2d extends Array
      * @param {Array2d} joinArray
      * @return {Array2d}
      */
-    joinLeft(joinArray)
+    attachLeft(joinArray)
     {
         return this.map((row, index) => joinArray[index].concat(row));
     }
@@ -273,7 +273,7 @@ export default class Array2d extends Array
      * @param {Array2d} joinArray
      * @return {Array2d}
      */
-    joinUp(joinArray)
+    attachUp(joinArray)
     {
         return joinArray.concat(this);
     }
@@ -283,9 +283,28 @@ export default class Array2d extends Array
      * @param {Array2d} joinArray
      * @return {Array2d}
      */
-    joinDown(joinArray)
+    attachDown(joinArray)
     {
         return this.concat(joinArray);
+    }
+
+    /**
+     * Wrapper for attach methods
+     * @param {string} direction
+     * @param {Array2d} joinArray
+     * @return {Array2d}
+     */
+    attach(direction, joinArray)
+    {
+        if (direction === 'right') {
+            return this.attachRight(joinArray);
+        } else if (direction === 'left') {
+            return this.attachLeft(joinArray);
+        } else if (direction === 'up') {
+            return this.attachUp(joinArray);
+        } else if (direction === 'down') {
+            return this.attachDown(joinArray);
+        }
     }
 
     /**
@@ -333,7 +352,7 @@ export default class Array2d extends Array
      * @param {any} fallback A default value, if the item doesn't exist
      * @returns {any}
      */
-    getItem(x, y, fallback = undefined)
+    getItem(x, y, fallback)
     {
         if (this[y] === undefined) {
             return fallback;
@@ -671,10 +690,10 @@ export default class Array2d extends Array
      * @param {function} callback A callback to apply to every item
      * @returns {array}
      */
-    toString(callback = null)
+    toString(callback)
     {
         // The default callback returns the value of every item
-        if (callback === null) {
+        if (callback === undefined) {
             callback = item => item.value;
         }
 
