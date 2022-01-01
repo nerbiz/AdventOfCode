@@ -47,7 +47,7 @@ export class Array2dItem
      */
     getSteps(toX, toY, separately = false)
     {
-        return Array2d.getSteps(this, toX, toY, null, separately);
+        return Array2d.getSteps(this, toX, toY, undefined, separately);
     }
 
     /**
@@ -67,7 +67,7 @@ export class Array2dItem
             throw new Error('The item needs a parent to get its adjacent items');
         }
 
-        return this.parent.getAdjacentItems(this, null, named);
+        return this.parent.getAdjacentItems(this, undefined, named);
     }
 
     /**
@@ -79,7 +79,7 @@ export class Array2dItem
             throw new Error('The item needs a parent to get its surrounding items');
         }
 
-        return this.parent.getSurroundingItems(this, null, named);
+        return this.parent.getSurroundingItems(this, undefined, named);
     }
 
     /**
@@ -217,7 +217,7 @@ export default class Array2d extends Array
                 newArray = newArray.map((row, y) =>
                     new Array(values[1])
                         .fill(undefined)
-                        .map((item, x) => new Array2dItem(x, y, null, Array2d.customData))
+                        .map((item, x) => new Array2dItem(x, y, undefined, Array2d.customData))
                 );
             }
         } else if (
