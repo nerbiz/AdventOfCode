@@ -14,13 +14,12 @@
         <script type="module">
             import FileReader from '../FileReader.js';
             import Parser from './Parser.js';
-            import Utilities from '../Utilities.js';
             import Array2d from '../Array2d.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
             let riskMap = await fileReader.parse();
 
-            riskMap = Array2d.withExtraData({
+            riskMap = Array2d.withData({
                 distance: Infinity,
                 previous: undefined,
             }, riskMap);
@@ -28,9 +27,9 @@
             const startPoint = riskMap.getItem(0, 0);
             const endPoint = riskMap.getItem(riskMap.length - 1, riskMap[0].length - 1);
 
+            // Use Dijkstra's algorithm to find the best path
             const unvisitedQueue = riskMap.flat();
             startPoint.distance = 0;
-
             while (unvisitedQueue.length > 0) {
                 const nearestPoint = unvisitedQueue
                     .sort((a, b) => a.distance - b.distance)

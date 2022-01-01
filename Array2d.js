@@ -4,22 +4,22 @@ export class Array2dItem
      * @param {number} x
      * @param {number} y
      * @param {any} value
-     * @param {object} extraData
+     * @param {object} customData
      * @param {Array2d} parent The Array2d this item is part of
      * @constructor
      */
-    constructor(x, y, value, extraData = {}, parent)
+    constructor(x, y, value, customData = {}, parent)
     {
         this.x = x;
         this.y = y;
         this.value = value;
         this.parent = parent;
 
-        for (const key in extraData) {
+        for (const key in customData) {
             // Allow dynamic properties using a callback
-            this[key] = (extraData[key] instanceof Function)
-                ? extraData[key](x, y)
-                : extraData[key];
+            this[key] = (customData[key] instanceof Function)
+                ? customData[key](x, y)
+                : customData[key];
         }
     }
 
@@ -177,14 +177,14 @@ export default class Array2d extends Array
     }
 
     /**
-     * Initialize with extra data for every item
-     * @param {object} extraData
+     * Initialize with custom data for every item
+     * @param {object} customData
      * @param  {...any} values See constructor
      * @returns {Array2d}
      */
-    static withExtraData(extraData, ...values)
+    static withData(customData, ...values)
     {
-        Array2d.extraData = extraData;
+        Array2d.customData = customData;
 
         return new Array2d(...values);
     }
@@ -217,7 +217,7 @@ export default class Array2d extends Array
                 newArray = newArray.map((row, y) =>
                     new Array(values[1])
                         .fill(undefined)
-                        .map((item, x) => new Array2dItem(x, y, null, Array2d.extraData))
+                        .map((item, x) => new Array2dItem(x, y, null, Array2d.customData))
                 );
             }
         } else if (
@@ -236,11 +236,11 @@ export default class Array2d extends Array
         newArray = newArray.map((row, y) => row.map((value, x) =>
             (value instanceof Array2dItem)
                 ? value
-                : new Array2dItem(x, y, value, Array2d.extraData)
+                : new Array2dItem(x, y, value, Array2d.customData)
         ));
 
         // Empty the static extra data
-        Array2d.extraData = undefined;
+        Array2d.customData = undefined;
 
         super(...newArray);
 
@@ -329,18 +329,18 @@ export default class Array2d extends Array
     {
         const clone = JSON.parse(JSON.stringify(this))
             .map(row => row.map(item => {
-                // Recreate the extra data object
-                const extraData = {};
+                // Recreate the custom data object
+                const customData = {};
                 for (const key in item) {
                     // Skip default properties
                     if (['x', 'y', 'value', 'parent'].includes(key)) {
                         continue;
                     }
 
-                    extraData[key] = item[key];
+                    customData[key] = item[key];
                 }
 
-                return new Array2dItem(item.x, item.y, item.value, extraData);
+                return new Array2dItem(item.x, item.y, item.value, customData);
             }));
 
         // Set the new parent in the new items
@@ -504,16 +504,16 @@ export default class Array2d extends Array
      * @param {number} x
      * @param {number} y
      * @param {any} value
-     * @param {object} extraData
+     * @param {object} customData
      * @returns {Array2d}
      */
-    setItem(x, y, value, extraData)
+    setItem(x, y, value, customData)
     {
         if (this[y] === undefined) {
             this[y] = [];
         }
 
-        this[y][x] = new Array2dItem(x, y, value, extraData, this);
+        this[y][x] = new Array2dItem(x, y, value, customData, this);
 
         return this;
     }
@@ -523,22 +523,22 @@ export default class Array2d extends Array
      * @param {number} x
      * @param {number} y
      * @param {any} value
-     * @param {object} extraData
+     * @param {object} customData
      * @returns {Array2d}
      */
-    updateItem(x, y, value, extraData)
+    updateItem(x, y, value, customData)
     {
         const existingItem = this.getItem(x, y);
 
         // Create a new item, if it doesn't exist
         if (existingItem === undefined) {
-            return this.setItem(x, y, value, extraData);
+            return this.setItem(x, y, value, customData);
         }
 
         // Update the item
         existingItem.value = value;
-        for (const key in extraData) {
-            existingItem[key] = extraData[key];
+        for (const key in customData) {
+            existingItem[key] = customData[key];
         }
 
         return this;
@@ -548,22 +548,22 @@ export default class Array2d extends Array
      * Expand the 2D array horizontally
      * @param {number} amount < 0 means to the left, > 0 means to the right
      * @param {any} value A value to set in the new items
-     * @param {object} extraData
+     * @param {object} customData
      * @returns {Array2d}
      */
-    expandHorizontally(amount, value, extraData)
+    expandHorizontally(amount, value, customData)
     {
         this.forEach((row, y) => {
             if (amount < 0) {
                 // Prepend every row with 1 or more items
                 for (let i = 0; i < Math.abs(amount); i++) {
                     row.forEach(item => item.x++);
-                    row.unshift(new Array2dItem(0, y, value, extraData, this));
+                    row.unshift(new Array2dItem(0, y, value, customData, this));
                 }
             } else {
                 // Append every row with 1 or more items
                 for (let i = 0; i < amount; i++) {
-                    row.push(new Array2dItem(row.length, y, value, extraData, this));
+                    row.push(new Array2dItem(row.length, y, value, customData, this));
                 }
             }
         });
@@ -575,10 +575,10 @@ export default class Array2d extends Array
      * Expand the 2D array vertically
      * @param {number} amount < 0 means to the top, > 0 means to the bottom
      * @param {any} value A value to set in the new items
-     * @param {object} extraData
+     * @param {object} customData
      * @returns {Array2d}
      */
-    expandVertically(amount, value, extraData)
+    expandVertically(amount, value, customData)
     {
         if (amount < 0) {
             // Prepend the new row
@@ -586,7 +586,7 @@ export default class Array2d extends Array
                 this.forEach2d(item => item.y++);
                 this.unshift(
                     Array(this[0].length).fill(undefined)
-                        .map((item, x) => new Array2dItem(x, 0, value, extraData, this))
+                        .map((item, x) => new Array2dItem(x, 0, value, customData, this))
                 );
             }
         } else {
@@ -594,7 +594,7 @@ export default class Array2d extends Array
             for (let i = 0; i < amount; i++) {
                 this.push(
                     Array(this[0].length).fill(undefined)
-                        .map((item, x) => new Array2dItem(x, this.length, value, extraData, this))
+                        .map((item, x) => new Array2dItem(x, this.length, value, customData, this))
                 );
             }
         }
@@ -606,15 +606,15 @@ export default class Array2d extends Array
      * Expand the 2D array on all 4 sides
      * @param {number} amount The amount to add in each direction
      * @param {any} value A value to set in the new items
-     * @param {object} extraData Extra data for the items
+     * @param {object} customData Extra data for the items
      * @returns {Array2d}
      */
-    expandAllSides(amount, value, extraData)
+    expandAllSides(amount, value, customData)
     {
-        return this.expandHorizontally(amount * -1, value, extraData)
-            .expandHorizontally(amount, value, extraData)
-            .expandVertically(amount * -1, value, extraData)
-            .expandVertically(amount, value, extraData);
+        return this.expandHorizontally(amount * -1, value, customData)
+            .expandHorizontally(amount, value, customData)
+            .expandVertically(amount * -1, value, customData)
+            .expandVertically(amount, value, customData);
     }
 
     /**
