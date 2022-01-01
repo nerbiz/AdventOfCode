@@ -250,74 +250,80 @@ export default class Array2d extends Array
 
     /**
      * Make a new Array2d, where a new one is attached to the current
-     * @param {Array2d} joinArray
+     * @param {Array2d} attachArray
      * @return {Array2d}
      */
-    attachRight(joinArray)
+    attachRight(attachArray)
     {
         // Update the indexes, before attaching
-        joinArray = joinArray.clone();
-        joinArray.forEach2d(item => item.x += this[0].length);
+        attachArray.forEach2d(item => item.parent = this);
+        attachArray.forEach2d(item => item.x += this[0].length);
+        this.forEach((row, index) => this[index] = row.concat(attachArray[index]));
 
-        return this.map((row, index) => row.concat(joinArray[index]));
+        return this;
     }
 
     /**
      * Make a new Array2d, where a new one is attached to the current
-     * @param {Array2d} joinArray
+     * @param {Array2d} attachArray
      * @return {Array2d}
      */
-    attachLeft(joinArray)
+    attachLeft(attachArray)
     {
-        // Update the indexes, before attaching
-        this.forEach2d(item => item.x += joinArray[0].length);
+        // Update the parents and indexes, before attaching
+        attachArray.forEach2d(item => item.parent = this);
+        this.forEach2d(item => item.x += attachArray[0].length);
+        this.forEach((row, index) => this[index] = attachArray[index].concat(this[index]));
 
-        return this.map((row, index) => joinArray[index].concat(row));
+        return this;
     }
 
     /**
      * Make a new Array2d, where a new one is attached to the current
-     * @param {Array2d} joinArray
+     * @param {Array2d} attachArray
      * @return {Array2d}
      */
-    attachUp(joinArray)
+    attachUp(attachArray)
     {
-        // Update the indexes, before attaching
-        this.forEach2d(item => item.y += joinArray.length);
+        // Update the parents and indexes, before attaching
+        attachArray.forEach2d(item => item.parent = this);
+        this.forEach2d(item => item.y += attachArray.length);
+        attachArray.reverse().forEach(attachRow => this.unshift(attachRow));
 
-        return joinArray.concat(this);
+        return this;
     }
 
     /**
      * Make a new Array2d, where a new one is attached to the current
-     * @param {Array2d} joinArray
+     * @param {Array2d} attachArray
      * @return {Array2d}
      */
-    attachDown(joinArray)
+    attachDown(attachArray)
     {
-        // Update the indexes, before attaching
-        joinArray = joinArray.clone();
-        joinArray.forEach2d(item => item.y += this.length);
+        // Update the parents and indexes, before attaching
+        attachArray.forEach2d(item => item.parent = this);
+        attachArray.forEach2d(item => item.y += this.length);
+        attachArray.forEach(attachRow => this.push(attachRow));
 
-        return this.concat(joinArray);
+        return this;
     }
 
     /**
      * Wrapper for attach methods
      * @param {string} direction
-     * @param {Array2d} joinArray
+     * @param {Array2d} attachArray
      * @return {Array2d}
      */
-    attach(direction, joinArray)
+    attach(direction, attachArray)
     {
         if (direction === 'right') {
-            return this.attachRight(joinArray);
+            return this.attachRight(attachArray);
         } else if (direction === 'left') {
-            return this.attachLeft(joinArray);
+            return this.attachLeft(attachArray);
         } else if (direction === 'up') {
-            return this.attachUp(joinArray);
+            return this.attachUp(attachArray);
         } else if (direction === 'down') {
-            return this.attachDown(joinArray);
+            return this.attachDown(attachArray);
         }
     }
 
@@ -651,7 +657,7 @@ export default class Array2d extends Array
     /**
      * Apply a callback to every item
      * @param {function} callback
-     * @returns {Array2d}
+     * @returns {void}
      */
     forEach2d(callback)
     {
@@ -706,7 +712,7 @@ export default class Array2d extends Array
      * @param {function} callback A callback to apply to every item
      * @returns {array}
      */
-    toString(callback)
+    toString(callback = undefined)
     {
         // The default callback returns the value of every item
         if (callback === undefined) {
