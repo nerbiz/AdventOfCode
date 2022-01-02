@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../Utilities.js';
+
+            const fileReader = new FileReader('./datatest.txt', new Parser(), false);
+            const scanners = await fileReader.parse();
+            const beacons = scanners.map(scanner => scanner.beacons).flat();
+
+            // Replace the scanner index by the scanner object
+            beacons.forEach(beacon => beacon.scanner = scanners[beacon.scanner]);
+
+            // Calculate the distance other beacons seen by the same scanner
+            beacons.forEach(beacon => {
+                beacons.filter(otherBeacon => otherBeacon !== beacon && otherBeacon.scanner === beacon.scanner)
+                    .forEach(otherBeacon => {
+                        beacon.distances.push({
+                            to: otherBeacon,
+                            distance: Math.sqrt(
+                                Math.abs(otherBeacon.coordinates[0] - beacon.coordinates[0]) ** 2
+                                + Math.abs(otherBeacon.coordinates[1] - beacon.coordinates[1]) ** 2
+                                + Math.abs(otherBeacon.coordinates[2] - beacon.coordinates[2]) ** 2)
+                        });
+                    });
+            });
+
+            // Look for beacons seen by other scanners, that have 11 distances in common
+            beacons.forEach(beacon => {
+                // Get beacons seen by other scanners
+                beacons.filter(otherBeacon => otherBeacon.scanner !== beacon.scanner).forEach(otherBeacon => {
+                    const beaconDistances = beacon.distances.map(distance => distance.distance);
+                    const otherBeaconDistances = otherBeacon.distances.map(distance => distance.distance);
+                    const sameDistances = beaconDistances.filter(distance => otherBeaconDistances.includes(distance));
+
+                    if (sameDistances.length >= 11) {
+                        let overlapping = beacon.scanner.overlapping.find(overlapping => overlapping.scanner === otherBeacon.scanner);
+                        if (overlapping === undefined) {
+                            beacon.scanner.overlapping.push(overlapping = {
+                                scanner: otherBeacon.scanner,
+                                sameBeacons: [],
+                            });
+                        }
+
+                        // Add the beacon of the other scanner to the list
+                        overlapping.sameBeacons.push([beacon, otherBeacon]);
+                    }
+                });
+            });
+
+            // Will contain all the scanners that are aligned (in orientation) with scanner 0
+            const scannersAligned = [];
+
+            // Add the first scanner
+            scanners[0].coordinates = [0, 0, 0];
+            scannersAligned.push(scanners[0]);
+
+            scanners.forEach(scanner => {
+                scanner.overlapping
+                    // Skip already aligned scanners
+                    .filter(overlapping => ! scannersAligned.includes(overlapping.scanner))
+                    .forEach(overlapping => {
+                        // Get the first overlapping beacons
+                        const sameBeacon1 = overlapping.sameBeacons[0][0];
+                        const sameBeacon2 = overlapping.sameBeacons[0][1];
+
+                        // Find the same connected beacon in the paired scanner
+                        let sameConnectedBeacon1, sameConnectedBeacon2;
+                        for (const distance of sameBeacon1.distances) {
+                            const match = sameBeacon2.distances.find(otherDistance => otherDistance.distance === distance.distance);
+                            if (match !== undefined) {
+                                // console.log('Matching distance', distance);
+                                sameConnectedBeacon1 = distance.to;
+                                sameConnectedBeacon2 = match.to;
+                                break;
+                            }
+                        };
+
+                        // Get the X, Y and Z difference between the same beacons in both scanners
+                        const differences1 = {
+                            x: Math.abs(sameBeacon1.coordinates[0] - sameConnectedBeacon1.coordinates[0]),
+                            y: Math.abs(sameBeacon1.coordinates[1] - sameConnectedBeacon1.coordinates[1]),
+                            z: Math.abs(sameBeacon1.coordinates[2] - sameConnectedBeacon1.coordinates[2]),
+                        };
+                        const differences2 = [
+                            Math.abs(sameBeacon2.coordinates[0] - sameConnectedBeacon2.coordinates[0]),
+                            Math.abs(sameBeacon2.coordinates[1] - sameConnectedBeacon2.coordinates[1]),
+                            Math.abs(sameBeacon2.coordinates[2] - sameConnectedBeacon2.coordinates[2]),
+                        ];
+                        
+                        // Update the order of X, Y and Z in the other scanner, by matching differences
+                        const coordinateIndexes = {};
+                        for (const coordinate in differences1) {
+                            differences2.forEach((difference, index) => {
+                                if (difference === differences1[coordinate]) {
+                                    coordinateIndexes[coordinate] = index;
+                                }
+                            });
+                        }
+
+                        sameBeacon2.scanner.beacons.forEach(beacon => {
+                            beacon.coordinates = [
+                                beacon.coordinates[coordinateIndexes.x],
+                                beacon.coordinates[coordinateIndexes.y],
+                                beacon.coordinates[coordinateIndexes.z],
+                            ];
+                        });
+
+                        // Update the orientation of the scanner, by matching X, Y and Z positive/negative differences
+                        const positions1 = {
+                            x: sameBeacon1.coordinates[0] - sameConnectedBeacon1.coordinates[0],
+                            y: sameBeacon1.coordinates[1] - sameConnectedBeacon1.coordinates[1],
+                            z: sameBeacon1.coordinates[2] - sameConnectedBeacon1.coordinates[2],
+                        };
+                        const positions2 = {
+                            x: sameBeacon2.coordinates[0] - sameConnectedBeacon2.coordinates[0],
+                            y: sameBeacon2.coordinates[1] - sameConnectedBeacon2.coordinates[1],
+                            z: sameBeacon2.coordinates[2] - sameConnectedBeacon2.coordinates[2],
+                        };
+
+                        const invertCoordinates = {
+                            x: (positions1.x !== positions2.x),
+                            y: (positions1.y !== positions2.y),
+                            z: (positions1.z !== positions2.z),
+                        };
+
+                        sameBeacon2.scanner.beacons.forEach(beacon => {
+                            beacon.coordinates = [
+                                (invertCoordinates.x === true) ? beacon.coordinates[0] *= -1 : beacon.coordinates[0],
+                                (invertCoordinates.y === true) ? beacon.coordinates[1] *= -1 : beacon.coordinates[1],
+                                (invertCoordinates.z === true) ? beacon.coordinates[2] *= -1 : beacon.coordinates[2],
+                            ];
+                        });
+
+                        // Set the coordinates of the other scanner
+                        sameBeacon2.scanner.coordinates = [
+                            sameBeacon1.scanner.coordinates[0] + sameBeacon1.coordinates[0] + (sameBeacon2.coordinates[0] * -1),
+                            sameBeacon1.scanner.coordinates[1] + sameBeacon1.coordinates[1] + (sameBeacon2.coordinates[1] * -1),
+                            sameBeacon1.scanner.coordinates[2] + sameBeacon1.coordinates[2] + (sameBeacon2.coordinates[2] * -1),
+                        ];
+
+                        // The scanner is now aligned
+                        scannersAligned.push(sameBeacon2.scanner);
+                    });
+            });
+
+            // Update the beacon coordinates, relative to scanner 0
+            beacons.forEach(beacon => beacon.coordinates = [
+                beacon.scanner.coordinates[0] + beacon.coordinates[0],
+                beacon.scanner.coordinates[1] + beacon.coordinates[1],
+                beacon.scanner.coordinates[2] + beacon.coordinates[2],
+            ]);
+
+            // 65 is a wrong answer
+            answer.innerText = Utilities.arrayUnique(
+                beacons.map(beacon => beacon.coordinates.join(', '))
+            ).length;
+        </script>
+    </body>
+</html>
