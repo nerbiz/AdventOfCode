@@ -36,9 +36,8 @@
                     // Increase the dice value by the rolls per turn, wrap from max number back to 1 if needed
                     diceValue = ((diceValue + rollsPerTurn) - 1) % maxDiceNumber + 1;
 
-                    // Roll the dice for the player
-                    // Example:
-                    // 7 + 8 + 9  =  (9 * rolls) - triangular number of (rolls - 3)
+                    // Roll the dice for the player, example:
+                    // 7 + 8 + 9  =  (9 * rolls) - triangular number of (rolls - 1)
                     const diceSum = (diceValue * rollsPerTurn) - ((rollsPerTurn - 1) * rollsPerTurn / 2);
                     diceRolls += rollsPerTurn;
 
