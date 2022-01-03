@@ -20,6 +20,7 @@
             const positions = await fileReader.parse();
             const maxPosition = 10;
             const maxDiceNumber = 100;
+            const rollsPerTurn = 3;
             const scores = {
                 1: 0,
                 2: 0,
@@ -32,13 +33,16 @@
             // Loop until someone wins
             playLoop: while (true) {
                 for (let playerNumber = 1; playerNumber <= 2; playerNumber++) {
-                    // Roll the dice for the player
-                    let diceSum = (diceValue++ % maxDiceNumber) + 1
-                        + (diceValue++ % maxDiceNumber) + 1
-                        + (diceValue++ % maxDiceNumber) + 1;
-                    diceRolls += 3;
+                    // Increase the dice value by the rolls per turn, wrap from max number back to 1 if needed
+                    diceValue = ((diceValue + rollsPerTurn) - 1) % maxDiceNumber + 1;
 
-                    // Update the position and score of the player
+                    // Roll the dice for the player
+                    // Example:
+                    // 7 + 8 + 9  =  (9 * rolls) - triangular number of (rolls - 3)
+                    const diceSum = (diceValue * rollsPerTurn) - ((rollsPerTurn - 1) * rollsPerTurn / 2);
+                    diceRolls += rollsPerTurn;
+
+                    // Update the position (wrap from 10 back to 1) and score of the player
                     positions[playerNumber] = ((positions[playerNumber] + diceSum - 1) % maxPosition) + 1;
                     scores[playerNumber] += positions[playerNumber];
 
