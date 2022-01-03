@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../Utilities.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser(), false);
+            const scanners = await fileReader.parse();
+            const beacons = scanners.map(scanner => scanner.beacons).flat();
+
+            // Replace the scanner index by the scanner object
+            beacons.forEach(beacon => beacon.scanner = scanners[beacon.scanner]);
+
+            // Replace the coordinate arrays by objects
+            beacons.forEach(beacon => beacon.coordinates = {
+                x: beacon.coordinates[0],
+                y: beacon.coordinates[1],
+                z: beacon.coordinates[2],
+            });
+
+            // Calculate the distance other beacons seen by the same scanner
+            beacons.forEach(beacon => {
+                beacons.filter(otherBeacon => otherBeacon !== beacon && otherBeacon.scanner === beacon.scanner)
+                    .forEach(otherBeacon => {
+                        beacon.distances.push({
+                            to: otherBeacon,
+                            distance: Math.sqrt(
+                                Math.abs(otherBeacon.coordinates.x - beacon.coordinates.x) ** 2
+                                + Math.abs(otherBeacon.coordinates.y - beacon.coordinates.y) ** 2
+                                + Math.abs(otherBeacon.coordinates.z - beacon.coordinates.z) ** 2)
+                        });
+                    });
+            });
+
+            // Look for beacons seen by other scanners, that have 11 distances in common
+            beacons.forEach(beacon => {
+                // Get beacons seen by other scanners
+                beacons.filter(otherBeacon => otherBeacon.scanner !== beacon.scanner)
+                    .forEach(otherBeacon => {
+                        const otherDistances = otherBeacon.distances.map(distance => distance.distance);
+                        const sameDistances = beacon.distances
+                            .map(distance => distance.distance)
+                            .filter(distance => otherDistances.includes(distance));
+
+                        if (sameDistances.length >= 11) {
+                            // Find or create the array of overlapping beacons
+                            let overlapping = beacon.scanner.overlapping
+                                .find(overlapping => overlapping.scanner === otherBeacon.scanner);
+
+                            if (overlapping === undefined) {
+                                beacon.scanner.overlapping.push(overlapping = {
+                                    scanner: otherBeacon.scanner,
+                                    sameBeacons: [],
+                                });
+                            }
+
+                            // Add the beacon of the other scanner to the list
+                            overlapping.sameBeacons.push([beacon, otherBeacon]);
+                        }
+                    });
+            });
+
+            const scannersQueue = [];
+            // Will contain all the scanners that are aligned (in orientation) with scanner 0
+            const scannersAligned = [];
+
+            // Add the first scanner to the queue
+            scanners[0].coordinates = {x: 0, y: 0, z: 0};
+            scannersQueue.push(scanners[0]);
+            scannersAligned.push(scanners[0]);
+
+            while (scannersQueue.length > 0) {
+                const scanner = scannersQueue.shift();
+
+                // Align the overlapping scanners
+                scanner.overlapping
+                    // Skip already aligned scanners
+                    .filter(overlapping => ! scannersAligned.includes(overlapping.scanner))
+                    .forEach(overlapping => {
+                        // Get the first overlapping beacons
+                        const sameBeacon1 = overlapping.sameBeacons[0][0];
+                        const sameBeacon2 = overlapping.sameBeacons[0][1];
+    
+                        // Find the beacon that is connected to both overlapping beacons,
+                        // and has 3 unique distances between the X, Y and Z axes
+                        let sameOtherBeacon1, sameOtherBeacon2, axisDistances, uniqueDistances;
+                        do {
+                            for (const distance of sameBeacon1.distances) {
+                                const match = sameBeacon2.distances
+                                    .find(otherDistance => otherDistance.distance === distance.distance);
+
+                                if (match !== undefined) {
+                                    sameOtherBeacon1 = distance.to;
+                                    sameOtherBeacon2 = match.to;
+    
+                                    // Calculate the X, Y and Z distances between beacons
+                                    axisDistances = [{
+                                        x: sameBeacon1.coordinates.x - sameOtherBeacon1.coordinates.x,
+                                        y: sameBeacon1.coordinates.y - sameOtherBeacon1.coordinates.y,
+                                        z: sameBeacon1.coordinates.z - sameOtherBeacon1.coordinates.z,
+                                    }, {
+                                        x: sameBeacon2.coordinates.x - sameOtherBeacon2.coordinates.x,
+                                        y: sameBeacon2.coordinates.y - sameOtherBeacon2.coordinates.y,
+                                        z: sameBeacon2.coordinates.z - sameOtherBeacon2.coordinates.z,
+                                    }];
+    
+                                    // Calculate the absolute distances between the X, Y and Z axes
+                                    uniqueDistances = Utilities.arrayUnique([
+                                        Math.abs(axisDistances[0].x),
+                                        Math.abs(axisDistances[0].y),
+                                        Math.abs(axisDistances[0].z),
+                                    ]);
+                                }
+                            }
+                        } while (uniqueDistances < 3);
+    
+                        // Update the order of X, Y and Z in the other scanner, by matching distances
+                        const xyzMapping = {};
+                        for (const axis1 in axisDistances[0]) {
+                            for (const axis2 in axisDistances[1]) {
+                                if (Math.abs(axisDistances[0][axis1]) === Math.abs(axisDistances[1][axis2])) {
+                                    xyzMapping[axis1] = axis2;
+                                }
+                            }
+                        }
+
+                        // Flip X, Y and/or Z, if the other scanner is upside-down
+                        const flipCoordinates = {
+                            x: (axisDistances[0].x !== axisDistances[1][xyzMapping.x]),
+                            y: (axisDistances[0].y !== axisDistances[1][xyzMapping.y]),
+                            z: (axisDistances[0].z !== axisDistances[1][xyzMapping.z]),
+                        };
+
+                        // Update the coordinates in the right order and orientation
+                        overlapping.scanner.beacons.forEach(beacon => {
+                            beacon.coordinates = {
+                                x: (flipCoordinates.x === true)
+                                    ? beacon.coordinates[xyzMapping.x] * -1
+                                    : beacon.coordinates[xyzMapping.x],
+                                y: (flipCoordinates.y === true)
+                                    ? beacon.coordinates[xyzMapping.y] * -1
+                                    : beacon.coordinates[xyzMapping.y],
+                                z: (flipCoordinates.z === true)
+                                    ? beacon.coordinates[xyzMapping.z] * -1
+                                    : beacon.coordinates[xyzMapping.z],
+                            };
+                        });
+    
+                        // Set the coordinates of the other scanner
+                        overlapping.scanner.coordinates = {
+                            x: scanner.coordinates.x
+                                + sameBeacon1.coordinates.x
+                                + (sameBeacon2.coordinates.x * -1),
+                            y: scanner.coordinates.y
+                                + sameBeacon1.coordinates.y
+                                + (sameBeacon2.coordinates.y * -1),
+                            z: scanner.coordinates.z
+                                + sameBeacon1.coordinates.z
+                                + (sameBeacon2.coordinates.z * -1),
+                        };
+    
+                        // The other scanner is now aligned
+                        scannersAligned.push(overlapping.scanner);
+
+                        // Add the other scanner to the queue
+                        if (! scannersQueue.includes(overlapping.scanner)) {
+                            scannersQueue.push(overlapping.scanner);
+                        }
+                    });
+            }
+
+            // Get the highest distance between any two scanners
+            answer.innerText = scanners
+                .map(scanner => scanners.filter(otherScanner => otherScanner !== scanner)
+                    .map(otherScanner =>
+                        Math.abs(otherScanner.coordinates.x - scanner.coordinates.x)
+                        + Math.abs(otherScanner.coordinates.y - scanner.coordinates.y)
+                        + Math.abs(otherScanner.coordinates.z - scanner.coordinates.z))
+                )
+                .flat()
+                .sort((a, b) => b - a)
+                .at(0);
+        </script>
+    </body>
+</html>
