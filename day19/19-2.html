@@ -96,7 +96,7 @@
                         // Find the beacon that is connected to both overlapping beacons,
                         // and has 3 unique distances between the X, Y and Z axes
                         let sameOtherBeacon1, sameOtherBeacon2, axisDistances, uniqueDistances;
-                        do {
+                        findOtherBeacon: while (true) {
                             for (const distance of sameBeacon1.distances) {
                                 const match = sameBeacon2.distances
                                     .find(otherDistance => otherDistance.distance === distance.distance);
@@ -122,9 +122,13 @@
                                         Math.abs(axisDistances[0].y),
                                         Math.abs(axisDistances[0].z),
                                     ]);
+
+                                    if (uniqueDistances.length === 3) {
+                                        break findOtherBeacon;
+                                    }
                                 }
                             }
-                        } while (uniqueDistances < 3);
+                        }
     
                         // Update the order of X, Y and Z in the other scanner, by matching distances
                         const xyzMapping = {};
