@@ -24,7 +24,7 @@
             let hash;
             do {
                 hash = CryptoJS.MD5(secretKey + ++number).toString();
-            } while(hash.substring(0, 6) !== '000000');
+            } while (hash.substring(0, 6) !== '000000');
 
             answer.innerText = number;
         </script>
