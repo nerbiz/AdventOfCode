@@ -18,8 +18,17 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const directions = await fileReader.parse();
 
-            answer.innerText = directions
-                .reduce((floor, direction) => (floor + (direction === '(' ? 1 : -1)), 0);
+            let floor = 0;
+            let position;
+            for (position = 0; position < directions.length; position++) {
+                floor += (directions[position] === '(') ? 1 : -1;
+
+                if (floor < 0) {
+                    break;
+                }
+            }
+
+            answer.innerText = position + 1;
         </script>
     </body>
 </html>
