@@ -86,15 +86,40 @@
                 }
             });
 
-            instructions.forEach(instruction => {
-                // Skip already resolved instructions
-                if (instruction.isResolved === true) {
+            const runInstructions = () => {
+                instructions.forEach(instruction => {
+                    // Skip already resolved instructions
+                    if (instruction.isResolved === true) {
+                        return;
+                    }
+    
+                    instruction.resolve();
+                    instruction.isResolved = true;
+                });
+            };
+
+            runInstructions();
+
+            // Set A's signal in B, reset everything, except for B
+            const bSignal = wires.find(wire => wire.id === 'a').signal;
+            wires.forEach(wire => {
+                if (wire.id === 'b') {
+                    wire.signal = bSignal;
                     return;
                 }
 
-                instruction.resolve();
-                instruction.isResolved = true;
+                wire.signal = undefined;
             });
+
+            instructions.forEach(instruction => {
+                instruction.isResolved = false;
+
+                if (instruction.wireId === 'b') {
+                    instruction.isResolved = true;
+                }
+            });
+
+            runInstructions();
 
             answer.innerText = wires.find(wire => wire.id === 'a').signal;
         </script>
