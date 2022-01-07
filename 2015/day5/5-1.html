@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const strings = await fileReader.parse();
+
+            answer.innerText = strings.reduce((sum, string) => {
+                // The string contains forbidden substrings
+                if (string.match(/ab|cd|pq|xy/) !== null) {
+                    return sum;
+                }
+
+                const doubleRegExp = new RegExp(string.split('')
+                    .map(character => character + character)
+                    .join('|'));
+
+                // The string has no double characters
+                if (doubleRegExp.test(string) === false) {
+                    return sum;
+                }
+
+                // The string has less than 3 vowels
+                const hasVowels = string.match(/[aeiou]/g);
+                if (hasVowels === null || hasVowels.length < 3) {
+                    return sum;
+                }
+
+                // The string is valid
+                return sum + 1;
+            }, 0);
+        </script>
+    </body>
+</html>
