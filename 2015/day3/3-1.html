@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const directions = await fileReader.parse();
+
+            let x = 0;
+            let y = 0;
+            const visited = {
+                // The starting position
+                '0,0': 1,
+            };
+
+            directions.forEach(direction => {
+                switch (direction) {
+                    case '^':
+                        y++;
+                        break;
+                    case 'v':
+                        y--;
+                        break;
+                    case '>':
+                        x++;
+                        break;
+                    case '<':
+                        x--;
+                        break;
+                }
+
+                // Increase the amount of visits at the location
+                visited[`${x},${y}`] = (visited[`${x},${y}`] || 0) + 1;
+            });
+
+            answer.innerText = Object.keys(visited).length;
+        </script>
+    </body>
+</html>
