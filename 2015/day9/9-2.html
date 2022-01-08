@@ -34,7 +34,7 @@
 
             places.forEach(place => place.distances
                 // Sort the distances of all places
-                .sort((a, b) => a.distance - b.distance)
+                .sort((a, b) => b.distance - a.distance)
                 // Replace place names with the corresponding objects
                 .map(travel => travel.to = places.find(place => place.name === travel.to))
             );
@@ -61,7 +61,7 @@
                 place.routeDistance = place.route.reduce((sum, travel) => (sum + travel.distance), 0);
             });
 
-            answer.innerText = places.sort((a, b) => a.routeDistance - b.routeDistance).at(0).routeDistance;
+            answer.innerText = places.sort((a, b) => b.routeDistance - a.routeDistance).at(0).routeDistance;
         </script>
     </body>
 </html>
