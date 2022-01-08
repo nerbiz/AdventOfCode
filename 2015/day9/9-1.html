@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../../Utilities.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let distances = await fileReader.parse();
+
+            // Sort from smallest to largest distance
+            distances.sort((a, b) => a.distance - b.distance);
+
+            const path = [];
+            const visited = [];
+
+            // The starting point is where 2 places are closest to each other
+            const start = distances.shift();
+            path.push(start);
+
+            const place1 = start.from;
+            const place2 = start.to;
+            visited.push(place1, place2);
+
+            const nearestDistance1 = distances.find(distance =>
+                distance.from === place1 || distance.to === place1);
+            const nearestDistance2 = distances.find(distance =>
+                distance.from === place2 || distance.to === place2);
+
+            // The next place is the one closest to one of the two places
+            let next = [nearestDistance1, nearestDistance2].sort((a, b) => a.distance - b.distance).at(0);
+            let nextIndex = distances.findIndex(distance => distance === next);
+
+            // Remove the entry and add it to the path
+            distances.splice(nextIndex, 1);
+            path.push(next);
+
+            // Remove any reference to the visited places
+            distances = distances.filter(distance => ! [place1, place2].includes(distance.from)
+                && ! [place1, place2].includes(distance.to));
+
+            while (distances.length > 0) {
+                // Of the next distance, use the unvisited place and mark it as visited
+                const fromPlace = [next.from, next.to].filter(place => ! visited.includes(place)).at(0);
+                visited.push(fromPlace);
+    
+                // Get the next closest distance
+                next = distances.find(distance => distance.from === fromPlace || distance.to === fromPlace);
+                nextIndex = distances.findIndex(distance => distance === next);
+    
+                // Remove the entry and add it to the path
+                distances.splice(nextIndex, 1);
+                path.push(next);
+
+                // Remove any reference to the visited place
+                distances = distances.filter(distance => distance.from !== fromPlace && distance.to !== fromPlace);
+            }
+
+            answer.innerText = path.map(travel => travel.distance).reduce((sum, distance) => (sum + distance), 0);
+        </script>
+    </body>
+</html>
