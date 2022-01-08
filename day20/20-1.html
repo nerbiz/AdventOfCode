@@ -58,7 +58,7 @@
                 imageMap.forEach2d(pixel => pixel.value = pixel.newValue);
             }
 
-            answer.innerText = imageMap.filter2d(pixel => (pixel.value === 1), true).length;
+            document.querySelector('#answer').innerText = imageMap.filter2d(pixel => (pixel.value === 1), true).length;
         </script>
     </body>
 </html>

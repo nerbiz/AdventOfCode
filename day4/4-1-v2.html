@@ -23,7 +23,7 @@
             drawNumbers: for (let number of drawnNumbers) {
                 for (let board of boards) {
                     if (board.checkWin(number) === true) {
-                        answer.innerText = board.calculateScore(number);
+                        document.querySelector('#answer').innerText = board.calculateScore(number);
                         break drawNumbers;
                     }
                 }

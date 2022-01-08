@@ -18,7 +18,7 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const presents = await fileReader.parse();
 
-            answer.innerText = presents
+            document.querySelector('#answer').innerText = presents
                 .map(dimensions => dimensions.sort((a, b) => a - b))
                 .map(dimensions =>
                     (3 * dimensions[0] * dimensions[1])

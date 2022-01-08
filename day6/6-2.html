@@ -58,36 +58,7 @@
                 totalCount += occurrences[daysLeft];
             }
 
-            answer.innerText = totalCount;
-
-            /* let totalCount = numbersList.length;
-
-            const counter = (daysUntilSpawn, daysLeft) => {
-                // Add 1, because a spawn will happen 1 day after 0 days remaining
-                daysLeft -= (daysUntilSpawn + 1);
-
-                // There aren't enough days left for spawning
-                if (daysLeft < 0) {
-                    return;
-                }
-
-                // Add the first spawn + remaining spawns
-                const spawnAmount = 1 + Math.floor(daysLeft / 7);
-                
-                // Add to the total count
-                totalCount += spawnAmount;
-
-                for (let i = 0; i < spawnAmount; i++) {
-                    const newDaysLeft = daysLeft - (i * 7);
-                    counter(8, newDaysLeft);
-                }
-            };
-
-            numbersList.forEach(daysUntilSpawn => {
-                counter(daysUntilSpawn, totalDaysLeft);
-            });
-
-            answer.innerText = totalCount; */
+            document.querySelector('#answer').innerText = totalCount;
         </script>
     </body>
 </html>

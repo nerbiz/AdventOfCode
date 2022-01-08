@@ -18,7 +18,7 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const strings = await fileReader.parse();
 
-            answer.innerText = strings.map(string => {
+            document.querySelector('#answer').innerText = strings.map(string => {
                 const originalLength = string.length;
                 
                 // Remove leading and trailing double quotes

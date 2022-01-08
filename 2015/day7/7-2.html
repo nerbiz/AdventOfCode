@@ -121,7 +121,7 @@
 
             runInstructions();
 
-            answer.innerText = wires.find(wire => wire.id === 'a').signal;
+            document.querySelector('#answer').innerText = wires.find(wire => wire.id === 'a').signal;
         </script>
     </body>
 </html>

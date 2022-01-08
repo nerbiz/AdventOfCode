@@ -68,7 +68,8 @@
                 });
             });
 
-            answer.innerText = dotsMap.reduce((sum, row) => (sum + row.filter(dot => dot !== null).length), 0);
+            document.querySelector('#answer').innerText = dotsMap
+                .reduce((sum, row) => (sum + row.filter(dot => dot !== null).length), 0);
         </script>
     </body>
 </html>

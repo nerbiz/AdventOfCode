@@ -40,7 +40,10 @@
                 });
             });
 
-            answer.innerText = lights.filter2d(light => light.value === true).flat().length;
+            document.querySelector('#answer').innerText = lights
+                .filter2d(light => light.value === true)
+                .flat()
+                .length;
         </script>
     </body>
 </html>

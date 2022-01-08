@@ -62,7 +62,7 @@
                     bottomRight: null,
                     bottom: null,
                 };
-                
+
                 // The top signal is the difference between segments 1 and 7
                 segmentSignals.top = segmentPatterns['7'].split('')
                     .filter(character => segmentPatterns['4'].indexOf(character) === -1)[0];
@@ -81,7 +81,7 @@
                             segmentSignals.bottom = difference[0];
                         }
                     });
-                
+
                 // To make 3, add the bottom signal to 7, only middle remaining
                 const threeWithoutMiddle = (segmentPatterns['7'] + segmentSignals.bottom).split('').sort().join('');
                 // Find all the 5-length patterns
@@ -96,12 +96,12 @@
                             segmentSignals.middle = difference[0];
                         }
                     });
-                
+
                 // 8 without the middle is 0
                 segmentPatterns['0'] = segmentPatterns['8'].split('')
                     .filter(character => character !== segmentSignals.middle)
                     .join('');
-                
+
                 // Using top, middle and bottom, the only difference between 5 and 6 is bottom-left
                 // Find patterns that contain top, middle and bottom
                 const topMiddleBottomPatterns = notedPatterns.filter(pattern => {
@@ -115,7 +115,7 @@
                         && pattern !== segmentPatterns['3']
                         && pattern !== segmentPatterns['9']);
                 });
-                
+
                 // Find the 6-length pattern that differs only 1 character from a 5-length pattern
                 const tmbFiveLength = topMiddleBottomPatterns.filter(pattern => pattern.length === 5);
                 const tmbSixLength = topMiddleBottomPatterns.filter(pattern => pattern.length === 6);
@@ -159,7 +159,8 @@
             });
 
             // Sum up all the output numbers
-            answer.innerText = outputNumbers.map(number => parseInt(number, 10))
+            document.querySelector('#answer').innerText = outputNumbers
+                .map(number => parseInt(number, 10))
                 .reduce((sum, number) => (sum + number), 0);
         </script>
     </body>

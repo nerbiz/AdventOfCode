@@ -18,8 +18,8 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const numbers = await fileReader.parse();
 
-            answer.innerText = numbers.reduce((increased, current, index) =>
-                (increased + (current > numbers[index - 1])), 0);
+            document.querySelector('#answer').innerText = numbers
+                .reduce((increased, current, index) => (increased + (current > numbers[index - 1])), 0);
         </script>
     </body>
 </html>

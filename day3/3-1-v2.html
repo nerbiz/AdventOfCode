@@ -31,7 +31,7 @@
             const epsilonRate = gammaRate.map(bit => (bit === '0') ? '1' : '0').join('');
 
             // Multiply the rates
-            answer.innerText = parseInt(gammaRate.join(''), 2) * parseInt(epsilonRate, 2);
+            document.querySelector('#answer').innerText = parseInt(gammaRate.join(''), 2) * parseInt(epsilonRate, 2);
         </script>
     </body>
 </html>

@@ -40,7 +40,8 @@
                 });
             });
 
-            answer.innerText = lights.reduce2d((sum, light) => (sum + light.value), 0);
+            document.querySelector('#answer').innerText = lights
+                .reduce2d((sum, light) => (sum + light.value), 0);
         </script>
     </body>
 </html>

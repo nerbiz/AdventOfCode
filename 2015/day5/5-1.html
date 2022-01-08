@@ -19,7 +19,7 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const strings = await fileReader.parse();
 
-            answer.innerText = strings.reduce((sum, string) => {
+            document.querySelector('#answer').innerText = strings.reduce((sum, string) => {
                 // The string contains forbidden substrings
                 if (string.match(/ab|cd|pq|xy/) !== null) {
                     return sum;

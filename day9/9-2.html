@@ -85,7 +85,7 @@
                 }
             });
 
-            answer.innerText = allBasins
+            document.querySelector('#answer').innerText = allBasins
                 // Sort by size (descending)
                 .sort((a, b) => b.length - a.length)
                 // Take the 3 largest

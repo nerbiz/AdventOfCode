@@ -24,7 +24,7 @@
             notes.forEach(note => {
                 let [signalPatterns, outputValues] = note.split(' | ');
                 outputValues = outputValues.split(' ');
-                
+
                 // See how many output values have a unique size
                 outputValues.forEach(outputValue => {
                     if (uniqueSegmentSizes.indexOf(outputValue.length) !== -1) {
@@ -33,7 +33,7 @@
                 });
             });
 
-            answer.innerText = occurrences;
+            document.querySelector('#answer').innerText = occurrences;
         </script>
     </body>
 </html>

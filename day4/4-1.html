@@ -33,7 +33,7 @@
                     const board = boards[j];
                     
                     if (board.checkWin(number) === true) {
-                        answer.innerText = board.calculateScore(number);
+                        document.querySelector('#answer').innerText = board.calculateScore(number);
                         win = true;
                         break;
                     }
