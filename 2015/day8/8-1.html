@@ -19,7 +19,6 @@
             const strings = await fileReader.parse();
 
             answer.innerText = strings.map(string => {
-                const originalString = string;
                 const originalLength = string.length;
                 
                 // Remove leading and trailing double quotes

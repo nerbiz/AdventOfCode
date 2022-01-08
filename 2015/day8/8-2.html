@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const strings = await fileReader.parse();
+
+            answer.innerText = strings.map(string => {
+                const originalLength = string.length;
+
+                string = '"'
+                    + string.replaceAll('\\', '\\\\')
+                        .replaceAll('"', '\\"')
+                    + '"';
+
+                return string.length - originalLength;
+            }).reduce((sum, difference) => (sum + difference), 0);
+        </script>
+    </body>
+</html>
