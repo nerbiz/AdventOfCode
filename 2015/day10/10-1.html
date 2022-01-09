@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let value = await fileReader.parse();
+            const steps = 40;
+
+            for (let step = 0; step < steps; step++) {
+                let newString = '';
+
+                let currentIndex = 0;
+                let currentDigit;
+
+                while (true) {
+                    currentDigit = value.at(currentIndex);
+
+                    // Reached the end of the string
+                    if (currentDigit === undefined) {
+                        break;
+                    }
+
+                    // Find the index of the next different digit
+                    let otherDigitIndex = value.slice(currentIndex + 1)
+                        .findIndex(otherDigit => otherDigit !== currentDigit);
+
+
+                    otherDigitIndex = (otherDigitIndex === -1)
+                        // No other digit found, use end of string as index
+                        ? otherDigitIndex = value.length
+                        : otherDigitIndex += currentIndex + 1;
+
+
+                    const amount = otherDigitIndex - currentIndex;
+                    newString += amount.toString() + currentDigit;
+
+                    currentIndex = otherDigitIndex;
+                }
+
+                value = newString.split('');
+            }
+
+            document.querySelector('#answer').innerText = value.length;
+        </script>
+    </body>
+</html>
