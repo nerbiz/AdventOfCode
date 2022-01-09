@@ -21,36 +21,27 @@
 
             for (let step = 0; step < steps; step++) {
                 let newString = '';
+                let currentDigit = value.at(0);
+                let amount = 0;
 
-                let currentIndex = 0;
-                let currentDigit;
+                for (let digit of value) {
+                    if (digit !== currentDigit) {
+                        // Add amount+digit to the string
+                        newString += amount + currentDigit;
 
-                while (true) {
-                    currentDigit = value.at(currentIndex);
-
-                    // Reached the end of the string
-                    if (currentDigit === undefined) {
-                        break;
+                        // Start counting for the next digit
+                        currentDigit = digit;
+                        amount = 1;
+                    } else {
+                        amount++;
                     }
-
-                    // Find the index of the next different digit
-                    let otherDigitIndex = value.slice(currentIndex + 1)
-                        .findIndex(otherDigit => otherDigit !== currentDigit);
-
-
-                    otherDigitIndex = (otherDigitIndex === -1)
-                        // No other digit found, use end of string as index
-                        ? otherDigitIndex = value.length
-                        : otherDigitIndex += currentIndex + 1;
-
-
-                    const amount = otherDigitIndex - currentIndex;
-                    newString += amount.toString() + currentDigit;
-
-                    currentIndex = otherDigitIndex;
                 }
 
-                value = newString.split('');
+                // Add the last digit(s) amount to the string
+                newString += amount + currentDigit;
+
+                // Update the value for the next step
+                value = newString;
             }
 
             document.querySelector('#answer').innerText = value.length;
