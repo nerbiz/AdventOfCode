@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../../Utilities.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let password = await fileReader.parse();
+            const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+            const lettersToIndexes = letters => letters.map(character => alphabet.indexOf(character));
+            const indexesToLetters = indexes => indexes.map(index => alphabet.at(index));
+
+            let passwordIndexes = lettersToIndexes(password);
+            const forbiddenIndexes = lettersToIndexes(['i', 'l', 'o']);
+
+            const incrementIndex = (indexes, changeIndex) => {
+                // Increase the index, wrap around from 26 to 0 if needed
+                indexes[changeIndex]++;
+                indexes[changeIndex] %= 26;
+
+                // If wrapped around, increase the next index (except when it's the first)
+                if (indexes[changeIndex] === 0 && changeIndex - 1 >= 0) {
+                    return incrementIndex(indexes, changeIndex - 1);
+                }
+
+                return indexes;
+            };
+
+            const incrementForbiddenIndexes = indexes => {
+                let foundIndex;
+
+                // Keep incrementing, for as long as forbidden indexes exist
+                for (const forbiddenIndex of forbiddenIndexes) {
+                    while ((foundIndex = indexes.indexOf(forbiddenIndex)) > -1) {
+                        indexes = incrementIndex(indexes, foundIndex);
+
+                        // Change the indexes after the found index to 0
+                        for (let i = foundIndex + 1; i < indexes.length; i++) {
+                            indexes[i] = 0;
+                        }
+                    }
+                }
+
+                return indexes;
+            };
+
+            const containsConsecutiveIndexes = indexes => {
+                const letters = indexesToLetters(indexes).join('');
+
+                const regExp = new RegExp(/.{3}/g);
+
+                // Get all combinations of 3 letters
+                const indexGroups = letters.match(regExp)
+                    .concat(letters.substring(1).match(regExp))
+                    .concat(letters.substring(2).match(regExp))
+                    // Convert letters to indexes
+                    .map(letters => lettersToIndexes(letters.split('')));
+
+                for (const indexes of indexGroups) {
+                    if (indexes[0] === indexes[1] - 1 && indexes[1] === indexes[2] - 1) {
+                        return true;
+                    }
+                }
+
+                return false;
+            };
+
+            const containsTwoDoubles = indexes => {
+                const letters = indexesToLetters(indexes);
+
+                // Replace each unique letter with letter+letter string matches
+                return Utilities.arrayUnique(letters)
+                    .map(character => [...letters.join('').matchAll(character + character)])
+                    .filter(matches => matches.length > 0)
+                    // At least 2 are needed
+                    .length > 1;
+            };
+
+            while (true) {
+                passwordIndexes = incrementForbiddenIndexes(passwordIndexes);
+                let requirementOne = containsConsecutiveIndexes(passwordIndexes);
+                let requirementTwo = containsTwoDoubles(passwordIndexes);
+
+                if (requirementOne && requirementTwo) {
+                    break;
+                }
+
+                passwordIndexes = incrementIndex(passwordIndexes, passwordIndexes.length - 1);
+            }
+
+            document.querySelector('#answer').innerText = indexesToLetters(passwordIndexes).join('');
+        </script>
+    </body>
+</html>
