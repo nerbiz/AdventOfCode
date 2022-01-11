@@ -24,11 +24,13 @@
                 relationships.flatMap(happiness => [happiness.person, happiness.nextTo]));
 
             // Add another person, who is mutually indifferent about all persons
-            personNames.push('new');
-            personNames.forEach(name => {
-                relationships.push({person: 'new', nextTo: name, score: 0});
-                relationships.push({person: name, nextTo: 'new', score: 0});
-            });
+            const newPerson = 'new';
+            personNames.push(newPerson);
+            personNames.filter(name => name !== newPerson)
+                .forEach(name => {
+                    relationships.push({person: newPerson, nextTo: name, score: 0});
+                    relationships.push({person: name, nextTo: newPerson, score: 0});
+                });
 
             // Calculate the mutual relationship score of all persons
             const mutualRelationships = relationships.map(relationship => ({
