@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../../Utilities.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const happinessList = await fileReader.parse();
+
+            // Convert person names to person objects
+            const persons = Utilities.arrayUnique(
+                happinessList.flatMap(happiness => [happiness.person, happiness.nextTo]))
+                .map(name => ({
+                    name,
+                    relations: happinessList
+                        .filter(happiness => happiness.person === name)
+                        .map(happiness => ({
+                            // Using a callback, because during this loop
+                            // not all person objects are created yet
+                            person: () => persons.find(person => person.name === happiness.nextTo),
+                            happiness: happiness.amount * (happiness.change === 'lose' ? -1 : 1),
+                            mutualHappiness: undefined,
+                        })),
+                }));
+
+            // Run the person object callbacks (replace names with objects)
+            persons.flatMap(person => person.relations)
+                .forEach(happiness => happiness.person = happiness.person());
+
+            // Calculate the mutual happinesses
+            persons.forEach(person => {
+                person.relations.forEach(relation => {
+                    relation.mutualHappiness = relation.happiness + relation.person.relations
+                        .find(relation => relation.person.name === person.name)
+                        .happiness;
+                });
+
+                // Sort by highest mutual happiness first
+                person.relations.sort((a, b) => b.mutualHappiness - a.mutualHappiness);
+            });
+
+            const happinessTotals = [];
+            persons.forEach(person => {
+                const placed = [person];
+                const scores = [];
+                let happinessTotal = 0;
+                let currentPerson = person;
+
+                while (placed.length < persons.length) {
+                    const relation = currentPerson.relations
+                        .filter(relation => ! placed.includes(relation.person))
+                        .at(0);
+
+                    happinessTotal += relation.mutualHappiness;
+                    placed.push(relation.person);
+                    scores.push(relation.mutualHappiness);
+                    currentPerson = relation.person;
+                }
+
+                const lastRelation = placed.at(-1).relations
+                    .find(relation => relation.person === person);
+                happinessTotal += lastRelation.mutualHappiness;
+                scores.push(lastRelation.mutualHappiness);
+
+                happinessTotals.push(happinessTotal);
+            });
+
+            document.querySelector('#answer').innerText = happinessTotals
+                .sort((a, b) => b - a)
+                .at(0)
+        </script>
+    </body>
+</html>
