@@ -14,102 +14,67 @@
         <script type="module">
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
-            import Utilities from '../../Utilities.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
             let password = await fileReader.parse();
-            const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
-            const lettersToIndexes = letters => letters.map(character => alphabet.indexOf(character));
-            const indexesToLetters = indexes => indexes.map(index => alphabet.at(index));
+            const incrementPassword = (string, index) => {
+                // Define the new incremented character, wrap around from 'z' to 'a'
+                const newCharacter = (string.at(index) === 'z')
+                    ? 'a'
+                    : String.fromCharCode(string.charCodeAt(index) + 1);
 
-            let passwordIndexes = lettersToIndexes(password);
-            const forbiddenIndexes = lettersToIndexes(['i', 'l', 'o']);
+                string = string.slice(0, index)
+                    // Replace the character at the specified index
+                    + newCharacter
+                    // Replace characters after the index with 'a'
+                    + string.slice(index + 1)
+                        .split('')
+                        .map(character => 'a')
+                        .join('');
 
-            const incrementIndex = (indexes, changeIndex) => {
-                // Increase the index, wrap around from 26 to 0 if needed
-                indexes[changeIndex]++;
-                indexes[changeIndex] %= 26;
-
-                // If wrapped around, increase the next index (except when it's the first)
-                if (indexes[changeIndex] === 0 && changeIndex - 1 >= 0) {
-                    return incrementIndex(indexes, changeIndex - 1);
+                // If the character was wrapped around to 'a', increment the next character
+                if (string.at(index) === 'a') {
+                    return incrementPassword(string, index - 1);
                 }
 
-                return indexes;
+                return string;
             };
 
-            const incrementForbiddenIndexes = indexes => {
-                let foundIndex;
+            const skipIllegalCharacters = string => {
+                const illegalIndex = string.search(/i|o|l/g);
 
-                // Keep incrementing, for as long as forbidden indexes exist
-                for (const forbiddenIndex of forbiddenIndexes) {
-                    while ((foundIndex = indexes.indexOf(forbiddenIndex)) > -1) {
-                        indexes = incrementIndex(indexes, foundIndex);
-
-                        // Change the indexes after the found index to 0
-                        for (let i = foundIndex + 1; i < indexes.length; i++) {
-                            indexes[i] = 0;
-                        }
-                    }
-                }
-
-                return indexes;
+                return (illegalIndex > -1)
+                    ? incrementPassword(string, illegalIndex)
+                    : string;
             };
 
-            const containsConsecutiveIndexes = indexes => {
-                const letters = indexesToLetters(indexes).join('');
-
-                const regExp = new RegExp(/.{3}/g);
-
-                // Get all combinations of 3 letters
-                const indexGroups = letters.match(regExp)
-                    .concat(letters.substring(1).match(regExp))
-                    .concat(letters.substring(2).match(regExp))
-                    // Convert letters to indexes
-                    .map(letters => lettersToIndexes(letters.split('')));
-
-                for (const indexes of indexGroups) {
-                    if (indexes[0] === indexes[1] - 1 && indexes[1] === indexes[2] - 1) {
-                        return true;
-                    }
-                }
-
-                return false;
+            const includesStraight = string => {
+                return string.split('')
+                    .map(letter => letter.charCodeAt(0))
+                    .some((charCode, index, charCodes) => charCode === charCodes[index + 1] - 1
+                        && charCode === charCodes[index + 2] - 2);
             };
 
-            const containsTwoDoubles = indexes => {
-                const letters = indexesToLetters(indexes);
-
-                // Replace each unique letter with letter+letter string matches
-                return Utilities.arrayUnique(letters)
-                    .map(character => [...letters.join('').matchAll(character + character)])
-                    .filter(matches => matches.length > 0)
-                    // At least 2 are needed
-                    .length > 1;
+            const hasTwoPairs = string => {
+                return /([a-z])\1.*([a-z])\2/g.test(string);
             };
 
-            const findNextPassword = indexes => {
+            const findNextPassword = password => {
                 while (true) {
-                    indexes = incrementForbiddenIndexes(indexes);
-                    let requirementOne = containsConsecutiveIndexes(indexes);
-                    let requirementTwo = containsTwoDoubles(indexes);
+                    password = incrementPassword(password, password.length - 1);
+                    password = skipIllegalCharacters(password);
 
-                    if (requirementOne && requirementTwo) {
-                        break;
+                    if (includesStraight(password) && hasTwoPairs(password)) {
+                        return password;
                     }
-
-                    indexes = incrementIndex(indexes, indexes.length - 1);
                 }
+            }
 
-                return indexes;
-            };
+            password = findNextPassword(password);
+            password = findNextPassword(password);
 
-            passwordIndexes = findNextPassword(passwordIndexes);
-            passwordIndexes = incrementIndex(passwordIndexes, passwordIndexes.length - 1);
-            passwordIndexes = findNextPassword(passwordIndexes);
-
-            document.querySelector('#answer').innerText = indexesToLetters(passwordIndexes).join('');
+            document.querySelector('#answer').innerText = password;
         </script>
     </body>
 </html>

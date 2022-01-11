@@ -36,7 +36,8 @@
                 }
             })(json);
 
-            document.querySelector('#answer').innerText = JSON.stringify(json).match(/-?\d+/g)
+            document.querySelector('#answer').innerText = JSON.stringify(json)
+                .match(/-?\d+/g)
                 .map(number => parseInt(number, 10))
                 .reduce((sum, number) => sum + number, 0);
         </script>
