@@ -23,6 +23,13 @@
             const personNames = Utilities.arrayUnique(
                 relationships.flatMap(happiness => [happiness.person, happiness.nextTo]));
 
+            // Add another person, who is mutually indifferent about all persons
+            personNames.push('new');
+            personNames.forEach(name => {
+                relationships.push({person: 'new', nextTo: name, score: 0});
+                relationships.push({person: name, nextTo: 'new', score: 0});
+            });
+
             // Calculate the mutual relationship score of all persons
             const mutualRelationships = relationships.map(relationship => ({
                 person1: relationship.person,
@@ -64,6 +71,7 @@
                 scoreTotals.push(scoreTotal);
             });
 
+            // 709 is too high
             document.querySelector('#answer').innerText = scoreTotals
                 .sort((a, b) => b - a)
                 .at(0);
