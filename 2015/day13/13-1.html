@@ -17,69 +17,56 @@
             import Utilities from '../../Utilities.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            const happinessList = await fileReader.parse();
+            const relationships = await fileReader.parse();
 
-            // Convert person names to person objects
-            const persons = Utilities.arrayUnique(
-                happinessList.flatMap(happiness => [happiness.person, happiness.nextTo]))
-                .map(name => ({
-                    name,
-                    relations: happinessList
-                        .filter(happiness => happiness.person === name)
-                        .map(happiness => ({
-                            // Using a callback, because during this loop
-                            // not all person objects are created yet
-                            person: () => persons.find(person => person.name === happiness.nextTo),
-                            happiness: happiness.amount * (happiness.change === 'lose' ? -1 : 1),
-                            mutualHappiness: undefined,
-                        })),
-                }));
+            // Get a list of all unique names
+            const personNames = Utilities.arrayUnique(
+                relationships.flatMap(happiness => [happiness.person, happiness.nextTo]));
 
-            // Run the person object callbacks (replace names with objects)
-            persons.flatMap(person => person.relations)
-                .forEach(happiness => happiness.person = happiness.person());
+            // Calculate the mutual relationship score of all persons
+            const mutualRelationships = relationships.map(relationship => ({
+                person1: relationship.person,
+                person2: relationship.nextTo,
+                score: relationship.score + relationships.find(otherRelationship =>
+                    otherRelationship.person === relationship.nextTo
+                    && otherRelationship.nextTo === relationship.person
+                ).score,
+            }));
 
-            // Calculate the mutual happinesses
-            persons.forEach(person => {
-                person.relations.forEach(relation => {
-                    relation.mutualHappiness = relation.happiness + relation.person.relations
-                        .find(relation => relation.person.name === person.name)
-                        .happiness;
-                });
+            const scoreTotals = [];
+            personNames.forEach(name => {
+                const first = name;
+                const inPlace = [];
+                let scoreTotal = 0;
+                let currentName = name;
 
-                // Sort by highest mutual happiness first
-                person.relations.sort((a, b) => b.mutualHappiness - a.mutualHappiness);
-            });
+                while (inPlace.length < personNames.length) {
+                    inPlace.push(currentName);
 
-            const happinessTotals = [];
-            persons.forEach(person => {
-                const placed = [person];
-                const scores = [];
-                let happinessTotal = 0;
-                let currentPerson = person;
-
-                while (placed.length < persons.length) {
-                    const relation = currentPerson.relations
-                        .filter(relation => ! placed.includes(relation.person))
+                    let bestRelationShip = mutualRelationships
+                        // Find the best relationship with someone who isn't placed yet
+                        .filter(relationship => relationship.person1 === currentName
+                            && ! inPlace.includes(relationship.person2))
+                        .sort((a, b) => b.score - a.score)
                         .at(0);
 
-                    happinessTotal += relation.mutualHappiness;
-                    placed.push(relation.person);
-                    scores.push(relation.mutualHappiness);
-                    currentPerson = relation.person;
+                    // Go from the last person to the first person again
+                    if (bestRelationShip === undefined) {
+                        bestRelationShip = mutualRelationships
+                            .find(relationship => relationship.person1 === currentName
+                                && relationship.person2 === first);
+                    }
+
+                    scoreTotal += bestRelationShip.score;
+                    currentName = bestRelationShip.person2;
                 }
 
-                const lastRelation = placed.at(-1).relations
-                    .find(relation => relation.person === person);
-                happinessTotal += lastRelation.mutualHappiness;
-                scores.push(lastRelation.mutualHappiness);
-
-                happinessTotals.push(happinessTotal);
+                scoreTotals.push(scoreTotal);
             });
 
-            document.querySelector('#answer').innerText = happinessTotals
+            document.querySelector('#answer').innerText = scoreTotals
                 .sort((a, b) => b - a)
-                .at(0)
+                .at(0);
         </script>
     </body>
 </html>

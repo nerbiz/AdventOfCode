@@ -11,7 +11,12 @@ export default class
 
         return linesArray.map(line => {
             const [match, person, change, amount, nextTo] = line.match(lineRegExp);
-            return {person, nextTo, change, amount: parseInt(amount, 10)};
+
+            return {
+                person,
+                nextTo,
+                score: parseInt((change === 'lose') ? amount * -1 : amount, 10)
+            };
         });
     }
 }
