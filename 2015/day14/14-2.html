@@ -44,7 +44,7 @@
             }
 
             document.querySelector('#answer').innerText = reindeer
-                .sort((a, b) => b - a)
+                .sort((a, b) => b.points - a.points)
                 .at(0)
                 .points;
         </script>
