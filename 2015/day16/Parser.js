@@ -20,8 +20,8 @@ export default class
             .map(line => line.replace(/^Sue \d+: /, ''))
             .map(line => line.split(', ')
                 .map(property => property.split(': ')))
-            .map(properties => {
-                const propertiesObject = {};
+            .map((properties, index) => {
+                const propertiesObject = {number: index + 1};
                 for (const property of properties) {
                     propertiesObject[property[0]] = parseInt(property[1], 10);
                 }
