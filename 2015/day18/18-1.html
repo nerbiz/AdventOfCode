@@ -22,16 +22,22 @@
             const steps = 100;
 
             for (let step = 0; step < steps; step++) {
-                let lightsClone = lights.clone();
+                // Change all simultaneously: use the original, apply in a clone
+                const lightsClone = lights.clone();
+
                 lights.forEach2d(light => {
+                    // Find surrounding lights that are on
                     const surrounding = light.getSurroundingItems()
                         .filter(light => light !== undefined && light.value === true);
+
+                    // Check whether the light should be on and apply the status
                     const status = (
                         (light.value === true && [2, 3].includes(surrounding.length))
                         || (light.value === false && surrounding.length === 3)
                     );
                     lightsClone.setItem(light.x, light.y, status);
                 });
+
                 lights = lightsClone;
             }
 

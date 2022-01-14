@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const lightsArray = await fileReader.parse();
+            let lights = new Array2d(lightsArray);
+            const steps = 100;
+
+            // Turn the light in the 4 corners on
+            const fourCorners = lights.getItems([
+                [0, 0],
+                [lights.at(0).length - 1, 0],
+                [0, lights.length - 1],
+                [lights.at(0).length - 1, lights.length - 1],
+            ]);
+            fourCorners.forEach(light => light.value = true);
+
+            for (let step = 0; step < steps; step++) {
+                // Change all simultaneously: use the original, apply in a clone
+                const lightsClone = lights.clone();
+
+                // Update all lights, except the 4 corner items
+                lights.filter2d(light => ! fourCorners.includes(light))
+                    .forEach2d(light => {
+                        // Find surrounding lights that are on
+                        const surrounding = light.getSurroundingItems()
+                            .filter(light => light !== undefined && light.value === true);
+
+                        // Check whether the light should be on and apply the status
+                        const status = (
+                            (light.value === true && [2, 3].includes(surrounding.length))
+                            || (light.value === false && surrounding.length === 3)
+                        );
+                        lightsClone.setItem(light.x, light.y, status);
+                    });
+
+                // Update items 1-by-1, to keep the reference with the 4 corner items
+                lightsClone.forEach2d(light => lights.updateItem(light.x, light.y, light.value));
+            }
+
+            document.querySelector('#answer').innerText = lights
+                .filter2d(light => light.value === true, true)
+                .length;
+        </script>
+    </body>
+</html>
