@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../../Utilities.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {replacements, molecule} = await fileReader.parse();
+            const generated = [];
+
+            replacements.forEach(replacement => {
+                // Find all character matches and generate molecules
+                [...molecule.matchAll(replacement[0])].forEach(match => {
+                    generated.push(
+                        molecule.substring(0, match.index)
+                        + replacement[1]
+                        + molecule.substring(match.index + replacement[0].length)
+                    );
+                });
+            });
+
+            document.querySelector('#answer').innerText = Utilities.arrayUnique(generated).length;
+        </script>
+    </body>
+</html>
