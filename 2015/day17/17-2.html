@@ -21,7 +21,7 @@
             const allCombinations = [];
 
             const findCombinations = (liters, containers, combination) => {
-                // Remove containers that are larger than the liters
+                // Create a copy, without the containers that are larger than the liters
                 containers = containers.filter(container => container <= liters);
 
                 // Check if the containers combined are large enough
