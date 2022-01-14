@@ -18,12 +18,13 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             let {replacements, molecule} = await fileReader.parse();
 
-            // Sort by longest replacement first
+            // Sort by largest replacement first
             // Because if it matches, it takes less steps than replacing parts of it
             replacements.sort((a, b) => b[1].length - a[1].length);
             let steps = 0;
 
             while (molecule !== 'e' && ++steps) {
+                // Replace with the first (largest) matching replacement
                 const replacement = replacements.find(replacement => molecule.match(replacement[1]) !== null);
                 molecule = molecule.replace(replacement[1], replacement[0]);
             }
