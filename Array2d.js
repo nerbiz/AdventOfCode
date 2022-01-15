@@ -24,7 +24,7 @@ export class Array2dItem
     }
 
     /**
-     * @param {Array2d} parent 
+     * @param {Array2d} parent
      * @returns {Array2dItem}
      */
     setParent(parent)
@@ -369,18 +369,25 @@ export default class Array2d extends Array
      * Get a value from the array
      * @param {number} x
      * @param {number} y
-     * @param {any} fallback A default value, if the item doesn't exist
      * @returns {any}
      */
-    getItem(x, y, fallback = undefined)
+    getItem(x, y)
     {
         if (this[y] === undefined) {
-            return fallback;
+            return undefined;
         }
 
-        return (this[y][x] !== undefined)
-            ? this[y][x]
-            : fallback;
+        return (this[y][x]);
+    }
+
+    /**
+     * Get multiple items, based on [x, y] arrays
+     * @param {array} xyPairs
+     * @returns {array}
+     */
+    getItems(xyPairs)
+    {
+        return xyPairs.map(xyPair => this.getItem(...xyPair));
     }
 
     /**
@@ -663,6 +670,18 @@ export default class Array2d extends Array
     {
         this.forEach((row, y) =>
             row.forEach((item, x) => callback(item, x, y, this)));
+    }
+
+    /**
+     * Apply a callback to every item and return the array itself unaltered
+     * @param {function} callback
+     * @returns {Array2d}
+     */
+    tap2d(callback)
+    {
+        this.forEach2d(callback);
+
+        return this;
     }
 
     /**
