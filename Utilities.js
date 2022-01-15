@@ -3,7 +3,7 @@ export default class
     /**
      * Make a range of numbers
      * @param {number} first
-     * @param {number} last 
+     * @param {number} last
      * @returns {array}
      */
     static range(first, last)
@@ -15,7 +15,7 @@ export default class
         for (let i = min; i <= max; i++) {
             range.push(i);
         }
-        
+
         return range;
     }
 
@@ -30,7 +30,7 @@ export default class
     {
         const indexes = [];
         let index;
-        
+
         while ((index = array.indexOf(searchElement, fromIndex)) !== -1) {
             indexes.push(index);
             fromIndex = index + 1;
@@ -58,6 +58,26 @@ export default class
     }
 
     /**
+     * Calculate the sum of array items
+     * @param {array} array 
+     * @returns {number}
+     */
+    static arraySum(array)
+    {
+        return array.reduce((sum, item) => (sum + item), 0);
+    }
+
+    /**
+     * Calculate the product of array items
+     * @param {array} array 
+     * @returns {number}
+     */
+    static arrayProduct(array)
+    {
+        return array.reduce((sum, item) => (sum * item), 1);
+    }
+
+    /**
      * Counts the occurrences of values in an array
      * @param {array} array The array to count values of
      * @returns {object}
@@ -77,13 +97,13 @@ export default class
     /**
      * Splits an array into chunks
      * @param {array} array
-     * @param {number} chunkSize 
+     * @param {number} chunkSize
      * @returns {array}
      */
     static arrayChunk(array, chunkSize)
     {
         const chunks = [];
-        
+
         for (let count = 0; count < array.length; count += chunkSize) {
             chunks.push(array.slice(count, count + chunkSize));
         }
