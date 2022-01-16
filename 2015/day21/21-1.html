@@ -40,26 +40,25 @@
 
             // Create all item combinations
             const combinations = [];
-            store.weapons.forEach(weapon => {
+            for (const weapon of store.weapons) {
                 const combination = addToCombination(weapon, {});
                 combinations.push(combination);
 
-                store.armor.forEach(armor => {
+                for (const armor of store.armor) {
                     const combination2 = addToCombination(armor, combination);
                     combinations.push(combination2);
 
-                    store.rings.forEach(ring => {
+                    for (const ring of store.rings) {
                         const combination3 = addToCombination(ring, combination2);
                         combinations.push(combination3);
 
-                        store.rings.filter(secondRing => secondRing !== ring)
-                            .forEach(ring => {
-                                const combination4 = addToCombination(ring, combination3);
-                                combinations.push(combination4);
-                            });
-                    });
-                });
-            });
+                        for (const ring2 of store.rings.filter(secondRing => secondRing !== ring)) {
+                            const combination4 = addToCombination(ring2, combination3);
+                            combinations.push(combination4);
+                        }
+                    }
+                }
+            }
 
             document.querySelector('#answer').innerText = combinations
                 .filter(combination => {
