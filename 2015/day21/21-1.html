@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {store, player, boss} = await fileReader.parse();
+
+            const addToCombination = (item, combination) => {
+                // Create a new combination, extend existing if possible
+                const newCombination = {
+                    items: (combination.items !== undefined)
+                        ? combination.items.map(item => item)
+                        : [],
+                    cost: combination.cost || 0,
+                    damage: combination.damage || 0,
+                    armor: combination.armor || 0,
+                };
+
+                // Add the item to the combination
+                newCombination.items.push(item);
+                newCombination.cost += item.cost;
+                newCombination.damage += item.damage;
+                newCombination.armor += item.armor;
+
+                return newCombination;
+            };
+
+            // Create all item combinations
+            const combinations = [];
+            store.weapons.forEach(weapon => {
+                const combination = addToCombination(weapon, {});
+                combinations.push(combination);
+
+                store.armor.forEach(armor => {
+                    const combination2 = addToCombination(armor, combination);
+                    combinations.push(combination2);
+
+                    store.rings.forEach(ring => {
+                        const combination3 = addToCombination(ring, combination2);
+                        combinations.push(combination3);
+
+                        store.rings.filter(secondRing => secondRing !== ring)
+                            .forEach(ring => {
+                                const combination4 = addToCombination(ring, combination3);
+                                combinations.push(combination4);
+                            });
+                    });
+                });
+            });
+
+            document.querySelector('#answer').innerText = combinations
+                .filter(combination => {
+                    const bossDamagePerTurn = (boss.damage - combination.armor);
+                    const playerDamagePerTurn = (combination.damage - boss.armor);
+                    const maxTurns = Math.ceil(player.hitPoints / bossDamagePerTurn);
+
+                    // See if the player wins within the maximum amount of turns
+                    for (let turn = 1; turn <= maxTurns; turn++) {
+                        if (playerDamagePerTurn * turn >= boss.hitPoints) {
+                            return true;
+                        }
+                    }
+                })
+                .sort((a, b) => a.cost - b.cost)
+                .at(0)
+                .cost;
+        </script>
+    </body>
+</html>
