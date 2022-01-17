@@ -17,7 +17,7 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const instructions = await fileReader.parse();
-            const registers = {a: 0, b: 0};
+            const registers = {a: 1, b: 0};
 
             const functions = {
                 hlf: register => { registers[register] /= 2 },
