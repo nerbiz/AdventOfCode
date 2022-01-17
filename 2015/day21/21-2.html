@@ -62,7 +62,7 @@
 
             document.querySelector('#answer').innerText = combinations
                 .sort((a, b) => b.cost - a.cost)
-                .filter(combination => {
+                .find(combination => {
                     // Each character does at least 1 damage per turn
                     const bossDamagePerTurn = Math.max(1, boss.damage - combination.armor);
                     const playerDamagePerTurn = Math.max(1, combination.damage - boss.armor);
@@ -71,7 +71,6 @@
 
                     return (maxTurns * playerDamagePerTurn < boss.hitPoints);
                 })
-                .at(0)
                 .cost;
         </script>
     </body>
