@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const instructions = await fileReader.parse();
+            const registers = {a: 0, b: 0};
+
+            const functions = {
+                hlf: register => { registers[register] /= 2 },
+                tpl: register => { registers[register] *= 3 },
+                inc: register => { registers[register]++ },
+                jmp: offset => { return offset },
+                jie: (register, offset) => { if (registers[register] % 2 === 0) return offset },
+                jio: (register, offset) => { if (registers[register] === 1) return offset },
+            }
+
+            let index = 0;
+            while (index < instructions.length) {
+                const instruction = instructions[index];
+                const result = functions[instruction[0]](...instruction.slice(1));
+
+                if (Number.isInteger(result)) {
+                    index += result;
+                } else {
+                    index++;
+                }
+            }
+
+            document.querySelector('#answer').innerText = registers['b'];
+        </script>
+    </body>
+</html>
