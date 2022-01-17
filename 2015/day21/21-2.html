@@ -52,7 +52,6 @@
             }
 
             // For all the combinations, create combinations where armor is added
-            const addCombinations = [];
             const combinationsClone = combinations.map(combination => combination);
             for (const combination of combinationsClone) {
                 for (const armor of store.armor) {
@@ -62,6 +61,7 @@
             }
 
             document.querySelector('#answer').innerText = combinations
+                .sort((a, b) => b.cost - a.cost)
                 .filter(combination => {
                     // Each character does at least 1 damage per turn
                     const bossDamagePerTurn = Math.max(1, boss.damage - combination.armor);
@@ -69,14 +69,8 @@
                     // Calculate after how many turns the boss would win
                     const maxTurns = Math.ceil(player.hitPoints / bossDamagePerTurn);
 
-                    // See if the player wins within the maximum amount of turns
-                    for (let turn = 1; turn <= maxTurns; turn++) {
-                        if (playerDamagePerTurn * turn >= boss.hitPoints) {
-                            return true;
-                        }
-                    }
+                    return (maxTurns * playerDamagePerTurn < boss.hitPoints);
                 })
-                .sort((a, b) => a.cost - b.cost)
                 .at(0)
                 .cost;
         </script>
