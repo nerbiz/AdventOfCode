@@ -59,7 +59,7 @@ export default class
 
     /**
      * Calculate the sum of array items
-     * @param {array} array 
+     * @param {array} array
      * @returns {number}
      */
     static arraySum(array)
@@ -69,12 +69,40 @@ export default class
 
     /**
      * Calculate the product of array items
-     * @param {array} array 
+     * @param {array} array
      * @returns {number}
      */
     static arrayProduct(array)
     {
         return array.reduce((sum, item) => (sum * item), 1);
+    }
+
+    /**
+     * Get array items that exist in the other arrays
+     * @param {array} array
+     * @param {array} arrays 1 or more arrays to compare with
+     * @returns {array}
+     */
+    static arrayIntersection(array, ...arrays)
+    {
+        // Concatenate the arrays to compare with
+        arrays = arrays.reduce((combined, array) => combined.concat(array), []);
+
+        return array.filter(item => arrays.includes(item));
+    }
+
+    /**
+     * Get items from array 1, that don't exist in the other arrays
+     * @param {array} array
+     * @param {array} arrays 1 or more arrays to compare with
+     * @returns {array}
+     */
+    static arrayDifference(array, ...arrays)
+    {
+        // Concatenate the arrays to compare with
+        arrays = arrays.reduce((combined, array) => combined.concat(array), []);
+
+        return array.filter(item => ! arrays.includes(item));
     }
 
     /**
