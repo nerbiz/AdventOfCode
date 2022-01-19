@@ -1,5 +1,8 @@
 export default class ArrayPrototype
 {
+    /**
+     * Call all register...() functions
+     */
     static extend()
     {
         ArrayPrototype.registerIndexesOf();
@@ -10,6 +13,30 @@ export default class ArrayPrototype
         ArrayPrototype.registerDifference();
         ArrayPrototype.registerCountValues();
         ArrayPrototype.registerChunk();
+        ArrayPrototype.registerClone();
+    }
+
+    /**
+     * Create a clone of an array
+     * @param {boolean} completely Whether to make a shallow copy (false) or not (true)
+     * @returns {array}
+     */
+    static registerClone()
+    {
+        Object.defineProperty(Array.prototype, 'clone', {
+            value: function clone(completely = false) {
+                return (completely === true)
+                    // Clone everything, including array items
+                    ? JSON.parse(JSON.stringify(this))
+                    // Shallow copy: create a new array,
+                    // with the same item references (in case of objects)
+                    : this.map(item => (Array.isArray(item))
+                        ? item.clone(completely)
+                        : item);
+            },
+            enumerable: false,
+            writable: false,
+        });
     }
 
     /**
