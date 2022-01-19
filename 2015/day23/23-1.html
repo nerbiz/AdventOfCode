@@ -26,7 +26,7 @@
                 jmp: offset => { return offset },
                 jie: (register, offset) => { if (registers[register] % 2 === 0) return offset },
                 jio: (register, offset) => { if (registers[register] === 1) return offset },
-            }
+            };
 
             let index = 0;
             while (index < instructions.length) {
