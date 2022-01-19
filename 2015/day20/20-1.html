@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let minimumPresents = await fileReader.parse();
+
+            // Find integers that a number is divisible by
+            // and calculate the sum of those integers
+            const getDivisibleSum = houseNumber => {
+                // A number is always divisible by 1 and itself
+                let sum = 1 + houseNumber;
+
+                // A number cannot be divisible by more than its half
+                for (let i = 2; i <= houseNumber / 2; i++) {
+                    if (houseNumber % i === 0) {
+                        sum += i;
+                    }
+                }
+
+                return {houseNumber, sum};
+            };
+
+            // Presents go in multiples of 10, so divide by 10 first
+            minimumPresents /= 10;
+
+            // No need to start looking from house number 1
+            let presents = Math.floor(minimumPresents * 0.2);
+
+            // Look for house numbers of which all the divisible integers
+            // add up to the required minimum
+            let lowestHouseNumber;
+            while (true) {
+                const {houseNumber, sum} = getDivisibleSum(presents);
+                if (sum >= minimumPresents) {
+                    lowestHouseNumber = houseNumber;
+                    break;
+                }
+
+                presents++;
+            }
+
+            document.querySelector('#answer').innerText = lowestHouseNumber;
+        </script>
+    </body>
+</html>
