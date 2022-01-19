@@ -22,11 +22,12 @@
                 return [capacity, durability, flavor, texture];
             });
 
+            const maxTeaspoons = 100 - ingredients.length + 1;
             const combinations = [];
-            for (let one = 1; one <= 99; one++) {
-                for (let two = 1; two <= 99; two++) {
-                    for (let three = 1; three <= 97; three++) {
-                        for (let four = 1; four <= 97; four++) {
+            for (let one = 1; one <= maxTeaspoons; one++) {
+                for (let two = 1; two <= maxTeaspoons; two++) {
+                    for (let three = 1; three <= maxTeaspoons; three++) {
+                        for (let four = 1; four <= maxTeaspoons; four++) {
                             if (one + two + three + four === 100) {
                                 combinations.push([one, two, three, four]);
                             }
