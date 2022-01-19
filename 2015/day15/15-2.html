@@ -18,8 +18,8 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const ingredients = (await fileReader.parse()).map(ingredient => {
-                const {capacity, durability, flavor, texture} = ingredient;
-                return [capacity, durability, flavor, texture];
+                const {capacity, durability, flavor, texture, calories} = ingredient;
+                return [capacity, durability, flavor, texture, calories];
             });
 
             const maxTeaspoons = 100 - ingredients.length + 1;
@@ -38,6 +38,13 @@
             }
 
             document.querySelector('#answer').innerText = combinations
+                .filter(combination =>
+                    (combination[0] * ingredients[0][4]
+                    + combination[1] * ingredients[1][4]
+                    + combination[2] * ingredients[2][4]
+                    + combination[3] * ingredients[3][4]
+                    === 500)
+                )
                 .map(combination =>
                     Math.max(0, (
                         combination[0] * ingredients[0][0]
