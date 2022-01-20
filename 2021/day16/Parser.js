@@ -1,5 +1,3 @@
-import Utilities from '../Utilities.js';
-
 export default class
 {
     constructor() {
