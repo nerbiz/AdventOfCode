@@ -5,15 +5,15 @@ export default class ArrayPrototype
      */
     static extend()
     {
-        ArrayPrototype.registerIndexesOf();
-        ArrayPrototype.registerUnique();
-        ArrayPrototype.registerSum();
-        ArrayPrototype.registerProduct();
-        ArrayPrototype.registerIntersection();
-        ArrayPrototype.registerDifference();
-        ArrayPrototype.registerCountValues();
-        ArrayPrototype.registerChunk();
-        ArrayPrototype.registerClone();
+        this.registerIndexesOf();
+        this.registerUnique();
+        this.registerSum();
+        this.registerProduct();
+        this.registerIntersection();
+        this.registerDifference();
+        this.registerCountValues();
+        this.registerChunk();
+        this.registerClone();
     }
 
     /**
