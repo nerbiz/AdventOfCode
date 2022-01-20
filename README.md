@@ -1,5 +1,3 @@
-# Advent of Code 2021 solutions
+# Advent of Code solutions
 
-These are my solutions for the [Advent of Code 2021](https://adventofcode.com/2021) competition.
-
-The directories are sorted by day and puzzle number. '1-2' means day 1, puzzle 2.
+These are my solutions for the [Advent of Code](https://adventofcode.com) competition.
