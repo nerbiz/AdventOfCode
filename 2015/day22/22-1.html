@@ -14,140 +14,18 @@
         <script type="module">
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
-            import Utilities from '../../Utilities.js';
+            import GameRound from './GameRound.js';
+            import GameWins from './GameWins.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const {spells, player, boss} = await fileReader.parse();
-            const playerWins = [];
-            const bossWins = [];
-            let lowestMana = Infinity;
-
-            const useSpell = (spell, player, boss) => {
-                boss.hitPoints -= spell.damage;
-                player.hitPoints += spell.heal;
-                player.mana += spell.mana;
-
-                // Prevent other spells from overwriting armor
-                if (spell.armor > 0) {
-                    player.armor = spell.armor;
-                }
-            };
-
-            const preTurn = (player, boss, castedSpells) => {
-                player.armor = 0;
-
-                // Apply any ongoing spells
-                castedSpells.filter(spell => spell.turns > 0)
-                    .forEach(spell => {
-                        useSpell(spell, player, boss)
-                        spell.turns--;
-                    });
-            };
-
-            const checkWin = (player, boss, castedSpells) => {
-                if (boss.hitPoints <= 0) {
-                    playerWins.push(castedSpells);
-                    lowestMana = castedSpells.map(spell => spell.cost)
-                        .reduce((sum, cost) => sum + cost, 0);
-                    return true;
-                } else if (player.hitPoints <= 0) {
-                    bossWins.push(castedSpells);
-                    return true;
-                }
-
-                return false;
-            };
-
-            const playerTurn = (player, boss, castedSpells, newSpell) => {
-                // Apply all ongoing pre-turn effects
-                preTurn(player, boss, castedSpells)
-
-                // Check if player won
-                if (checkWin(player, boss, castedSpells) === true) {
-                    return true;
-                }
-
-                // Cast spell and apply it if it should be immediately
-                castedSpells.push(newSpell);
-                player.mana -= newSpell.cost;
-                if (newSpell.immediate === true) {
-                    useSpell(newSpell, player, boss);
-                    newSpell.turns = Math.max(0, --newSpell.turns);
-                }
-
-                // Check if player won
-                if (checkWin(player, boss, castedSpells) === true) {
-                    return true;
-                }
-            };
-
-            const bossTurn = (player, boss, castedSpells) => {
-                // Apply all ongoing pre-turn effects
-                preTurn(player, boss, castedSpells);
-
-                // Check if player won
-                if (checkWin(player, boss, castedSpells) === true) {
-                    return true;
-                }
-
-                // Reduce player hit points (damage - armor)
-                player.hitPoints -= (boss.damage - player.armor);
-
-                // Check if boss won
-                if (checkWin(player, boss, castedSpells) === true) {
-                    return true;
-                }
-            };
-
-            const doTurns = (player, boss, castedSpells, newSpell) => {
-                // Before casting a new spell, see if the mana spending is already higher than the lowest
-                const manaCost = castedSpells.map(spell => spell.cost)
-                    .reduce((sum, cost) => sum + cost, 0)
-                    + newSpell.cost;
-                if (manaCost >= lowestMana) {
-                    return;
-                }
-
-                // Clone everything, because different game progressions are used
-                player = Utilities.clone(player);
-                boss = Utilities.clone(boss);
-                castedSpells = Utilities.clone(castedSpells);
-                newSpell = Utilities.clone(newSpell);
-
-                // Player turn
-                if (playerTurn(player, boss, castedSpells, newSpell) === true) {
-                    return;
-                }
-
-                // Boss turn
-                if (bossTurn(player, boss, castedSpells) === true) {
-                    return;
-                }
-
-                // Get any ongoing spells (can't cast duplicates)
-                const ongoingSpellNames = castedSpells
-                    .filter(spell => spell.turns > 0)
-                    .map(spell => spell.name);
-
-                const availableSpells = spells.filter(spell => player.mana >= spell.cost
-                    && ! ongoingSpellNames.includes(spell.name));
-
-                // Boss wins if player can't afford any spells
-                if (availableSpells.length === 0) {
-                    bossWins.push(castedSpells);
-                    return;
-                }
-
-                for (const spell of availableSpells) {
-                    doTurns(player, boss, castedSpells, spell);
-                }
-            };
 
             for (const spell of spells) {
-                doTurns(player, boss, [], spell);
+                const gameRound = new GameRound(player, boss, spells, [], spell);
+                gameRound.start();
             }
 
-            document.querySelector('#answer').innerText = lowestMana;
+            document.querySelector('#answer').innerText = GameWins.lowestManaCost;
         </script>
     </body>
 </html>
