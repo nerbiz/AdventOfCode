@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let instructions = await fileReader.parse();
+
+            // Create the keypad
+            const keypad = [
+                [undefined, undefined, 1, undefined, undefined],
+                [undefined, 2, 3, 4, undefined],
+                [5, 6, 7, 8, 9],
+                [undefined, 'A', 'B', 'C', undefined],
+                [undefined, undefined, 'D', undefined, undefined],
+            ];
+            let current = [2, 0];
+
+            // Convert U, D, L, R to [y, x] coordinate increments
+            instructions = instructions.map(instruction => instruction.map(direction => {
+                switch (direction) {
+                    case 'U':
+                        return [-1, 0];
+                    case 'D':
+                        return [1, 0];
+                    case 'L':
+                        return [0, -1];
+                    case 'R':
+                        return [0, 1];
+                }
+            }));
+
+            const code = [];
+            instructions.forEach(instruction => {
+                instruction.forEach(direction => {
+                    const y = current[0] + direction[0];
+                    const x = current[1] + direction[1];
+
+                    // Get the value of the next coordinate
+                    const nextKey = (keypad[y] === undefined)
+                        ? undefined
+                        : (keypad[y][x] === undefined)
+                            ? undefined
+                            : [y, x];
+
+                    // Keep the coordinate, if the new one doesn't exist
+                    current = nextKey || current;
+                });
+
+                code.push(keypad[current[0]][current[1]]);
+            });
+
+            document.querySelector('#answer').innerText = code.join('');
+        </script>
+    </body>
+</html>
