@@ -22,23 +22,17 @@
             const steps = 100;
 
             for (let step = 0; step < steps; step++) {
-                // Change all simultaneously: use the original, apply in a clone
-                const lightsClone = lights.clone();
-
-                lights.forEach2d(light => {
+                lights.tap2d(light => {
                     // Find surrounding lights that are on
                     const surrounding = light.getSurroundingItems()
                         .filter(light => light !== undefined && light.value === true);
 
-                    // Check whether the light should be on and apply the status
-                    const status = (
-                        (light.value === true && [2, 3].includes(surrounding.length))
-                        || (light.value === false && surrounding.length === 3)
-                    );
-                    lightsClone.setItem(light.x, light.y, status);
-                });
-
-                lights = lightsClone;
+                    // Set the value for the next iteration
+                    light.nextValue = (light.value === true && [2, 3].includes(surrounding.length))
+                        || (light.value === false && surrounding.length === 3);
+                })
+                // Update the values
+                .forEach2d(light => light.value = light.nextValue);
             }
 
             document.querySelector('#answer').innerText = lights

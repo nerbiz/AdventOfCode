@@ -31,26 +31,19 @@
             fourCorners.forEach(light => light.value = true);
 
             for (let step = 0; step < steps; step++) {
-                // Change all simultaneously: use the original, apply in a clone
-                const lightsClone = lights.clone();
-
                 // Update all lights, except the 4 corner items
                 lights.filter2d(light => ! fourCorners.includes(light))
-                    .forEach2d(light => {
+                    .tap2d(light => {
                         // Find surrounding lights that are on
                         const surrounding = light.getSurroundingItems()
                             .filter(light => light !== undefined && light.value === true);
 
-                        // Check whether the light should be on and apply the status
-                        const status = (
-                            (light.value === true && [2, 3].includes(surrounding.length))
-                            || (light.value === false && surrounding.length === 3)
-                        );
-                        lightsClone.setItem(light.x, light.y, status);
-                    });
-
-                // Update items 1-by-1, to keep the reference with the 4 corner items
-                lightsClone.forEach2d(light => lights.updateItem(light.x, light.y, light.value));
+                        // Set the value for the next iteration
+                        light.nextValue = (light.value === true && [2, 3].includes(surrounding.length))
+                            || (light.value === false && surrounding.length === 3);
+                    })
+                    // Update the values
+                    .forEach2d(light => light.value = light.nextValue);
             }
 
             document.querySelector('#answer').innerText = lights
