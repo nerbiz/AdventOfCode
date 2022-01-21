@@ -21,15 +21,18 @@
             let elf = 0;
             const houses = [];
 
-            // Every elf brings a multiple of 10 presents,
-            // so first divide by 10 to reduce amount of loops
-            targetAmount /= 10;
-
-            const start = (new Date()).getTime();
+            // Every elf brings a multiple of 11 presents,
+            // so first divide by 11 to reduce amount of loops
+            targetAmount = Math.floor(targetAmount / 11);
 
             // Calculate the amount of presents each house gets
-            while (++elf < targetAmount) {
-                for (let houseNumber = elf; houseNumber < targetAmount; houseNumber += elf) {
+            elfLoop: while (++elf < targetAmount) {
+                for (let i = 1; i <= 50; i++) {
+                    const houseNumber = i * elf;
+                    if (houseNumber > targetAmount) {
+                        continue elfLoop;
+                    }
+
                     houses[houseNumber] = (houses[houseNumber] || 0) + elf;
 
                     if (houses[houseNumber] >= targetAmount) {
@@ -37,8 +40,6 @@
                     }
                 }
             }
-
-            console.log((new Date()).getTime() - start);
 
             document.querySelector('#answer').innerText = lowestHouseNumber;
         </script>
