@@ -18,7 +18,7 @@ export class Array2dItem
         for (const key in customData) {
             // Allow dynamic properties using a callback
             this[key] = (customData[key] instanceof Function)
-                ? customData[key](x, y)
+                ? customData[key](x, y, this.parent)
                 : customData[key];
         }
     }
