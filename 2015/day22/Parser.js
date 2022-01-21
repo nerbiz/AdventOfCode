@@ -10,7 +10,7 @@ export default class
         return {
             spells: linesArray
                 .slice(linesArray.findIndex(line => line.startsWith('Spells')) + 1)
-                .map(line => line.match(/([^\d]+)(\d+) +(\d+) +(\d+) +(\d+) +(\d+) +(\d+) +(\d+)/))
+                .map(line => line.match(/([^\d]+)(\d+) +(\d+) +(\d+) +(\d+) +(\d+) +(\d+)/))
                 .map(matches => ({
                     name: matches[1].trim(),
                     cost: parseInt(matches[2], 10),
@@ -19,7 +19,6 @@ export default class
                     armor: parseInt(matches[5], 10),
                     mana: parseInt(matches[6], 10),
                     turns: parseInt(matches[7], 10),
-                    immediate: (matches[8] === '1'),
                 })),
             player: {
                 hitPoints: parseInt(linesArray.at(0).replace(/[^\d]+/g, ''), 10),

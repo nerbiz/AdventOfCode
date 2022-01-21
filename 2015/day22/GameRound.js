@@ -4,6 +4,13 @@ import GameWins from './GameWins.js';
 export default class GameRound
 {
     /**
+     * Whether 'hard mode' is on
+     * @type {boolean}
+     * @static
+     */
+    static hardMode = false;
+
+    /**
      * This class handles 1 round, containing a player and boss turn
      * @param {object} player
      * @param {object} boss
@@ -47,26 +54,23 @@ export default class GameRound
 
         // Get any ongoing spells (can't cast duplicates)
         const ongoingSpellNames = this.castedSpells
-            .filter(spell => spell.turns > 0)
+            // Including spells that end in the next turn,
+            // because they can be cast again
+            .filter(spell => spell.turns > 1)
             .map(spell => spell.name);
 
         const availableSpells = this.allSpells.filter(spell =>
             this.player.mana >= spell.cost && ! ongoingSpellNames.includes(spell.name));
 
-        // Boss wins if player can't afford any spells
+        // The boss wins if the player can't afford any spells
         if (availableSpells.length === 0) {
             GameWins.bossWon(this.castedSpells);
             return;
         }
 
         for (const spell of availableSpells) {
-            const gameRound = new GameRound(
-                this.player,
-                this.boss,
-                this.allSpells,
-                this.castedSpells,
-                spell
-            );
+            const gameRound = new GameRound(this.player, this.boss,
+                this.allSpells, this.castedSpells, spell);
 
             gameRound.start();
         }
@@ -138,9 +142,13 @@ export default class GameRound
      */
     playerTurn()
     {
-        // Stop if the boss won
-        if (this.checkWin() === true) {
-            return true;
+        if (GameRound.hardMode === true) {
+            this.player.hitPoints--;
+
+            // Stop if the boss won
+            if (this.checkWin() === true) {
+                return true;
+            }
         }
 
         // Apply all ongoing pre-turn effects, stop if the player won
@@ -152,8 +160,8 @@ export default class GameRound
         this.castedSpells.push(this.newSpell);
         this.player.mana -= this.newSpell.cost;
 
-        // Apply the spell if it should be immediately
-        if (this.newSpell.immediate === true) {
+        // Apply the spell immediately, if it's not an effect
+        if (this.newSpell.turns === 0) {
             this.useSpell(this.newSpell);
         }
 

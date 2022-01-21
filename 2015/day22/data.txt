@@ -3,9 +3,9 @@ Player Mana: 500
 Boss Hit Points: 55
 Boss Damage: 8
 
-Spells          Cost    Damage  Heal    Armor   Mana   Turns    Immediate
-Magic Missile   53      4       0       0       0       0       1
-Drain           73      2       2       0       0       0       1
-Shield          113     0       0       7       0       6       1
-Poison          173     3       0       0       0       6       0
-Recharge        229     0       0       0       101     5       0
+Spells          Cost    Damage  Heal    Armor   Mana   Turns
+Magic Missile   53      4       0       0       0      0
+Drain           73      2       2       0       0      0
+Shield          113     0       0       7       0      6
+Poison          173     3       0       0       0      6
+Recharge        229     0       0       0       101    5
