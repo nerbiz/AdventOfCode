@@ -172,9 +172,9 @@ export default class ArrayPrototype
             value: function countValues() {
                 const occurrences = {};
 
-                for (let i = 0; i < array.length; i++) {
-                    occurrences[array[i]] = occurrences[array[i]] || 0;
-                    occurrences[array[i]]++;
+                for (let i = 0; i < this.length; i++) {
+                    occurrences[this[i]] = occurrences[this[i]] || 0;
+                    occurrences[this[i]]++;
                 }
 
                 return occurrences;
