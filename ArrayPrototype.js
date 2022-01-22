@@ -41,7 +41,6 @@ export default class ArrayPrototype
 
     /**
      * Like indexOf(), but finds all the indexes
-     * @param {array} array The input array/string
      * @param {any} searchElement The item to search for
      * @param {number} fromIndex The index to start the search at
      * @returns {array}
@@ -67,7 +66,6 @@ export default class ArrayPrototype
 
     /**
      * Remove duplicates from an array
-     * @param {array} array The input array
      * @returns {array}
      */
     static registerUnique()
@@ -91,7 +89,6 @@ export default class ArrayPrototype
 
     /**
      * Calculate the sum of array items
-     * @param {array} array
      * @returns {number}
      */
     static registerSum()
@@ -107,7 +104,6 @@ export default class ArrayPrototype
 
     /**
      * Calculate the product of array items
-     * @param {array} array
      * @returns {number}
      */
     static registerProduct()
@@ -123,7 +119,6 @@ export default class ArrayPrototype
 
     /**
      * Get array items that exist in the other arrays
-     * @param {array} array
      * @param {array} arrays 1 or more arrays to compare with
      * @returns {array}
      */
@@ -143,7 +138,6 @@ export default class ArrayPrototype
 
     /**
      * Get items from array 1, that don't exist in the other arrays
-     * @param {array} array
      * @param {array} arrays 1 or more arrays to compare with
      * @returns {array}
      */
@@ -163,13 +157,13 @@ export default class ArrayPrototype
 
     /**
      * Counts the occurrences of values in an array
-     * @param {array} array The array to count values of
+     * @param {boolean} asArray Whether to return an array or object
      * @returns {object}
      */
     static registerCountValues()
     {
         Object.defineProperty(Array.prototype, 'countValues', {
-            value: function countValues() {
+            value: function countValues(asArray = false) {
                 const occurrences = {};
 
                 for (let i = 0; i < this.length; i++) {
@@ -177,7 +171,9 @@ export default class ArrayPrototype
                     occurrences[this[i]]++;
                 }
 
-                return occurrences;
+                return (asArray === true)
+                    ? Object.entries(occurrences)
+                    : occurrences;
             },
             enumerable: false,
             writable: false,
@@ -186,7 +182,6 @@ export default class ArrayPrototype
 
     /**
      * Splits an array into chunks
-     * @param {array} array
      * @param {number} chunkSize
      * @returns {array}
      */
