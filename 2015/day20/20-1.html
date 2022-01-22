@@ -25,8 +25,6 @@
             // so first divide by 10 to reduce amount of loops
             targetAmount /= 10;
 
-            const start = (new Date()).getTime();
-
             // Calculate the amount of presents each house gets
             while (++elf < targetAmount) {
                 for (let houseNumber = elf; houseNumber < targetAmount; houseNumber += elf) {
@@ -37,8 +35,6 @@
                     }
                 }
             }
-
-            console.log((new Date()).getTime() - start);
 
             document.querySelector('#answer').innerText = lowestHouseNumber;
         </script>
