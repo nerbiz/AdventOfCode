@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const ipAddresses = await fileReader.parse();
+            const abbaRegExp = /([a-z])(?!\1)([a-z])\2\1/g;
+
+            document.querySelector('#answer').innerText = ipAddresses
+                .filter(ipAddress => {
+                    // Get parts that match the pattern
+                    const matches = ipAddress.filter(part => part.match(abbaRegExp))
+
+                    // Matching hypernet sequences are not allowed
+                    return (
+                        matches.length > 0
+                        && matches.every(part => ! part.startsWith('['))
+                    );
+                })
+                .length;
+        </script>
+    </body>
+</html>
