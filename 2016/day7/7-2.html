@@ -19,16 +19,22 @@
             const ipAddresses = await fileReader.parse();
 
             // Any first a-z character,
+            // which is not preceded by an opening square bracket,
             // followed by a different second character,
-            // followed by the second and first character
-            const abbaRegExp = /([a-z])(?!\1)([a-z])\2\1/g;
+            // followed by the first character,
+            // followed by the inverse (second-first-second) between square brackets
+            const abaBabRegExp = /(?<!\[.*)([a-z])(?!\1)([a-z])\1.*\[.*(\2\1\2)/;
 
+            // 405 is too high
             document.querySelector('#answer').innerText = ipAddresses
-                // Keep IP address parts that match the pattern
-                .map(parts => parts.filter(part => part.match(abbaRegExp)))
-                // At least 1 part needed, except when it's a hypernet sequence
-                .filter(parts => parts.length > 0
-                    && parts.every(part => ! part.startsWith('[')))
+                // Place hypernet sequences at the end
+                .map(parts => {
+                    parts.sort((a, b) => a.startsWith('[') ? 1 : -1);
+                    return parts;
+                })
+                // Convert the parts to 1 string
+                .map(parts => parts.join(''))
+                .filter(ipAddress => ipAddress.match(abaBabRegExp))
                 .length;
         </script>
     </body>
