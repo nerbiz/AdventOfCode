@@ -14,6 +14,7 @@ export default class ArrayPrototype
         this.registerCountValues();
         this.registerChunk();
         this.registerClone();
+        this.registerTap();
     }
 
     /**
@@ -196,6 +197,23 @@ export default class ArrayPrototype
                 }
 
                 return chunks;
+            },
+            enumerable: false,
+            writable: false,
+        });
+    }
+
+    /**
+     * Apply a callback to every item and return the array itself unaltered
+     * @param {function} callback
+     * @returns {array}
+     */
+    static registerTap()
+    {
+        Object.defineProperty(Array.prototype, 'tap', {
+            value: function tap(callback) {
+                this.forEach(callback);
+                return this;
             },
             enumerable: false,
             writable: false,
