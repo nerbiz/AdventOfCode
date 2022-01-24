@@ -4,12 +4,15 @@
         <meta charset="UTF-8">
         <style>
             #answer {
-                font-size: 25px;
+                font-size: 20px;
+                width: 630px;
+                height: 150px;
+                line-height: 1;
             }
         </style>
     </head>
     <body>
-        <p id="answer"></p>
+        <textarea id="answer"></textarea>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -49,11 +52,8 @@
                 }
             });
 
-            console.log(screen.toString(pixel => pixel.value ? '█' : ' '));
-
-            document.querySelector('#answer').innerText = screen
-                .filter2d(pixel => (pixel.value === true), true)
-                .length;
+            document.querySelector('#answer').value = screen
+                .toString(pixel => pixel.value ? '█' : ' ');
         </script>
     </body>
 </html>
