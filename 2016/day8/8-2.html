@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
+            import Array2d from '../../Array2d.js';
+
+            ArrayPrototype.extend();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {screen, instructions} = await fileReader.parse();
+            screen = Array2d.withData({value: false}, screen.rows, screen.columns);
+
+            instructions.forEach(instruction => {
+                if (instruction.type === 'rect') {
+                    screen.getSlice(0, 0, instruction.x, instruction.y)
+                        .forEach2d(pixel => pixel.value = true);
+                } else if (instruction.type === 'rotate') {
+                    if (instruction.part === 'row') {
+                        const row = screen.at(instruction.index);
+
+                        row.tap(pixel => {
+                            const newX = (pixel.x + instruction.amount) % row.length;
+                            screen.getItem(newX, pixel.y).newValue = pixel.value;
+                        })
+                        // Apply the new values
+                        .forEach(pixel => pixel.value = pixel.newValue);
+                    } else {
+                        const column = screen.getColumn(instruction.index);
+
+                        column.tap(pixel => {
+                            const newY = (pixel.y + instruction.amount) % column.length;
+                            screen.getItem(pixel.x, newY).newValue = pixel.value;
+                        })
+                        // Apply the new values
+                        .forEach(pixel => pixel.value = pixel.newValue);
+                    }
+                }
+            });
+
+            console.log(screen.toString(pixel => pixel.value ? '█' : ' '));
+
+            document.querySelector('#answer').innerText = screen
+                .filter2d(pixel => (pixel.value === true), true)
+                .length;
+        </script>
+    </body>
+</html>
