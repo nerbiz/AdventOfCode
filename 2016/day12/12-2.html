@@ -17,7 +17,7 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const instructions = await fileReader.parse();
-            const registers = {a: 0, b: 0, c: 0, d: 0};
+            const registers = {a: 0, b: 0, c: 1, d: 0};
 
             const getValue = value => Number.isInteger(value)
                 ? value
