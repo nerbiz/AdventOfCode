@@ -43,18 +43,18 @@
             startNode.inPath = true;
 
             const findPath = () => {
-                const openList = [startNode];
-                const closedList = [];
+                const queue = [startNode];
+                const visited = [];
 
-                while (openList.length > 0) {
-                    const currentNode = openList.sort((a, b) => a.F - b.F).shift();
-                    closedList.push(currentNode);
+                while (queue.length > 0) {
+                    const currentNode = queue.sort((a, b) => a.F - b.F).shift();
+                    visited.push(currentNode);
 
                     // Target reached, construct the path using 'previous' property
                     if (currentNode === endNode) {
                         const path = [];
-                        let currentNode = closedList.at(-1);
-                        while (currentNode !== startNode) {
+                        let currentNode = visited.at(-1);
+                        while (currentNode.previous !== undefined) {
                             currentNode.inPath = true;
                             path.push(currentNode);
                             currentNode = currentNode.previous;
@@ -67,24 +67,24 @@
                         .filter(neighbor => neighbor !== undefined
                             // The node must not be an obstacle
                             && neighbor.value === true
-                            // The node must not be in the closed list
-                            && ! closedList.includes(neighbor))
+                            // The node must not be visited yet
+                            && ! visited.includes(neighbor))
                         .forEach(neighbor => {
                             // Calculate the F value of the neighbor
                             const G = (currentNode.G + 1);
                             const F = G + getHeuristic(neighbor, endNode);
 
                             // Update the neighbor's values if the F is lower
-                            if (openList.includes(neighbor) && F < neighbor.F) {
+                            if (queue.includes(neighbor) && F < neighbor.F) {
                                 neighbor.G = G;
                                 neighbor.F = F;
                                 neighbor.previous = currentNode;
                             } else {
-                                // Otherwise add the neighbor to the open list
+                                // Otherwise add the neighbor to the queue
                                 neighbor.G = G;
                                 neighbor.F = F;
                                 neighbor.previous = currentNode;
-                                openList.push(neighbor);
+                                queue.push(neighbor);
                             }
                         });
                 }
