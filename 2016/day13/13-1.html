@@ -42,55 +42,51 @@
             startNode.F = startNode.G + getHeuristic(startNode, endNode);
             startNode.inPath = true;
 
-            const findPath = () => {
-                const queue = [startNode];
-                const visited = [];
+            const queue = [startNode];
+            const visited = [];
+            const path = [];
 
-                while (queue.length > 0) {
-                    const currentNode = queue.sort((a, b) => a.F - b.F).shift();
-                    visited.push(currentNode);
+            while (queue.length > 0) {
+                const currentNode = queue.sort((a, b) => a.F - b.F).shift();
+                visited.push(currentNode);
 
-                    // Target reached, construct the path using 'previous' property
-                    if (currentNode === endNode) {
-                        const path = [];
-                        let currentNode = visited.at(-1);
-                        while (currentNode.previous !== undefined) {
-                            currentNode.inPath = true;
-                            path.push(currentNode);
-                            currentNode = currentNode.previous;
-                        }
-
-                        return path.reverse();
+                // Target reached, construct the path using 'previous' property
+                if (currentNode === endNode) {
+                    let currentNode = visited.at(-1);
+                    while (currentNode.previous !== undefined) {
+                        currentNode.inPath = true;
+                        path.push(currentNode);
+                        currentNode = currentNode.previous;
                     }
 
-                    currentNode.getAdjacentItems()
-                        .filter(neighbor => neighbor !== undefined
-                            // The node must not be an obstacle
-                            && neighbor.value === true
-                            // The node must not be visited yet
-                            && ! visited.includes(neighbor))
-                        .forEach(neighbor => {
-                            // Calculate the F value of the neighbor
-                            const G = (currentNode.G + 1);
-                            const F = G + getHeuristic(neighbor, endNode);
-
-                            // Update the neighbor's values if the F is lower
-                            if (queue.includes(neighbor) && F < neighbor.F) {
-                                neighbor.G = G;
-                                neighbor.F = F;
-                                neighbor.previous = currentNode;
-                            } else {
-                                // Otherwise add the neighbor to the queue
-                                neighbor.G = G;
-                                neighbor.F = F;
-                                neighbor.previous = currentNode;
-                                queue.push(neighbor);
-                            }
-                        });
+                    break;
                 }
-            }
 
-            const path = findPath();
+                currentNode.getAdjacentItems()
+                    .filter(neighbor => neighbor !== undefined
+                        // The node must not be an obstacle
+                        && neighbor.value === true
+                        // The node must not be visited yet
+                        && ! visited.includes(neighbor))
+                    .forEach(neighbor => {
+                        // Calculate the F value of the neighbor
+                        const G = (currentNode.G + 1);
+                        const F = G + getHeuristic(neighbor, endNode);
+
+                        // Update the neighbor's values if the F is lower
+                        if (queue.includes(neighbor) && F < neighbor.F) {
+                            neighbor.G = G;
+                            neighbor.F = F;
+                            neighbor.previous = currentNode;
+                        } else {
+                            // Otherwise add the neighbor to the queue
+                            neighbor.G = G;
+                            neighbor.F = F;
+                            neighbor.previous = currentNode;
+                            queue.push(neighbor);
+                        }
+                    });
+            }
 
             // Visualize the path
             console.log(maze.toString(node => {
