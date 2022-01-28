@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {number, target} = await fileReader.parse();
+            const valueFormula = (x, y) => {
+                const decimal = (x * x) + (3 * x) + (2 * x * y) + y + (y * y) + number;
+                const binary = decimal.toString(2);
+                // True = open space, false = wall
+                return (binary.split('').filter(bit => bit === '1').length % 2 === 0);
+            };
+            const maze = Array2d.withData({
+                value: (x, y) => valueFormula(x, y),
+                G: undefined,
+                F: undefined,
+                previous: undefined,
+            }, target[1] * 2, target[0] * 2);
+
+            const getHeuristic = (startNode, endNode) => {
+                return Math.abs(endNode.x - startNode.x) + Math.abs(endNode.y - endNode.y);
+            };
+
+            // Use the A* algorithm
+            const startNode = maze.getItem(1, 1);
+            const endNode = maze.getItem(target[0], target[1]);
+            startNode.G = 0;
+            startNode.F = startNode.G + getHeuristic(startNode, endNode);
+            startNode.inPath = true;
+
+            const findPath = () => {
+                const openList = [startNode];
+                const closedList = [];
+
+                while (openList.length > 0) {
+                    const currentNode = openList.sort((a, b) => a.F - b.F).shift();
+                    closedList.push(currentNode);
+
+                    // Target reached, construct the path using 'previous' property
+                    if (currentNode === endNode) {
+                        const path = [];
+                        let currentNode = closedList.at(-1);
+                        while (currentNode !== startNode) {
+                            currentNode.inPath = true;
+                            path.push(currentNode);
+                            currentNode = currentNode.previous;
+                        }
+
+                        return path.reverse();
+                    }
+
+                    currentNode.getAdjacentItems()
+                        .filter(neighbor => neighbor !== undefined
+                            // The node must not be an obstacle
+                            && neighbor.value === true
+                            // The node must not be in the closed list
+                            && ! closedList.includes(neighbor))
+                        .forEach(neighbor => {
+                            // Calculate the F value of the neighbor
+                            const G = (currentNode.G + 1);
+                            const F = G + getHeuristic(neighbor, endNode);
+
+                            // Update the neighbor's values if the F is lower
+                            if (openList.includes(neighbor) && F < neighbor.F) {
+                                neighbor.G = G;
+                                neighbor.F = F;
+                                neighbor.previous = currentNode;
+                            } else {
+                                // Otherwise add the neighbor to the open list
+                                neighbor.G = G;
+                                neighbor.F = F;
+                                neighbor.previous = currentNode;
+                                openList.push(neighbor);
+                            }
+                        });
+                }
+            }
+
+            const path = findPath();
+
+            // Visualize the path
+            console.log(maze.toString(node => {
+                if (node.inPath === true) {
+                    return '█';
+                }
+
+                return node.value ? '.' : '#';
+            }));
+
+            document.querySelector('#answer').innerText = path.length;
+        </script>
+    </body>
+</html>

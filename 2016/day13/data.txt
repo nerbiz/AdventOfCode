@@ -1,0 +1,2 @@
+Favorite number: 1358
+Target: 31,39

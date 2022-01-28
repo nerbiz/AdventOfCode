@@ -1,0 +1,2 @@
+Favorite number: 10
+Target: 7,4
