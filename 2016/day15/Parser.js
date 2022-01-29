@@ -9,7 +9,8 @@ export default class
     {
         const discRegExp = /\d+.+?(\d+).+?\d+.+?(\d+)/;
 
-        return linesArray.map(line => line.match(discRegExp))
+        return linesArray
+            .map(line => line.match(discRegExp))
             .map(matches => ({
                 positions: matches[1] - 0,
                 start: matches[2] - 0,
