@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {diskLength, initialState} = await fileReader.parse();
+
+            // Generate a string long enough to fill the disk
+            let generated = initialState;
+            while (generated.length < diskLength) {
+                const a = generated;
+                // B is the reverse of A, with 0/1 characters swapped
+                const b = a.split('')
+                    .reverse()
+                    .map(character => Number(! Number(character)))
+                    .join('');
+                generated = a + '0' + b.toString(2);
+            }
+
+            // Cut off at the length of the disk
+            generated = generated.substring(0, diskLength);
+
+            // Create the checksum for the generated string, with an odd length
+            let checksum = generated;
+            do {
+                checksum = checksum
+                    // Get all character pairs
+                    .match(/../g)
+                    // Equal characters become 1, otherwise 0
+                    .map(pair => Number(pair[0] === pair[1]))
+                    .join('');
+            } while (checksum.length % 2 === 0);
+
+            // 00101101011111101 is too high
+            document.querySelector('#answer').innerText = checksum;
+        </script>
+    </body>
+</html>

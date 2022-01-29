@@ -1,0 +1,2 @@
+Disk length: 272
+Initial state: 01111010110010011

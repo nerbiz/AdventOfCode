@@ -1,0 +1,2 @@
+Disk length: 20
+Initial state: 10000
