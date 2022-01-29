@@ -18,6 +18,12 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const discs = await fileReader.parse();
 
+            // Add the new disc
+            discs.push({
+                positions: 11,
+                start: 0,
+            });
+
             let startSeconds = -1;
             while (true) {
                 startSeconds++;

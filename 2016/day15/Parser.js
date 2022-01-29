@@ -7,13 +7,12 @@ export default class
      */
     parse(linesArray)
     {
-        const discRegExp = /(\d+).+?(\d+).+?\d+.+?(\d+)/;
+        const discRegExp = /\d+.+?(\d+).+?\d+.+?(\d+)/;
 
         return linesArray.map(line => line.match(discRegExp))
             .map(matches => ({
-                number: matches[1] - 0,
-                positions: matches[2] - 0,
-                start: matches[3] - 0,
+                positions: matches[1] - 0,
+                start: matches[2] - 0,
             }));
     }
 }
