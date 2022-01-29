@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const discs = await fileReader.parse();
+
+            let startSeconds = -1;
+            while (true) {
+                startSeconds++;
+                let result = 0;
+
+                for (let i = 0; i < discs.length; i++) {
+                    const disc = discs[i];
+                    result = Math.max(
+                        result,
+                        (disc.start + startSeconds + i + 1) % disc.positions
+                    );
+                }
+
+                if (result === 0) {
+                    break;
+                }
+            }
+
+            document.querySelector('#answer').innerText = startSeconds;
+        </script>
+    </body>
+</html>
