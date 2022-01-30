@@ -12,7 +12,9 @@ export class Array2dItem
     {
         this.x = x;
         this.y = y;
-        this.value = value;
+        this.value = (value instanceof Function)
+            ? value(x, y, this.parent)
+            : value;
         this.parent = parent;
 
         for (const key in customData) {
