@@ -27,18 +27,18 @@
             // or a character, followed by 2 of the same different character
             const trapRegExp = /^(.)\1(?!\1).|(.)(?!\2)(.)\3$/;
 
-            console.log(tiles);
-
+            // Add more rows
             tiles.expandVertically(rows - 1);
+
+            // Set the values of all added tiles
             tiles.slice(1).forEach2d(tile => {
                 const {upLeft, up, upRight} = tile.getSurroundingItems(true);
+
                 tile.value = Number([upLeft, up, upRight]
                     .map(tile => (tile === undefined) ? 0 : tile.value)
                     .join('')
                     .match(trapRegExp) !== null);
             });
-
-            console.log(tiles.toString(tile => tile.value ? '^' : '.'));
 
             document.querySelector('#answer').innerText = tiles
                 .filter2d(tile => tile.value === 0)
