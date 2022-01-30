@@ -19,10 +19,7 @@
             const elfsAmount = await fileReader.parse();
             let elfs = new Array(elfsAmount)
                 .fill(undefined)
-                .map((elf, index) => ({
-                    number: index + 1,
-                    presents: 1,
-                }));
+                .map((elf, index) => index + 1);
 
             while (true) {
                 // Whether there is an odd number of elfs left
@@ -41,7 +38,7 @@
                 }
             }
 
-            document.querySelector('#answer').innerText = elfs.at(0).number;
+            document.querySelector('#answer').innerText = elfs.at(0);
         </script>
     </body>
 </html>
