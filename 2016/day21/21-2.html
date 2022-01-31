@@ -17,7 +17,26 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             let {password, operations} = await fileReader.parse();
+            password = 'fbgdceah';
             password = password.split('');
+
+            // Reverse all operations
+            // Except 'swap letter', because it's the same effect in reverse
+            // Except 'reverse', because it's the same effect in reverse
+            // Except 'rotate based on letter', because it needs other logic in the function
+            operations.forEach(operation => {
+                if (operation[0] === 'swap' && operation[1] === 'position') {
+                    const arg1 = operation[2];
+                    operation[2] = operation[3];
+                    operation[3] = arg1;
+                } else if (operation[0] === 'rotate' && ['left', 'right'].includes(operation[1])) {
+                    operation[1] = (operation[1] === 'left') ? 'right' : 'left';
+                } else if (operation[0] === 'move') {
+                    const arg1 = operation[1];
+                    operation[1] = operation[2];
+                    operation[2] = arg1;
+                }
+            });
 
             const functions = {
                 swap: (variant, arg1, arg2) => {
@@ -47,9 +66,17 @@
                         password = password.slice(password.length - arg1)
                             .concat(password.slice(0, (password.length - arg1)));
                     } else if (variant === 'based') {
-                        let amount = password.indexOf(arg1);
-                        amount += 1 + ((amount >= 4) ? 1 : 0);
-                        functions.rotate('right', amount);
+                        let index = password.indexOf(arg1);
+
+                        if (index % 2 === 1) {
+                            functions.rotate('left', 1 + ((index - 1) / 2));
+                        } else {
+                            if (index === 0) {
+                                index = 8;
+                            }
+
+                            functions.rotate('left', ((8 + (index - 2)) / 2) + 2);
+                        }
                     }
                 },
                 reverse: (startIndex, endIndex) => {
@@ -62,10 +89,11 @@
                 },
             };
 
-            // Perform operations on the password
-            operations.forEach(operation => {
-                functions[operation[0]](...operation.slice(1));
-            });
+            // Perform operations on the password, in reversed order
+            operations.reverse()
+                .forEach(operation => {
+                    functions[operation[0]](...operation.slice(1))
+                });
 
             document.querySelector('#answer').innerText = password.join('');
         </script>
