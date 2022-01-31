@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {maxNumber, ranges} = await fileReader.parse();
+            ranges.sort((a, b) => a[0] - b[0]);
+
+            // Join overlapping ranges, until no removing is possible anymore
+            let removedAmount;
+            do {
+                removedAmount = 0;
+
+                for (let i = ranges.length - 1; i > 0; i--) {
+                    const currentRange = ranges[i];
+                    const previousRange = ranges[i - 1];
+
+                    // See if the range start is between the previous range
+                    if (currentRange[0] < previousRange[1]) {
+                        if (currentRange[1] > previousRange[1]) {
+                            ranges[i - 1][1] = currentRange[1];
+                        }
+
+                        // Remove the redundant range
+                        ranges.splice(i, 1);
+                        removedAmount++;
+                    }
+                }
+            } while (removedAmount > 0);
+
+            // Join adjacent ranges
+            for (let i = ranges.length - 1; i > 0; i--) {
+                const currentRange = ranges[i];
+                const previousRange = ranges[i - 1];
+
+                if (currentRange[0] === previousRange[1] + 1) {
+                    ranges[i - 1][1] = currentRange[1];
+
+                    // Remove the redundant range
+                    ranges.splice(i, 1);
+                }
+            }
+
+            // If the lowest blocked number is higher than 0, the lowest is 0,
+            // Otherwise it's the first number after the higher boundary of the first range
+            document.querySelector('#answer').innerText = (ranges[0][0] > 0)
+                ? 0
+                : ranges[0][1] + 1;
+        </script>
+    </body>
+</html>
