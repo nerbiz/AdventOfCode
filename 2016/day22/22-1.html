@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const nodes = await fileReader.parse();
+            const viablePairs = [];
+
+            for (const node of nodes) {
+                // Skip empty nodes
+                if (node.used === 0) {
+                    continue;
+                }
+
+                // Find nodes in which the current's data fits
+                const otherNodes = nodes.filter(otherNode => otherNode !== node);
+                for (const otherNode of otherNodes) {
+                    if (node.used <= otherNode.available) {
+                        viablePairs.push([node, otherNode]);
+                    }
+                }
+            }
+
+            document.querySelector('#answer').innerText = viablePairs.length;
+        </script>
+    </body>
+</html>
