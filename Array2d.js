@@ -45,6 +45,25 @@ export class Array2dItem
     }
 
     /**
+     * @returns {Array2dItem}
+     */
+    clone()
+    {
+        const itemData = JSON.parse(JSON.stringify(this));
+
+        // Recreate the custom data object
+        const customData = {};
+        for (const key in itemData) {
+            // Skip default properties
+            if (! ['x', 'y', 'value', 'parent'].includes(key)) {
+                customData[key] = itemData[key];
+            }
+        }
+
+        return new Array2dItem(itemData.x, itemData.y, itemData.value, customData, this.parent);
+    }
+
+    /**
      * @see Array2d.getSteps
      */
     getSteps(toX, toY, separately = false)
@@ -335,27 +354,10 @@ export default class Array2d extends Array
      */
     clone()
     {
-        const clone = JSON.parse(JSON.stringify(this))
-            .map(row => row.map(item => {
-                // Recreate the custom data object
-                const customData = {};
-                for (const key in item) {
-                    // Skip default properties
-                    if (['x', 'y', 'value', 'parent'].includes(key)) {
-                        continue;
-                    }
+        const clone = this.map2d(item => item.clone());
+        clone.forEach2d(item => item.setParent(clone));
 
-                    customData[key] = item[key];
-                }
-
-                return new Array2dItem(item.x, item.y, item.value, customData);
-            }));
-
-        // Set the new parent in the new items
-        const newArray2d = new Array2d(clone);
-        newArray2d.forEach2d(item => item.parent = newArray2d);
-
-        return newArray2d;
+        return clone;
     }
 
     /**
