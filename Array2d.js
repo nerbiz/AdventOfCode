@@ -735,6 +735,26 @@ export default class Array2d extends Array
     }
 
     /**
+     * Find the first item that matches the callback logic
+     * @param {function} callback
+     * @returns {Array2dItem}
+     */
+    find2d(callback) {
+        let found;
+
+        findLoop: for (let y = 0; y < this.length; y++) {
+            for (let x = 0; x < this[y].length; x++) {
+                if (callback(this[y][x], x, y, this) === true) {
+                    found = this[y][x];
+                    break findLoop;
+                }
+            }
+        }
+
+        return found;
+    }
+
+    /**
      * Convert the array to string
      * @param {function} callback A callback to apply to every item
      * @returns {array}
