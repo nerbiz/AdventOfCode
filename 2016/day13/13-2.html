@@ -62,30 +62,35 @@
                     break;
                 }
 
-                currentNode.getAdjacentItems()
-                    .filter(neighbor => neighbor !== undefined
+                for (const neighbor of currentNode.getAdjacentItems()) {
+                    if (neighbor === undefined
                         // The node must not be an obstacle
-                        && neighbor.value === true
+                        || neighbor.value === false
                         // The node must not be visited yet
-                        && ! visited.includes(neighbor))
-                    .forEach(neighbor => {
-                        // Calculate the F value of the neighbor
-                        const G = (currentNode.G + 1);
-                        const F = G + getHeuristic(neighbor, endNode);
+                        || visited.includes(neighbor)
+                    ) {
+                        continue;
+                    }
 
-                        // Update the neighbor's values if the F is lower
-                        if (queue.includes(neighbor) && F < neighbor.F) {
-                            neighbor.G = G;
-                            neighbor.F = F;
-                            neighbor.previous = currentNode;
-                        } else {
-                            // Otherwise add the neighbor to the queue
-                            neighbor.G = G;
-                            neighbor.F = F;
-                            neighbor.previous = currentNode;
-                            queue.push(neighbor);
-                        }
-                    });
+                    // Calculate the F value of the neighbor
+                    const G = (currentNode.G + 1);
+                    const F = G + Math.abs(endNode.x - neighbor.x)
+                        + Math.abs(endNode.y - neighbor.y);
+
+                    // Update the neighbor's values if it's not in the queue,
+                    // or if it is in the queue, but the F is lower
+                    const inQueue = queue.includes(neighbor);
+                    if ((inQueue && F < neighbor.F) || ! inQueue) {
+                        neighbor.G = G;
+                        neighbor.F = F;
+                        neighbor.previous = currentNode;
+                    }
+
+                    // Add the neighbor to the queue
+                    if (! inQueue) {
+                        queue.push(neighbor);
+                    }
+                }
             }
 
             // Visualize the maze
