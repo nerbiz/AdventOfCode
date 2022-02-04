@@ -18,6 +18,12 @@
             const fileReader = new FileReader('./datatest.txt', new Parser());
             const data = await fileReader.parse();
 
+            const startTime = new Date().getTime();
+
+            console.log(data);
+
+            console.log('Done in ms:', new Date().getTime() - startTime);
+
             // document.querySelector('#answer').innerText =
         </script>
     </body>
