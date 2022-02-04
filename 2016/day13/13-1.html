@@ -80,7 +80,7 @@
                     // Update the neighbor's values if it's not in the queue,
                     // or if it is in the queue, but the F is lower
                     const inQueue = queue.includes(neighbor);
-                    if ((inQueue && F < neighbor.F) || ! inQueue) {
+                    if (! inQueue || (inQueue && F < neighbor.F)) {
                         neighbor.G = G;
                         neighbor.F = F;
                         neighbor.previous = currentNode;
