@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script src="./blueimp-JavaScript-MD5/md5.min.js"></script>
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const salt = await fileReader.parse();
+            const threeRegExp = /(.)\1{2}/;
+            const hashes = [];
+
+            const makeHash = input => {
+                let hash = md5(input);
+                for (let i = 0; i < 2016; i++) {
+                    hash = md5(hash);
+                }
+
+                return hash;
+            }
+
+            let index = 0;
+            let keysFound = 0;
+            findKeys: while (true) {
+                hashes[index] = hashes[index] || makeHash(salt + index);
+                const match = hashes[index].match(threeRegExp);
+
+                // The hash has three consecutive same characters
+                if (match !== null) {
+                    for (let i = index + 1; i <= index + 1000; i++) {
+                        hashes[i] = hashes[i] || makeHash(salt + i);
+
+                        // See if the hash contains five of the same characters, consecutively
+                        const fiveRegExp = new RegExp(match[1] + '{5}');
+                        if (hashes[i].match(fiveRegExp)) {
+                            // Enough keys found
+                            if (++keysFound === 64) {
+                                break findKeys;
+                            }
+                        }
+                    }
+                }
+
+                index++;
+            }
+
+            document.querySelector('#answer').innerText = index;
+        </script>
+    </body>
+</html>
