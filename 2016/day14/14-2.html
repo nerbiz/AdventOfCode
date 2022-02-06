@@ -44,8 +44,10 @@
                         // See if the hash contains five of the same characters, consecutively
                         const fiveRegExp = new RegExp(match[1] + '{5}');
                         if (hashes[i].match(fiveRegExp)) {
+                            console.log('Found', ++keysFound);
+
                             // Enough keys found
-                            if (++keysFound === 64) {
+                            if (keysFound === 64) {
                                 break findKeys;
                             }
                         }
