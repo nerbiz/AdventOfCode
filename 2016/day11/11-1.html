@@ -19,7 +19,6 @@
             const floors = await fileReader.parse();
             const itemsAmount = floors.flat().length;
             let fewestSteps = Infinity;
-            let fewestReport;
 
             const startTime = new Date().getTime();
 
@@ -40,7 +39,7 @@
 
             const floorStateString = (index, floor) => {
                 return index + ':' + floor
-                    .map(item => item.element + '-' + item.type.at(0).toUpperCase())
+                    .map(item => item.element + '-' + item.type)
                     .sort()
                     .join(',');
             };
@@ -60,27 +59,37 @@
                     return;
                 }
 
-                // If there is at least one generator on the same floor as a microchip,
-                // one of them has to be correspond to the microchip
-                for (const floor of floors) {
-                    for (const microchip of floor.filter(item => item.type === 'microchip')) {
-                        const generators = floor.filter(item => item.type === 'generator');
-                        const corresponding = generators
-                            .find(generator => generator.element === microchip.element);
-
-                        // The chip is fried
-                        if (generators.length > 0 && corresponding === undefined) {
-                            // console.log('Fried!', microchip);
-                            return;
-                        }
-                    }
-                }
-
                 // See if all the items are at the top floor
                 if (floors[3].length === itemsAmount) {
                     console.log('Target reached in', steps, 'steps');
                     fewestSteps = steps;
                     return;
+                }
+
+                // If there is at least one generator on the same floor as a microchip,
+                // one of them has to be correspond to the microchip
+                for (const floor of floors) {
+                    // No need to check an empty floor
+                    if (floor.length === 0) {
+                        continue;
+                    }
+
+                    // It's safe if there are no generators
+                    const generators = floor.filter(item => item.type === 'generator');
+                    if (generators.length === 0) {
+                        continue;
+                    }
+
+                    for (const microchip of floor.filter(item => item.type === 'microchip')) {
+                        const corresponding = generators
+                            .find(generator => generator.element === microchip.element);
+
+                        // The chip is fried
+                        if (corresponding === undefined) {
+                            // console.log('Fried!', microchip);
+                            return;
+                        }
+                    }
                 }
 
                 // Find all combinations for moving items
@@ -107,23 +116,16 @@
                     for (const combination of moveCombinations) {
                         // Add the item(s) to the next floor, remove from the current
                         const floorsCopy = floors.map(floor => floor.map(item => item));
-                        for (const item of combination) {
-                            floorsCopy[nextFloorIndex].push(item);
-                            const itemIndex = floorsCopy[floorIndex].indexOf(item);
-                            floorsCopy[floorIndex].splice(itemIndex, 1);
-                        }
+                        floorsCopy[nextFloorIndex] = floorsCopy[nextFloorIndex].concat(combination);
+                        floorsCopy[floorIndex] = floorsCopy[floorIndex].filter(item => ! combination.includes(item));
 
                         // Don't repeat any previous step, to avoid infinite loops
                         const floorState = floorStateString(nextFloorIndex, floorsCopy[nextFloorIndex]);
                         if (floorStates.includes(floorState)) {
-                            // console.log('Already did:', floorState);
                             continue;
                         }
 
-                        const floorStatesCopy = floorStates.map(state => state);
-                        floorStatesCopy.push(floorState);
-
-                        traverseFloors(floorsCopy, nextFloorIndex, steps + 1, floorStatesCopy);
+                        traverseFloors(floorsCopy, nextFloorIndex, steps + 1, floorStates.concat(floorState));
                     }
                 }
             };
