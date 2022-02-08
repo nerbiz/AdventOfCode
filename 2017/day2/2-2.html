@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const spreadsheet = await fileReader.parse();
+
+            document.querySelector('#answer').innerText =spreadsheet
+                .map(row => row.sort((a, b) => b - a))
+                .map(row => row
+                    .map((number, index) => {
+                        for (const otherNumber of row.slice(index + 1)) {
+                            if (number % otherNumber === 0) {
+                                return number / otherNumber;
+                            }
+                        }
+                    })
+                    .find(number => number !== undefined))
+                .reduce((sum, number) => (sum + number), 0);
+        </script>
+    </body>
+</html>
