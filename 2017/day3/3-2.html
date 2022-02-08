@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const target = await fileReader.parse();
+
+            const grid = Array2d.withData({value: 0}, 11, 11);
+            const middleLocation = grid.getItem(5, 5);
+            middleLocation.value = 1;
+            let gridX = middleLocation.x;
+            let gridY = middleLocation.y;
+
+            let number = 0;
+            let currentLocation;
+            let x = 0;
+            let y = 0;
+
+            mainLoop: while (++number) {
+                x = number;
+                currentLocation = grid.getItem(gridX + x, gridY + y);
+                currentLocation.value = currentLocation.getSurroundingItems()
+                    .reduce((sum, location) => (sum + location.value), 0);
+
+                if (currentLocation.value >= target) {
+                    break;
+                }
+
+                do {
+                    y--;
+                    currentLocation = grid.getItem(gridX + x, gridY + y);
+                    currentLocation.value = currentLocation.getSurroundingItems()
+                        .reduce((sum, location) => (sum + location.value), 0);
+
+                    if (currentLocation.value >= target) {
+                        break mainLoop;
+                    }
+                } while (y > number * -1);
+
+
+                do {
+                    x--;
+                    currentLocation = grid.getItem(gridX + x, gridY + y);
+                    currentLocation.value = currentLocation.getSurroundingItems()
+                        .reduce((sum, location) => (sum + location.value), 0);
+
+                    if (currentLocation.value >= target) {
+                        break mainLoop;
+                    }
+                } while (x > number * -1);
+
+
+                do {
+                    y++;
+                    currentLocation = grid.getItem(gridX + x, gridY + y);
+                    currentLocation.value = currentLocation.getSurroundingItems()
+                        .reduce((sum, location) => (sum + location.value), 0);
+
+                    if (currentLocation.value >= target) {
+                        break mainLoop;
+                    }
+                } while (y < number);
+
+
+                do {
+                    x++;
+                    currentLocation = grid.getItem(gridX + x, gridY + y);
+                    currentLocation.value = currentLocation.getSurroundingItems()
+                        .reduce((sum, location) => (sum + location.value), 0);
+
+                    if (currentLocation.value >= target) {
+                        break mainLoop;
+                    }
+                } while (x < number);
+            }
+
+            document.querySelector('#answer').innerText = currentLocation.value;
+        </script>
+    </body>
+</html>
