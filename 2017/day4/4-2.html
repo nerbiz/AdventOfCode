@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const passphrases = await fileReader.parse();
+
+            document.querySelector('#answer').innerText = passphrases
+                // Duplicates are adjacent after sorting
+                .map(words => words
+                    // Sort characters to find anagrams
+                    .map(word => word.split('').sort().join(''))
+                    .sort()
+                )
+                // Filter out passphrases containing duplicates
+                .filter(words => {
+                    for (let i = 0; i < words.length; i++) {
+                        if (words[i] === words[i + 1]) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                })
+                .length;
+        </script>
+    </body>
+</html>
