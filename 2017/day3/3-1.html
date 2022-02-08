@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const target = await fileReader.parse();
+            const location = {square: 1, x: 0, y: 0};
+            let number = 0;
+
+            mainLoop: while (++number) {
+                location.x = number;
+                location.square++;
+
+                if (location.square === target) {
+                    break;
+                }
+
+                do {
+                    location.y--;
+                    location.square++;
+
+                    if (location.square === target) {
+                        break mainLoop;
+                    }
+                } while (location.y > number * -1);
+
+
+                do {
+                    location.x--;
+                    location.square++;
+
+                    if (location.square === target) {
+                        break mainLoop;
+                    }
+                } while (location.x > number * -1);
+
+
+                do {
+                    location.y++;
+                    location.square++;
+
+                    if (location.square === target) {
+                        break mainLoop;
+                    }
+                } while (location.y < number);
+
+
+                do {
+                    location.x++;
+                    location.square++;
+
+                    if (location.square === target) {
+                        break mainLoop;
+                    }
+                } while (location.x < number);
+            }
+
+            document.querySelector('#answer').innerText = Math.abs(location.x) + Math.abs(location.y);
+        </script>
+    </body>
+</html>
