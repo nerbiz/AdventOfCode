@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let banks = await fileReader.parse();
+            let again = true;
+            let steps;
+
+            mainLoop: while (true) {
+                let states = [];
+                steps = 0;
+
+                while (++steps) {
+                    // See if this configuration has existed before
+                    const state = banks.join(',');
+                    if (states.includes(state)) {
+                        // Stop after the second second time
+                        if (! again) {
+                            steps--;
+                            break mainLoop;
+                        }
+
+                        // Loop a second time
+                        again = false;
+                        continue mainLoop;
+                    }
+                    states.push(state);
+
+                    // Find the bank containing the most blocks, then empty it
+                    const mostBlocksIndex = banks.indexOf(Math.max(...banks));
+                    let blocks = banks[mostBlocksIndex];
+                    banks[mostBlocksIndex] = 0;
+
+                    // Redistribute the blocks over the banks
+                    let nextIndex = mostBlocksIndex;
+                    while (blocks > 0) {
+                        banks[++nextIndex % banks.length]++;
+                        blocks--;
+                    }
+                }
+            }
+
+            document.querySelector('#answer').innerText = steps;
+        </script>
+    </body>
+</html>
