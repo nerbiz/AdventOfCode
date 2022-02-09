@@ -127,9 +127,7 @@ export default class ArrayPrototype
     {
         Object.defineProperty(Array.prototype, 'intersection', {
             value: function intersection(...arrays) {
-                // Concatenate the arrays to compare with
-                arrays = arrays.reduce((combined, array) => combined.concat(array), []);
-
+                arrays = [].concat(...arrays);
                 return this.filter(item => arrays.includes(item));
             },
             enumerable: false,
@@ -146,9 +144,7 @@ export default class ArrayPrototype
     {
         Object.defineProperty(Array.prototype, 'difference', {
             value: function difference(...arrays) {
-                // Concatenate the arrays to compare with
-                arrays = arrays.reduce((combined, array) => combined.concat(array), []);
-
+                arrays = [].concat(...arrays);
                 return this.filter(item => ! arrays.includes(item));
             },
             enumerable: false,
