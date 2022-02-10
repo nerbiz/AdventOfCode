@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../../Utilities.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
+
+            ArrayPrototype.extend();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {listSize, lengths} = await fileReader.parse();
+            let list = [...Array(256).keys()];
+            lengths = lengths.join(',')
+                .split('')
+                .map(character => character.charCodeAt(0))
+                .concat(17, 31, 73, 47, 23);
+            let currentIndex = 0;
+            let skipSize = 0;
+
+            for (let i = 0; i < 64; i++) {
+                for (const length of lengths) {
+                    if (length > list.length) {
+                        continue;
+                    }
+
+                    // Get indexes for reversing, wrapping around if needed
+                    const indexes = Utilities
+                        .range(currentIndex, currentIndex + length - 1)
+                        .map(index => index % list.length);
+
+                    // Get the current values at the indexes
+                    const values = indexes.map(index => list[index]);
+
+                    // Set the values in reverse order
+                    for (const index of indexes) {
+                        list[index] = values.pop();
+                    }
+
+                    // Update the current index and skip size
+                    currentIndex = (currentIndex + length + skipSize++) % list.length;
+                }
+            }
+
+            document.querySelector('#answer').innerText = list
+                .chunk(16)
+                .map(chunk => chunk.reduce((result, number) => (result ^ number), 0))
+                .map(number => number.toString(16).padStart(2, '0'))
+                .join('');
+        </script>
+    </body>
+</html>
