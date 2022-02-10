@@ -14,33 +14,35 @@
         <script type="module">
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
+            import Utilities from '../../Utilities.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const {listSize, lengths} = await fileReader.parse();
             let list = [...Array(listSize).keys()];
-            let index = 0;
+            let currentIndex = 0;
             let skipSize = 0;
-            let shiftedLeft = 0;
 
             for (const length of lengths) {
                 if (length > list.length) {
                     continue;
                 }
 
-                // Shift all items left, based on the index
-                list = list.slice(index).concat(list.slice(0, index));
-                shiftedLeft += index;
+                // Get indexes for reversing, wrapping around if needed
+                const indexes = Utilities
+                    .range(currentIndex, currentIndex + length - 1)
+                    .map(index => index % list.length);
 
-                // Reverse a part of the array
-                list = list.slice(0, length).reverse().concat(list.slice(length));
+                    // Get the current values at the indexes
+                const values = indexes.map(index => list[index]);
 
-                // Define the next index
-                index = (length + skipSize++) % list.length;
+                // Set the values in reverse order
+                for (const index of indexes) {
+                    list[index] = values.pop();
+                }
+
+                // Update the current index and skip size
+                currentIndex = (currentIndex + length + skipSize++) % list.length;
             }
-
-            // Shift all items right, for the total amount of left shifts
-            const shiftRight = shiftedLeft % list.length;
-            list = list.slice(list.length - shiftRight).concat(list.slice(0, list.length - shiftRight));
 
             document.querySelector('#answer').innerText = list[0] * list[1];
         </script>
