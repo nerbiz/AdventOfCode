@@ -16,7 +16,7 @@
             import Parser from './Parser.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            let stream = await fileReader.parse();
+            const stream = await fileReader.parse();
 
             // The counter for each group score
             let counter = 0;
