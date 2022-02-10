@@ -15,7 +15,7 @@ export default class
             return {
                 name: matches[1],
                 weight: matches[2] - 0,
-                above: (matches[3] !== undefined)
+                subTowers: (matches[3] !== undefined)
                     ? matches[3].split(', ')
                     : []
             };

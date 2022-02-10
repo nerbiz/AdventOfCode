@@ -22,7 +22,7 @@
 
             // The bottom program is the name that appears only once
             document.querySelector('#answer').innerText = programs
-                .map(program => [program.name].concat(program.above))
+                .map(program => [program.name].concat(program.subTowers))
                 .flat()
                 .countValues(true)
                 .find(occurrences => occurrences[1] === 1)
