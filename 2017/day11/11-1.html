@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const directions = await fileReader.parse();
+            let x = 0;
+            let y = 0;
+            let z = 0;
+
+            /*
+            Red Blob Games - Hexagonal Grids
+            https://www.redblobgames.com/grids/hexagons/
+
+            https://stackoverflow.com/a/47749887/1909468
+
+            A square has 4 sides: 2 axes
+            A hexagon has 6 sides: 3 axes
+            */
+            for (const direction of directions) {
+                switch (direction) {
+                    case 'nw':
+                        x--;
+                        y++;
+                        break;
+                    case 'n':
+                        y++;
+                        z--;
+                        break;
+                    case 'ne':
+                        x++;
+                        z--;
+                        break;
+                    case 'sw':
+                        x--;
+                        z++;
+                        break;
+                    case 's':
+                        y--;
+                        z++;
+                        break;
+                    case 'se':
+                        x++;
+                        y--;
+                        break;
+                }
+            }
+
+            document.querySelector('#answer').innerText = (Math.abs(x) + Math.abs(y) + Math.abs(z)) / 2;
+        </script>
+    </body>
+</html>
