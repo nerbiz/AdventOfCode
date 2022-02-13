@@ -16,28 +16,27 @@
             import Parser from './Parser.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            const layers = await fileReader.parse();
+            const layersData = await fileReader.parse();
+            const layers = [];
             let severity = 0;
 
-            // Set scanner properties in the layers
-            layers.forEach(layer => {
+            for (const layer of layersData) {
+                // Set scanner properties in the layers
                 layer.currentIndex = 0;
                 layer.direction = 1;
-            });
 
-            // Create the steps, placing layers at their index
-            const lastLayerDepth = layers.at(-1).depth;
-            const steps = [...Array(lastLayerDepth + 1).keys()]
-                .map(index => layers.find(layer => layer.depth === index));
+                layers[layer.depth] = layer;
+            }
 
-            for (const step of steps) {
-                // Increase severity if there is a scanner at the current step
-                if (step !== undefined && step.currentIndex === 0) {
-                    severity += step.depth * step.range;
+            let packetIndex = -1;
+            while (++packetIndex < layers.length) {
+                // Increase severity if there is a scanner at the current index
+                if (layers[packetIndex]?.currentIndex === 0) {
+                    severity += layers[packetIndex].depth * layers[packetIndex].range;
                 }
 
                 // Move the scanners
-                for (const layer of layers) {
+                for (const layer of layers.filter(layer => layer !== undefined)) {
                     layer.currentIndex += layer.direction;
 
                     // Change direction for the next step if needed
