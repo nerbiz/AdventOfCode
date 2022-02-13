@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const layers = await fileReader.parse();
+            let delay = -1;
+
+            const startTime = new Date().getTime();
+
+            const initializeLayers = picoSeconds => {
+                layers.forEach(layer => {
+                    // Get the 0-based range
+                    const range = layer.range - 1;
+
+                    layer.currentIndex = picoSeconds % (range * 2);
+                    layer.direction = 1;
+
+                    if (layer.currentIndex >= layer.range) {
+                        layer.direction = -1;
+                        layer.currentIndex = range - (layer.currentIndex % range);
+                    }
+
+                    if (layer.currentIndex === layer.range - 1) {
+                        layer.direction = -1;
+                    }
+                });
+            };
+
+            // Create the steps, placing layers at their index
+            const lastLayerDepth = layers.at(-1).depth;
+            const steps = [...Array(lastLayerDepth + 1).keys()]
+                .map(index => layers.find(layer => layer.depth === index));
+
+            nextDelay: while (++delay >= 0) {
+                initializeLayers(delay);
+
+                let packetIndex = -1;
+                while (++packetIndex < steps.length) {
+                    // Check if the delay has passed and the packet is caught
+                    if (packetIndex >= 0 && steps[packetIndex]?.currentIndex === 0) {
+                        continue nextDelay;
+                    }
+
+                    // Move the scanners
+                    for (const layer of layers) {
+                        layer.currentIndex += layer.direction;
+
+                        // Change direction for the next step if needed
+                        if (layer.currentIndex === 0 || layer.currentIndex === layer.range - 1) {
+                            layer.direction *= -1;
+                        }
+                    }
+                }
+
+                break;
+            }
+
+            console.log('Time taken:', new Date().getTime() - startTime);
+
+            document.querySelector('#answer').innerText = delay;
+        </script>
+    </body>
+</html>
