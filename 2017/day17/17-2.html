@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const steps = await fileReader.parse();
+
+            let index = 0;
+            let value = 0;
+            let bufferLength = 0;
+            let stepsSinceLast = 0;
+
+            while (++bufferLength < 5e7) {
+                index = ((index + steps) % bufferLength) + 1;
+
+                if (index === 1) {
+                    value += 1 + stepsSinceLast;
+                    stepsSinceLast = 0;
+                    continue;
+                }
+
+                stepsSinceLast++;
+            }
+
+            document.querySelector('#answer').innerText = value;
+        </script>
+    </body>
+</html>
