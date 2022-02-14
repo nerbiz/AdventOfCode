@@ -10,16 +10,15 @@ export default class
         return {
             programs: linesArray.at(0)
                 .split(': ')
-                .at(1)
-                .split(''),
+                .at(1),
             moves: linesArray.at(1)
                 .split(',')
                 .map(move => {
                     const part2 = move.substring(1);
 
                     return [move[0]].concat((part2.indexOf('/') === -1)
-                        ? part2
-                        : [...part2.split('/')]);
+                        ? part2 - 0
+                        : [...part2.split('/').map(item => item.match(/\d/) ? item - 0 : item)]);
                 }),
         };
     }

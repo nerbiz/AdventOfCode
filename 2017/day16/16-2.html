@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {programs, moves} = await fileReader.parse();
+            const originalPrograms = programs;
+
+            const doMoves = () => {
+                for (const move of moves) {
+                    if (move[0] === 's') {
+                        const endIndex = programs.length - move[1];
+                        programs = programs.substring(endIndex) + programs.substring(0, endIndex);
+                        continue;
+                    }
+
+                    const firstCharacter = programs[move[1]] || move[1];
+                    const secondCharacter = programs[move[2]] || move[2];
+                    programs = programs.replace(firstCharacter, secondCharacter.toUpperCase())
+                        .replace(secondCharacter, firstCharacter)
+                        .toLowerCase();
+                }
+            };
+
+            // See at which round the programs are at their intial positions again
+            let rounds = 0;
+            while (++rounds) {
+                doMoves();
+
+                if (programs === originalPrograms) {
+                    break;
+                }
+            }
+
+            // Only do the moves after the remaining amound of rounds
+            for (let i = 0; i < 1e9 % rounds; i++) {
+                doMoves();
+            }
+
+            document.querySelector('#answer').innerText = programs;
+        </script>
+    </body>
+</html>

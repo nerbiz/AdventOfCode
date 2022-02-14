@@ -20,23 +20,19 @@
 
             for (const move of moves) {
                 if (move[0] === 's') {
-                    programs = programs.slice(0 - move[1]).concat(programs.slice(0, 0 - move[1]));
+                    const endIndex = programs.length - move[1];
+                    programs = programs.substring(endIndex) + programs.substring(0, endIndex);
                     continue;
                 }
 
-                // In case of letters, replace them with their indexes
-                if (move[0] === 'p') {
-                    move[1] = programs.indexOf(move[1]);
-                    move[2] = programs.indexOf(move[2]);
-                }
-
-                // Swap the characters at the indexes
-                const first = programs[move[1]];
-                programs[move[1]] = programs[move[2]];
-                programs[move[2]] = first;
+                const firstCharacter = programs[move[1]] || move[1];
+                const secondCharacter = programs[move[2]] || move[2];
+                programs = programs.replace(firstCharacter, secondCharacter.toUpperCase())
+                    .replace(secondCharacter, firstCharacter)
+                    .toLowerCase();
             }
 
-            document.querySelector('#answer').innerText = programs.join('');
+            document.querySelector('#answer').innerText = programs;
         </script>
     </body>
 </html>
