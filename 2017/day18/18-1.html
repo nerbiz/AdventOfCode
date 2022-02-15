@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const instructions = await fileReader.parse();
+            const registers = instructions
+                .map(instruction => instruction[1])
+                .filter(register => ! Number.isInteger(register))
+                .reduce((registers, name) => {
+                    if (registers[name] === undefined) {
+                        registers[name] = 0;
+                    }
+
+                    return registers;
+                }, {});
+
+            const getValue = value => (value in registers) ? registers[value] : value;
+
+            const functions = {
+                snd: value => { frequency = getValue(value); },
+                set: (register, value) => { registers[register] = getValue(value); },
+                add: (register, value) => { registers[register] += getValue(value); },
+                mul: (register, value) => { registers[register] *= getValue(value); },
+                mod: (register, value) => { registers[register] %= getValue(value); },
+                rcv: value => { if (getValue(value) !== 0) return Infinity; },
+                jgz: (value, amount) => { if (getValue(value) > 0) return getValue(amount); },
+            };
+
+            let frequency;
+            let index = 0;
+            while (index >= 0 && index < instructions.length) {
+                const instruction = instructions[index];
+                const result = functions[instruction[0]](...instruction.slice(1));
+
+                index += (result !== undefined) ? result : 1;
+            }
+
+            document.querySelector('#answer').innerText = frequency;
+        </script>
+    </body>
+</html>
