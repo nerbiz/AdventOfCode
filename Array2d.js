@@ -665,8 +665,20 @@ export default class Array2d extends Array
      */
     map2d(callback)
     {
-        return this.map((row, y) =>
-            row.map((item, x) => callback(item, x, y, this)));
+        const items = [];
+        const edited = this.map((row, y) =>
+            row.map((item, x) => {
+                items.push(item);
+                return callback(item, x, y, this);
+            })
+        );
+
+        // Set the new parent in the items
+        for (const item of items) {
+            item.setParent(edited);
+        }
+
+        return edited;
     }
 
     /**
