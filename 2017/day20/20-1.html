@@ -43,7 +43,7 @@
                     return particle;
                 })
                 // Keep the particles that move towards <0,0,0>
-                    .filter(particle => {
+                .filter(particle => {
                     let {position, velocity, acceleration} = particle;
                     particle.positionSum = position.reduce((sum, value) => (sum + value), 0);
                     particle.velocitySum = velocity.reduce((sum, value) => (sum + value), 0);
