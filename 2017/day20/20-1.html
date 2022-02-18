@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const particles = await fileReader.parse();
+
+            let lowestAcceleration = Infinity;
+
+            document.querySelector('#answer').innerText = particles
+                // Calculate the acceleration sums
+                .map(particle => {
+                    particle.accelerationSum = particle.acceleration
+                        .reduce((sum, value) => (sum + Math.abs(value)), 0);
+
+                    // Update the lowest acceleration if needed
+                    lowestAcceleration = Math.min(lowestAcceleration, particle.accelerationSum);
+
+                    return particle;
+                })
+                // Keep the particles that accelerate the least
+                .filter(particle => particle.accelerationSum === lowestAcceleration)
+                // Remove coordinates that don't accelerate
+                .map(particle => {
+                    const accelerating = particle.acceleration.map(value => value > 0);
+                    particle.position = particle.position.filter((value, index) => accelerating[index])
+                    particle.velocity = particle.velocity.filter((value, index) => accelerating[index])
+                    particle.acceleration = particle.acceleration.filter((value, index) => accelerating[index])
+
+                    return particle;
+                })
+                // Keep the particles that move towards <0,0,0>
+                    .filter(particle => {
+                    let {position, velocity, acceleration} = particle;
+                    particle.positionSum = position.reduce((sum, value) => (sum + value), 0);
+                    particle.velocitySum = velocity.reduce((sum, value) => (sum + value), 0);
+                    particle.accelerationSum = acceleration.reduce((sum, value) => (sum + value), 0);
+
+                    return (particle.positionSum > 0 && particle.velocitySum < 0 && particle.accelerationSum < 0)
+                    || (particle.positionSum < 0 && particle.velocitySum > 0 && particle.accelerationSum > 0);
+                })
+                // Sort by furthest away first
+                .sort((a, b) => Math.abs(b.positionSum) - Math.abs(a.positionSum))
+                .at(0)
+                .index;
+        </script>
+    </body>
+</html>
