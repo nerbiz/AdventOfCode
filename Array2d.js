@@ -577,15 +577,17 @@ export default class Array2d extends Array
                 // Increase the X value of existing items
                 row.forEach(item => item.x += amountAbs);
 
-                // Prepend every row with new item(s)
-                for (let x = amountAbs - 1; x > -1; x--) {
-                    row.unshift(new Array2dItem(x, y, value, customData, this));
-                }
+                // Prepend a new row of items
+                row.unshift(
+                    ...Array(amountAbs).fill(undefined)
+                        .map((item, x) => new Array2dItem(x, y, value, customData, this))
+                );
             } else {
-                // Append every row with new item(s)
-                for (let i = 0; i < amount; i++) {
-                    row.push(new Array2dItem(row.length, y, value, customData, this));
-                }
+                // Prepend a new row of items
+                row.push(
+                    ...Array(amount).fill(undefined)
+                        .map((item, x) => new Array2dItem(x + row.length, y, value, customData, this))
+                );
             }
         });
 
