@@ -572,12 +572,14 @@ export default class Array2d extends Array
     {
         this.forEach((row, y) => {
             if (amount < 0) {
+                const amountAbs = amount * -1;
+
                 // Increase the X value of existing items
-                row.forEach(item => item.x += amount * -1);
+                row.forEach(item => item.x += amountAbs);
 
                 // Prepend every row with new item(s)
-                for (let i = 0; i < Math.abs(amount); i++) {
-                    row.unshift(new Array2dItem(this[0][0].x - 1, y, value, customData, this));
+                for (let x = amountAbs - 1; x > -1; x--) {
+                    row.unshift(new Array2dItem(x, y, value, customData, this));
                 }
             } else {
                 // Append every row with new item(s)
@@ -600,14 +602,16 @@ export default class Array2d extends Array
     expandVertically(amount, value = undefined, customData)
     {
         if (amount < 0) {
+            const amountAbs = amount * -1;
+
             // Increase the Y value of existing items
-            this.forEach2d(item => item.y += amount * -1);
+            this.forEach2d(item => item.y += amountAbs);
 
             // Prepend the new rows
-            for (let i = 0; i < Math.abs(amount); i++) {
+            for (let y = amountAbs - 1; y > -1; y--) {
                 this.unshift(
                     Array(this[0].length).fill(undefined)
-                        .map((item, x) => new Array2dItem(x, this[0][0].y - 1, value, customData, this))
+                        .map((item, x) => new Array2dItem(x, y, value, customData, this))
                 );
             }
         } else {
