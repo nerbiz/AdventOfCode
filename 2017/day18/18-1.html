@@ -42,7 +42,7 @@
 
             let frequency;
             let index = 0;
-            while (index >= 0 && index < instructions.length) {
+            while (index < instructions.length) {
                 const instruction = instructions[index];
                 const result = functions[instruction[0]](...instruction.slice(1));
 

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const instructions = await fileReader.parse();
+            const registers = instructions
+                .map(instruction => instruction[1])
+                .filter(register => ! Number.isInteger(register))
+                .reduce((registers, name) => {
+                    registers[name] = 0;
+                    return registers;
+                }, {});
+
+            class Program {
+                functions = {
+                    set: (register, value) => { this.registers[register] = this.getValue(value); },
+                    add: (register, value) => { this.registers[register] += this.getValue(value); },
+                    mul: (register, value) => { this.registers[register] *= this.getValue(value); },
+                    mod: (register, value) => { this.registers[register] %= this.getValue(value); },
+                    jgz: (value, amount) => {
+                        if (this.getValue(value) > 0) {
+                            return this.getValue(amount);
+                        }
+                    },
+                    snd: value => {
+                        this.otherProgram.queue.push(this.getValue(value));
+                        this.sentAmount++;
+                    },
+                    rcv: register => {
+                        // The program is waiting, if there are no values in the queue
+                        if (this.queue.length === 0) {
+                            this.isWaiting = true;
+
+                            // If the other program is also waiting, a deadlock is reached
+                            if (this.otherProgram.isWaiting) {
+                                deadlock = true;
+                            }
+
+                            // Keep the same index, i.e. wait at this instruction
+                            return 0;
+                        }
+
+                        this.isWaiting = false;
+                        this.registers[register] = this.queue.shift();
+                    },
+                };
+
+                constructor(id, registers) {
+                    this.id = id;
+                    this.registers = JSON.parse(JSON.stringify(registers));
+                    this.registers.p = this.id;
+                    this.index = 0;
+                    this.queue = [];
+                    this.sentAmount = 0;
+                    this.isWaiting = false;
+                }
+
+                setOtherProgram(program) {
+                    this.otherProgram = program;
+                }
+
+                getValue(value) {
+                    return (value in this.registers)
+                        ? this.registers[value]
+                        : value;
+                }
+
+                nextInstruction() {
+                    const instruction = instructions[this.index];
+                    const result = this.functions[instruction[0]](...instruction.slice(1));
+
+                    this.index += (result !== undefined) ? result : 1;
+                }
+            }
+
+            const program0 = new Program(0, registers);
+            const program1 = new Program(1, registers);
+            program0.setOtherProgram(program1);
+            program1.setOtherProgram(program0);
+            let deadlock = false;
+
+            while (true) {
+                program0.nextInstruction();
+                if (deadlock === true) {
+                    break;
+                }
+
+                program1.nextInstruction();
+                if (deadlock === true) {
+                    break;
+                }
+            }
+
+            document.querySelector('#answer').innerText = program1.sentAmount;
+        </script>
+    </body>
+</html>
