@@ -11,7 +11,7 @@ export default class
             const instruction = line.split(' ');
 
             for (const index of [1, 2]) {
-                if (instruction[index]?.match(/\d/)) {
+                if (instruction[index].match(/\d/)) {
                     instruction[index] -= 0;
                 }
             }
