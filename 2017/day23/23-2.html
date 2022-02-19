@@ -12,11 +12,6 @@
         <p id="answer"></p>
 
         <script type="module">
-            import FileReader from '../../FileReader.js';
-            import Parser from './Parser.js';
-
-            const fileReader = new FileReader('./data.txt', new Parser());
-            const instructions = await fileReader.parse();
             let notPrimeAmount = 0;
 
             nextNumber: for (let i = 106500; i <= 123500; i += 17) {
