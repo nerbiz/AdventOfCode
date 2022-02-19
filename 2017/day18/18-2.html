@@ -26,39 +26,6 @@
                 }, {});
 
             class Program {
-                functions = {
-                    set: (register, value) => { this.registers[register] = this.getValue(value); },
-                    add: (register, value) => { this.registers[register] += this.getValue(value); },
-                    mul: (register, value) => { this.registers[register] *= this.getValue(value); },
-                    mod: (register, value) => { this.registers[register] %= this.getValue(value); },
-                    jgz: (value, amount) => {
-                        if (this.getValue(value) > 0) {
-                            return this.getValue(amount);
-                        }
-                    },
-                    snd: value => {
-                        this.otherProgram.queue.push(this.getValue(value));
-                        this.sentAmount++;
-                    },
-                    rcv: register => {
-                        // The program is waiting, if there are no values in the queue
-                        if (this.queue.length === 0) {
-                            this.isWaiting = true;
-
-                            // If the other program is also waiting, a deadlock is reached
-                            if (this.otherProgram.isWaiting) {
-                                deadlock = true;
-                            }
-
-                            // Keep the same index, i.e. wait at this instruction
-                            return 0;
-                        }
-
-                        this.isWaiting = false;
-                        this.registers[register] = this.queue.shift();
-                    },
-                };
-
                 constructor(id, registers) {
                     this.id = id;
                     this.registers = JSON.parse(JSON.stringify(registers));
@@ -73,6 +40,51 @@
                     this.otherProgram = program;
                 }
 
+                set(register, value) {
+                    this.registers[register] = this.getValue(value);
+                }
+
+                add(register, value) {
+                    this.registers[register] += this.getValue(value);
+                }
+
+                mul(register, value) {
+                    this.registers[register] *= this.getValue(value);
+                }
+
+                mod(register, value) {
+                    this.registers[register] %= this.getValue(value);
+                }
+
+                jgz(value, amount) {
+                    if (this.getValue(value) > 0) {
+                        return this.getValue(amount);
+                    }
+                }
+
+                snd(value) {
+                    this.otherProgram.queue.push(this.getValue(value));
+                    this.sentAmount++;
+                }
+
+                rcv(register) {
+                    // The program is waiting, if there are no values in the queue
+                    if (this.queue.length === 0) {
+                        this.isWaiting = true;
+
+                        // If the other program is also waiting, a deadlock is reached
+                        if (this.otherProgram.isWaiting) {
+                            deadlock = true;
+                        }
+
+                        // Keep the same index, i.e. wait at this instruction
+                        return 0;
+                    }
+
+                    this.isWaiting = false;
+                    this.registers[register] = this.queue.shift();
+                }
+
                 getValue(value) {
                     return (value in this.registers)
                         ? this.registers[value]
@@ -81,7 +93,7 @@
 
                 nextInstruction() {
                     const instruction = instructions[this.index];
-                    const result = this.functions[instruction[0]](...instruction.slice(1));
+                    const result = this[instruction[0]](...instruction.slice(1));
 
                     this.index += (result !== undefined) ? result : 1;
                 }
