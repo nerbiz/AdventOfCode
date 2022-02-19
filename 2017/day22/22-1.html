@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const grid = new Array2d(await fileReader.parse());
+            grid.expandAllSides(200, false);
+            const directions = ['up', 'right', 'down', 'left'];
+            let currentDirection = 0;
+            const steps = 1e4;
+            let infections = 0;
+            let currentNode = grid.getItem(
+                Math.floor(grid[0].length / 2),
+                Math.floor(grid.length / 2)
+            );
+
+            for (let step = 0; step < steps; step++) {
+                // Define the next direction, infected = right, clean = left
+                currentDirection = (4 + currentDirection + (currentNode.value ? 1 : -1)) % 4;
+
+                // Swap the status of the current node
+                currentNode.value = ! currentNode.value;
+
+                // Update the infections amount if needed
+                infections += currentNode.value;
+
+                // Go to the next node
+                const adjacent = currentNode.getAdjacentItems(true);
+                currentNode = adjacent[directions[currentDirection]];
+            }
+
+            document.querySelector('#answer').innerText = infections;
+        </script>
+    </body>
+</html>
