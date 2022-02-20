@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {currentState, stepsRequired, stateActions} = await fileReader.parse();
+            const tape = [0];
+            let currentIndex = 0;
+
+            for (let step = 0; step < stepsRequired; step++) {
+                const currentValue = tape[currentIndex];
+
+                // Get the actions to perform
+                const action = stateActions[currentState][currentValue];
+
+                // Write the new value
+                tape[currentIndex] = action.write;
+
+                // Define the next index, expand the tape if needed
+                currentIndex += action.move;
+                if (currentIndex === -1) {
+                    tape.unshift(0);
+                    currentIndex = 0;
+                } else if (currentIndex === tape.length) {
+                    tape.push(0);
+                }
+
+                currentState = action.nextState;
+            }
+
+            document.querySelector('#answer').innerText = tape
+                .filter(value => value === 1)
+                .length;
+        </script>
+    </body>
+</html>
