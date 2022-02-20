@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const instructions = await fileReader.parse();
+
+            const parameters = [
+                [1,   13,  0],
+                [1,   11,  3],
+                [1,   14,  8],
+                [26,  -5,  5],
+                [1,   14, 13],
+                [1,   10,  9],
+                [1,   12,  6],
+                [26, -14,  1],
+                [26,  -8,  1],
+                [1,   13,  2],
+                [26,   0,  7],
+                [26,  -5,  5],
+                [26,  -9,  8],
+                [26,  -1, 15],
+            ];
+
+            const modelNumber = (11141191213918).toString().split('').map(digit => digit - 0);
+            let output = 0;
+            let index = -1;
+
+            for (const digit of modelNumber) {
+                const [divide, check, add] = parameters[++index];
+                const previousOutput = output;
+                output = Math.trunc(previousOutput / divide);
+
+                if (digit !== ((previousOutput % 26) + check)) {
+                    output = (output * 26) + (digit + add);
+                }
+
+                console.log({divide, check, add});
+                console.log('Output for digit', digit, 'at index', String(index).padStart(2, ' '), 'is', output);
+                console.log('');
+            }
+
+            // document.querySelector('#answer').innerText = highestModelNumber;
+        </script>
+    </body>
+</html>
