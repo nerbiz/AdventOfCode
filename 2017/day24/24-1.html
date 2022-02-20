@@ -18,6 +18,7 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const allComponents = await fileReader.parse();
             const startComponents = allComponents.filter(component => component.includes(0));
+            const components = allComponents.filter(component => ! component.includes(0));
             let highestStrength = 0;
 
             const makeBridges = (port, components, bridge = []) => {
@@ -59,12 +60,10 @@
 
             for (const startComponent of startComponents) {
                 // Clone the components, because the list will change
-                const components = allComponents
-                    .filter(component => component !== startComponent)
-                    .map(component => component.map(port => port));
+                const componentsClone = components.map(component => component.map(port => port));
 
-                const nextPort = startComponent.find(port => port !== 0);
-                makeBridges(nextPort, components, [startComponent]);
+                const nextPort = (startComponent[0] === 0) ? startComponent[1] : startComponent[0];
+                makeBridges(nextPort, componentsClone, [startComponent]);
             }
 
             document.querySelector('#answer').innerText = highestStrength;
