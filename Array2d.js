@@ -798,10 +798,11 @@ export class Pathfinding
      * Find the shortest path between 2 nodes using the A* algorithm
      * @param {Array2d} grid
      * @param {Array2dItem} startNode
-     * @param {Array2dItem} endNode
+     * @param {Array2dItem} targetNode
      * @param {function} checkForWall A function that checks if a node is a wall
+     * @returns {array} The shortest path as a nodes array
      */
-    static aStar(grid, startNode, endNode, checkForWall = neighbor => false)
+    static aStar(grid, startNode, targetNode, checkForWall = neighbor => false)
     {
         // Reset pathfinding properties of all nodes
         grid.forEach2d(node => {
@@ -812,24 +813,18 @@ export class Pathfinding
 
         // Calculate the F value of the start node
         startNode.G = 0;
-        startNode.F = startNode.G + Math.abs(endNode.x - startNode.x)
-            + Math.abs(endNode.y - startNode.y);
+        startNode.F = startNode.G + Math.abs(targetNode.x - startNode.x)
+            + Math.abs(targetNode.y - startNode.y);
 
         const queue = [startNode];
         const visited = [];
-        const path = [];
 
         while (queue.length > 0) {
             let currentNode = queue.sort((a, b) => a.F - b.F).shift();
             visited.push(currentNode);
 
-            // Target reached, construct the path using 'previous' property
-            if (currentNode === endNode) {
-                while (currentNode.previous !== undefined) {
-                    path.push(currentNode);
-                    currentNode = currentNode.previous;
-                }
-
+            // Target reached
+            if (currentNode === targetNode) {
                 break;
             }
 
@@ -845,8 +840,8 @@ export class Pathfinding
 
                 // Calculate the F value of the neighbor
                 const G = (currentNode.G + 1);
-                const F = G + Math.abs(endNode.x - neighbor.x)
-                    + Math.abs(endNode.y - neighbor.y);
+                const F = G + Math.abs(targetNode.x - neighbor.x)
+                    + Math.abs(targetNode.y - neighbor.y);
 
                 // Update the neighbor's values if it's not in the queue,
                 // or if it is in the queue, but the F is lower
@@ -862,6 +857,71 @@ export class Pathfinding
                     queue.push(neighbor);
                 }
             }
+        }
+
+        // Construct the path
+        const path = [];
+        let currentNode = targetNode;
+        while (currentNode.previous !== undefined) {
+            path.push(currentNode);
+            currentNode = currentNode.previous;
+        }
+
+        // Reverse the path, to go from start to end
+        return path.reverse();
+    }
+
+    /**
+     * Find the shortest path between 2 nodes using Dijkstra's algorithm
+     * @param {Array2d} grid
+     * @param {Array2dItem} startNode
+     * @param {Array2dItem} targetNode
+     * @returns {array} The shortest path as a nodes array
+     */
+    static dijkstra(grid, startNode, targetNode)
+    {
+        // Reset pathfinding properties of all nodes
+        grid.forEach2d(node => {
+            node.distance = Infinity;
+            node.previous = undefined;
+        });
+
+        const unvisitedQueue = grid.flat();
+        startNode.distance = 0;
+
+        while (unvisitedQueue.length > 0) {
+            // Get the next nearest point from the unvisited queue
+            const nearestNode = unvisitedQueue
+                .sort((a, b) => a.distance - b.distance)
+                .shift();
+
+            const adjacent = nearestNode.getAdjacentItems()
+                // Get unvisited adjacent items
+                .filter(adjacent => adjacent !== undefined && unvisitedQueue.includes(adjacent))
+                .map(adjacent => {
+                    const newDistance = nearestNode.distance + adjacent.value;
+
+                    // Update the distance to the adjacent item, if it's smaller
+                    if (newDistance < adjacent.distance) {
+                        adjacent.distance = newDistance;
+                        adjacent.previous = nearestNode;
+                    }
+
+                    return adjacent;
+                });
+
+            // Stop searching after the target node is reached
+            if (adjacent.includes(targetNode)) {
+                break;
+            }
+        }
+
+        // Construct the path
+        const path = [];
+        let currentNode = targetNode;
+        while (currentNode.previous !== undefined) {
+            path.push(currentNode);
+            currentNode = currentNode.previous;
         }
 
         // Reverse the path, to go from start to end

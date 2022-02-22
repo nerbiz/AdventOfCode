@@ -14,38 +14,23 @@
         <script type="module">
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
-            import Array2d from '../../Array2d.js';
+            import Array2d, {Pathfinding} from '../../Array2d.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            let riskMap = await fileReader.parse();
-
-            riskMap = Array2d.withData({
-                distance: Infinity,
-                previous: undefined,
-            }, riskMap);
+            const riskMap = new Array2d(await fileReader.parse());
 
             const startPoint = riskMap.getItem(0, 0);
             const endPoint = riskMap.getItem(riskMap.length - 1, riskMap[0].length - 1);
+            const path = Pathfinding.dijkstra(riskMap, startPoint, endPoint);
 
-            // Use Dijkstra's algorithm to find the best path
-            const unvisitedQueue = riskMap.flat();
-            startPoint.distance = 0;
-            while (unvisitedQueue.length > 0) {
-                const nearestPoint = unvisitedQueue
-                    .sort((a, b) => a.distance - b.distance)
-                    .shift();
-
-                nearestPoint.getAdjacentItems()
-                    .filter(adjacent => adjacent !== undefined && unvisitedQueue.includes(adjacent))
-                    .forEach(adjacent => {
-                        // Update the distance to the adjacent item, if it's smaller
-                        const newDistance = nearestPoint.distance + adjacent.value;
-                        if (newDistance < adjacent.distance) {
-                            adjacent.distance = newDistance;
-                            adjacent.previous = nearestPoint;
-                        }
-                    });
-            }
+            // Show the path in the console
+            console.log(riskMap.toString(point => {
+                if (point === startPoint || path.includes(point)) {
+                    return '\x1b[35m' + point.value + '\x1b[0m';
+                } else {
+                    return '\x1b[37m' + point.value + '\x1b[0m';
+                }
+            }));
 
             document.querySelector('#answer').innerText = endPoint.distance;
         </script>
