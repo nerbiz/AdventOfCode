@@ -890,28 +890,30 @@ export class Pathfinding
         startNode.distance = 0;
 
         while (unvisitedQueue.length > 0) {
-            // Get the next nearest point from the unvisited queue
-            const nearestNode = unvisitedQueue
-                .sort((a, b) => a.distance - b.distance)
-                .shift();
+            // Get the next nearest node from the unvisited queue
+            const nearestNode = unvisitedQueue.sort((a, b) => a.distance - b.distance).shift();
 
-            const adjacent = nearestNode.getAdjacentItems()
-                // Get unvisited adjacent items
-                .filter(adjacent => adjacent !== undefined && unvisitedQueue.includes(adjacent))
-                .map(adjacent => {
-                    const newDistance = nearestNode.distance + adjacent.value;
+            let targetReached = false;
+            for (const adjacent of nearestNode.getAdjacentItems()) {
+                if (adjacent === undefined || ! unvisitedQueue.includes(adjacent)) {
+                    continue;
+                }
 
-                    // Update the distance to the adjacent item, if it's smaller
-                    if (newDistance < adjacent.distance) {
-                        adjacent.distance = newDistance;
-                        adjacent.previous = nearestNode;
-                    }
+                // Update the distance in the adjacent node, if the distance is smaller
+                const newDistance = nearestNode.distance + adjacent.value;
+                if (newDistance < adjacent.distance) {
+                    adjacent.distance = newDistance;
+                    adjacent.previous = nearestNode;
+                }
 
-                    return adjacent;
-                });
+                if (adjacent === targetNode) {
+                    targetReached = true;
+                    break;
+                }
+            }
 
             // Stop searching after the target node is reached
-            if (adjacent.includes(targetNode)) {
+            if (targetReached === true) {
                 break;
             }
         }
