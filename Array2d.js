@@ -277,11 +277,11 @@ export default class Array2d extends Array
     attachRight(attachArray)
     {
         // Update the indexes, before attaching
-        attachArray.forEach2d(item => item.parent = this);
         attachArray.forEach2d(item => item.x += this[0].length);
         this.forEach((row, index) => this[index] = row.concat(attachArray[index]));
 
-        return this;
+        // Update the parent of all items
+        return this.tap2d(item => item.setParent(this));
     }
 
     /**
@@ -291,12 +291,12 @@ export default class Array2d extends Array
      */
     attachLeft(attachArray)
     {
-        // Update the parents and indexes, before attaching
-        attachArray.forEach2d(item => item.parent = this);
+        // Update the indexes, before attaching
         this.forEach2d(item => item.x += attachArray[0].length);
         this.forEach((row, index) => this[index] = attachArray[index].concat(this[index]));
 
-        return this;
+        // Update the parent of all items
+        return this.tap2d(item => item.setParent(this));
     }
 
     /**
@@ -306,12 +306,12 @@ export default class Array2d extends Array
      */
     attachUp(attachArray)
     {
-        // Update the parents and indexes, before attaching
-        attachArray.forEach2d(item => item.parent = this);
+        // Update the indexes, before attaching
         this.forEach2d(item => item.y += attachArray.length);
         attachArray.reverse().forEach(attachRow => this.unshift(attachRow));
 
-        return this;
+        // Update the parent of all items
+        return this.tap2d(item => item.setParent(this));
     }
 
     /**
@@ -321,12 +321,12 @@ export default class Array2d extends Array
      */
     attachDown(attachArray)
     {
-        // Update the parents and indexes, before attaching
-        attachArray.forEach2d(item => item.parent = this);
+        // Update the indexes, before attaching
         attachArray.forEach2d(item => item.y += this.length);
         attachArray.forEach(attachRow => this.push(attachRow));
 
-        return this;
+        // Update the parent of all items
+        return this.tap2d(item => item.setParent(this));
     }
 
     /**
@@ -820,7 +820,7 @@ export class Pathfinding
         const visited = [];
 
         while (queue.length > 0) {
-            let currentNode = queue.sort((a, b) => a.F - b.F).shift();
+            const currentNode = queue.sort((a, b) => a.F - b.F).shift();
             visited.push(currentNode);
 
             // Target reached
