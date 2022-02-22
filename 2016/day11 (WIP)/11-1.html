@@ -20,6 +20,14 @@
             const itemsAmount = floors.flat().length;
             let fewestSteps = Infinity;
 
+            /* const items = floors.flat().sort((a, b) => {
+                return (a.element === b.element)
+                    ? 0
+                    : (a.element < b.element) ? -1 : 1;
+            });
+            console.log(items.map(item => item.element + '-' + item.type));
+            throw new Error('Done'); */
+
             const startTime = new Date().getTime();
 
             /* const visualizeFloors = floors => floors.map(floor =>
@@ -48,11 +56,6 @@
                 .map((floor, index) => floorStateString(index, floor));
 
             const traverseFloors = (floors, floorIndex = 0, steps = 0, floorStates = initialFloorStates) => {
-                // if (steps > 200) {
-                //     console.log('Forget it');
-                //     return;
-                // }
-
                 // Stop if the amount of steps is already higher than the current lowest
                 if (steps >= fewestSteps) {
                     // console.log('Too many steps, stop here');
@@ -66,31 +69,25 @@
                     return;
                 }
 
-                // If there is at least one generator on the same floor as a microchip,
-                // one of them has to be correspond to the microchip
+                // A microchip is fried if there are generator(s) on the same floor,
+                // but none of the generators match the microchip's element
                 for (const floor of floors) {
-                    // No need to check an empty floor
-                    if (floor.length === 0) {
-                        continue;
-                    }
-
-                    // It's safe if there are no generators
                     const generators = floor.filter(item => item.type === 'generator');
                     if (generators.length === 0) {
                         continue;
                     }
 
-                    for (const microchip of floor.filter(item => item.type === 'microchip')) {
-                        const corresponding = generators
-                            .find(generator => generator.element === microchip.element);
-
+                    const microchips = floor.filter(item => item.type === 'microchip');
+                    for (const microchip of microchips) {
                         // The chip is fried
-                        if (corresponding === undefined) {
-                            // console.log('Fried!', microchip);
+                        if (! generators.find(generator => generator.element === microchip.element)) {
                             return;
                         }
                     }
                 }
+
+                // Sort by microchips first, because those have less possibilities
+                floors[floorIndex].sort((a, b) => a.type === 'microchip' ? -1 : 1);
 
                 // Find all combinations for moving items
                 const moveCombinations = [];
