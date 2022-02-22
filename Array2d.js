@@ -1,3 +1,5 @@
+import PriorityQueue from './PriorityQueue.js';
+
 export class Array2dItem
 {
     /**
@@ -886,16 +888,18 @@ export class Pathfinding
             node.previous = undefined;
         });
 
-        const unvisitedQueue = grid.flat();
         startNode.distance = 0;
+        const unvisitedQueue = new PriorityQueue();
+        unvisitedQueue.enqueue(startNode.distance, startNode);
 
-        while (unvisitedQueue.length > 0) {
+        while (! unvisitedQueue.isEmpty()) {
             // Get the next nearest node from the unvisited queue
-            const nearestNode = unvisitedQueue.sort((a, b) => a.distance - b.distance).shift();
+            const nearestNode = unvisitedQueue.dequeue();
 
             let targetReached = false;
             for (const adjacent of nearestNode.getAdjacentItems()) {
-                if (adjacent === undefined || ! unvisitedQueue.includes(adjacent)) {
+                // The adjacent node should not be visited yet
+                if (adjacent === undefined || adjacent.visited === true) {
                     continue;
                 }
 
@@ -910,7 +914,14 @@ export class Pathfinding
                     targetReached = true;
                     break;
                 }
+
+                // Add the adjacent node to the queue, if it's not in there yet
+                if (! unvisitedQueue.has(adjacent)) {
+                    unvisitedQueue.enqueue(adjacent.distance, adjacent);
+                }
             }
+
+            nearestNode.visited = true;
 
             // Stop searching after the target node is reached
             if (targetReached === true) {
