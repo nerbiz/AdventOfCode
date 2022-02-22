@@ -17,20 +17,20 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const changes = await fileReader.parse();
-            const frequencies = [];
+            const frequencies = {};
+            let frequency = 0;
             let duplicateFrequency;
 
-            let frequency = 0;
             let index = -1;
             while (++index >= 0) {
                 frequency += changes[index % changes.length];
 
-                if (frequencies.includes(frequency)) {
+                if (frequencies[frequency] === true) {
                     duplicateFrequency = frequency;
                     break;
                 }
 
-                frequencies.push(frequency);
+                frequencies[frequency] = true;
             }
 
             document.querySelector('#answer').innerText = duplicateFrequency;
