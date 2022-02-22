@@ -14,80 +14,12 @@
         <script type="module">
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
-            import Array2d from '../../Array2d.js';
+            import Array2d, {Pathfinding} from '../../Array2d.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const map = new Array2d(await fileReader.parse());
             const numberNodes = map.filter2d(item => (Number.isInteger(item.value)), true);
             let shortestDistance = Infinity;
-
-            // Find path using the A* algorithm
-            const findPath = (startNode, endNode) => {
-                // Reset pathfinding properties of all nodes
-                map.forEach2d(node => {
-                    node.G = undefined;
-                    node.F = undefined;
-                    node.previous = undefined;
-                });
-
-                startNode.G = 0;
-                startNode.F = startNode.G + Math.abs(endNode.x - startNode.x)
-                    + Math.abs(endNode.y - startNode.y);
-                // startNode.inPath = true;
-
-                const queue = [startNode];
-                const visited = [];
-                const path = [];
-
-                while (queue.length > 0) {
-                    let currentNode = queue.sort((a, b) => a.F - b.F).shift();
-                    visited.push(currentNode);
-
-                    // Target reached, construct the path using 'previous' property
-                    if (currentNode === endNode) {
-                        while (currentNode.previous !== undefined) {
-                            // currentNode.inPath = true;
-                            path.push(currentNode);
-                            currentNode = currentNode.previous;
-                        }
-
-                        break;
-                    }
-
-                    for (const neighbor of currentNode.getAdjacentItems()) {
-                        if (neighbor === undefined
-                            // The node must not be an obstacle
-                            || neighbor.value === false
-                            // The node must not be visited yet
-                            || visited.includes(neighbor)
-                        ) {
-                            continue;
-                        }
-
-                        // Calculate the F value of the neighbor
-                        const G = (currentNode.G + 1);
-                        const F = G + Math.abs(endNode.x - neighbor.x)
-                            + Math.abs(endNode.y - neighbor.y);
-
-                        // Update the neighbor's values if it's not in the queue,
-                        // or if it is in the queue, but the F is lower
-                        const inQueue = queue.includes(neighbor);
-                        if (! inQueue || (inQueue && F < neighbor.F)) {
-                            neighbor.G = G;
-                            neighbor.F = F;
-                            neighbor.previous = currentNode;
-                        }
-
-                        // Add the neighbor to the queue
-                        if (! inQueue) {
-                            queue.push(neighbor);
-                        }
-                    }
-                }
-
-                // Reverse the path, to go from start to end
-                return path.reverse();
-            }
 
             // Find all possible combinations for visiting every target node
             const startNode = numberNodes.find(node => node.value === 0);
@@ -120,7 +52,7 @@
 
                 const targetNodes = numberNodes.filter(targetNode => targetNode !== node);
                 for (const targetNode of targetNodes) {
-                    node.paths[targetNode.value] = findPath(node, targetNode);
+                    node.paths[targetNode.value] = Pathfinding.aStar(map, node, targetNode, () => false);
                 }
             }
 

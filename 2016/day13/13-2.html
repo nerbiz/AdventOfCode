@@ -57,11 +57,6 @@
                     continue;
                 }
 
-                // Stop after a maximum amount of nodes has been visited
-                if (visited.length === 200) {
-                    break;
-                }
-
                 for (const neighbor of currentNode.getAdjacentItems()) {
                     if (neighbor === undefined
                         // The node must not be an obstacle

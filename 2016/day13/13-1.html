@@ -14,7 +14,7 @@
         <script type="module">
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
-            import Array2d from '../../Array2d.js';
+            import Array2d, {Pathfinding} from '../../Array2d.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const {number, target} = await fileReader.parse();
@@ -26,76 +26,16 @@
             };
             const maze = Array2d.withData({
                 value: (x, y) => valueFormula(x, y),
-                G: undefined,
-                F: undefined,
-                previous: undefined,
             }, target[1] * 2, target[0] * 2);
 
-            const getHeuristic = (startNode, endNode) => {
-                return Math.abs(endNode.x - startNode.x) + Math.abs(endNode.y - startNode.y);
-            };
-
-            // Use the A* algorithm
+            // Find the shortest path
             const startNode = maze.getItem(1, 1);
             const endNode = maze.getItem(target[0], target[1]);
-            startNode.G = 0;
-            startNode.F = startNode.G + getHeuristic(startNode, endNode);
-            startNode.inPath = true;
-
-            const queue = [startNode];
-            const visited = [];
-            const path = [];
-
-            while (queue.length > 0) {
-                const currentNode = queue.sort((a, b) => a.F - b.F).shift();
-                visited.push(currentNode);
-
-                // Target reached, construct the path using 'previous' property
-                if (currentNode === endNode) {
-                    let currentNode = visited.at(-1);
-                    while (currentNode.previous !== undefined) {
-                        currentNode.inPath = true;
-                        path.push(currentNode);
-                        currentNode = currentNode.previous;
-                    }
-
-                    break;
-                }
-
-                for (const neighbor of currentNode.getAdjacentItems()) {
-                    if (neighbor === undefined
-                        // The node must not be an obstacle
-                        || neighbor.value === false
-                        // The node must not be visited yet
-                        || visited.includes(neighbor)
-                    ) {
-                        continue;
-                    }
-
-                    // Calculate the F value of the neighbor
-                    const G = (currentNode.G + 1);
-                    const F = G + Math.abs(endNode.x - neighbor.x)
-                        + Math.abs(endNode.y - neighbor.y);
-
-                    // Update the neighbor's values if it's not in the queue,
-                    // or if it is in the queue, but the F is lower
-                    const inQueue = queue.includes(neighbor);
-                    if (! inQueue || (inQueue && F < neighbor.F)) {
-                        neighbor.G = G;
-                        neighbor.F = F;
-                        neighbor.previous = currentNode;
-                    }
-
-                    // Add the neighbor to the queue
-                    if (! inQueue) {
-                        queue.push(neighbor);
-                    }
-                }
-            }
+            const path = Pathfinding.aStar(maze, startNode, endNode, () => false);
 
             // Visualize the path
             console.log(maze.toString(node => {
-                if (node.inPath === true) {
+                if (node === startNode || path.includes(node)) {
                     return '█';
                 }
 

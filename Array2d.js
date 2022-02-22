@@ -789,3 +789,82 @@ export default class Array2d extends Array
         ).join('\n');
     }
 }
+
+
+
+export class Pathfinding
+{
+    /**
+     * Find the shortest path between 2 nodes using the A* algorithm
+     * @param {Array2d} grid
+     * @param {Array2dItem} startNode
+     * @param {Array2dItem} endNode
+     * @param {function} checkForWall A function that checks if a node is a wall
+     */
+    static aStar(grid, startNode, endNode, checkForWall = neighbor => false)
+    {
+        // Reset pathfinding properties of all nodes
+        grid.forEach2d(node => {
+            node.G = undefined;
+            node.F = undefined;
+            node.previous = undefined;
+        });
+
+        // Calculate the F value of the start node
+        startNode.G = 0;
+        startNode.F = startNode.G + Math.abs(endNode.x - startNode.x)
+            + Math.abs(endNode.y - startNode.y);
+
+        const queue = [startNode];
+        const visited = [];
+        const path = [];
+
+        while (queue.length > 0) {
+            let currentNode = queue.sort((a, b) => a.F - b.F).shift();
+            visited.push(currentNode);
+
+            // Target reached, construct the path using 'previous' property
+            if (currentNode === endNode) {
+                while (currentNode.previous !== undefined) {
+                    path.push(currentNode);
+                    currentNode = currentNode.previous;
+                }
+
+                break;
+            }
+
+            for (const neighbor of currentNode.getAdjacentItems()) {
+                if (neighbor === undefined
+                    // The node must not be an obstacle
+                    || neighbor.value === checkForWall(neighbor)
+                    // The node must not be visited yet
+                    || visited.includes(neighbor)
+                ) {
+                    continue;
+                }
+
+                // Calculate the F value of the neighbor
+                const G = (currentNode.G + 1);
+                const F = G + Math.abs(endNode.x - neighbor.x)
+                    + Math.abs(endNode.y - neighbor.y);
+
+                // Update the neighbor's values if it's not in the queue,
+                // or if it is in the queue, but the F is lower
+                const inQueue = queue.includes(neighbor);
+                if (! inQueue || (inQueue && F < neighbor.F)) {
+                    neighbor.G = G;
+                    neighbor.F = F;
+                    neighbor.previous = currentNode;
+                }
+
+                // Add the neighbor to the queue
+                if (! inQueue) {
+                    queue.push(neighbor);
+                }
+            }
+        }
+
+        // Reverse the path, to go from start to end
+        return path.reverse();
+    }
+}
