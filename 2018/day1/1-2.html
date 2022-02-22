@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const changes = await fileReader.parse();
+            const frequencies = [];
+            let duplicateFrequency;
+
+            let frequency = 0;
+            let index = -1;
+            while (++index >= 0) {
+                frequency += changes[index % changes.length];
+
+                if (frequencies.includes(frequency)) {
+                    duplicateFrequency = frequency;
+                    break;
+                }
+
+                frequencies.push(frequency);
+            }
+
+            document.querySelector('#answer').innerText = duplicateFrequency;
+        </script>
+    </body>
+</html>
