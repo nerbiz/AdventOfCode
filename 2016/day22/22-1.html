@@ -17,7 +17,7 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const nodes = await fileReader.parse();
-            const viablePairs = [];
+            let viablePairsAmount = 0;
 
             for (const node of nodes) {
                 // Skip empty nodes
@@ -29,12 +29,12 @@
                 const otherNodes = nodes.filter(otherNode => otherNode !== node);
                 for (const otherNode of otherNodes) {
                     if (node.used <= otherNode.available) {
-                        viablePairs.push([node, otherNode]);
+                        viablePairsAmount++;
                     }
                 }
             }
 
-            document.querySelector('#answer').innerText = viablePairs.length;
+            document.querySelector('#answer').innerText = viablePairsAmount;
         </script>
     </body>
 </html>
