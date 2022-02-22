@@ -16,10 +16,8 @@
             import Parser from './Parser.js';
             import Array2d, {Pathfinding} from '../../Array2d.js';
 
-            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const fileReader = new FileReader('./data.txt', new Parser());
             const riskMap = new Array2d(await fileReader.parse());
-
-            const startTime = new Date().getTime();
 
             // Expand the risk horizontally, increasing the values in every clone
             const placeholders = [...Array(4).keys()];
@@ -35,17 +33,6 @@
             const startPoint = riskMap.getItem(0, 0);
             const endPoint = riskMap.getItem(riskMap.length - 1, riskMap[0].length - 1);
             const path = Pathfinding.dijkstra(riskMap, startPoint, endPoint);
-
-            // Show the path in the console
-            console.log(riskMap.toString(point => {
-                if (point === startPoint || path.includes(point)) {
-                    return '\x1b[35m' + point.value + '\x1b[0m';
-                } else {
-                    return '\x1b[37m' + point.value + '\x1b[0m';
-                }
-            }));
-
-            console.log('Time taken:', new Date().getTime() - startTime);
 
             document.querySelector('#answer').innerText = endPoint.distance;
         </script>
