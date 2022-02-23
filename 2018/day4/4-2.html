@@ -23,7 +23,6 @@
                     minute: index,
                     guards: {},
                 }));
-            const guardIds = [];
 
             // Sort the events by date (ascending)
             events.sort((a, b) => a.date - b.date);
@@ -40,10 +39,6 @@
                 // Set the guard ID for the following events
                 if (event.guardId !== undefined) {
                     guardId = event.guardId;
-
-                    if (! guardIds.includes(guardId)) {
-                        guardIds.push(guardId);
-                    }
                 }
 
                 // The guard falls asleep
