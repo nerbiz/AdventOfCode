@@ -17,67 +17,53 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const events = await fileReader.parse();
-            const midnightHour = Array(60)
-                .fill(undefined)
-                .map((minute, index) => ({minute: index}));
-            const guardIds = [];
-
-            // Sort the events by date (ascending)
-            events.sort((a, b) => a.date - b.date);
+            const guards = {};
 
             let guardId;
             let asleepMinute;
-            for (const event of events) {
-                // Convert any dates before midnight, to midnight
-                if (event.date.getHours() === 23) {
-                    event.date.setHours(0);
-                    event.date.setMinutes(0);
-                }
+            events.sort((a, b) => a.date - b.date)
+                .forEach(event => {
+                    // If the event is before midnight, set it to midnight
+                    const currentMinute = (event.date.getHours() === 23)
+                        ? 0
+                        : event.date.getMinutes();
 
-                // Set the guard ID for the following events
-                if (event.guardId !== undefined) {
-                    guardId = event.guardId;
+                    // Set the guard ID for the following events
+                    if (event.guardId !== undefined) {
+                        guardId = event.guardId;
 
-                    if (! guardIds.includes(guardId)) {
-                        guardIds.push(guardId);
-                    }
-                }
-
-                // The guard falls asleep
-                if (event.status === 'asleep') {
-                    asleepMinute = event.date.getMinutes();
-                }
-
-                // The guard wakes up
-                else {
-                    // Increase the asleep count of the guard, for the preceding minutes
-                    if (asleepMinute !== undefined) {
-                        for (let minute = asleepMinute; minute < event.date.getMinutes(); minute++) {
-                            midnightHour[minute][guardId] = (midnightHour[minute][guardId] || 0);
-                            midnightHour[minute][guardId]++;
+                        if (! (guardId in guards)) {
+                            guards[guardId] = Array(60).fill(0);
                         }
                     }
+
+                    if (event.status === 'asleep') {
+                        // Set the minute when the guard fell asleep
+                        asleepMinute = currentMinute;
+                    } else {
+                        // When waking up, increase the asleep count for the preceding minutes
+                        for (let minute = asleepMinute; minute < currentMinute; minute++) {
+                            guards[guardId][minute]++;
+                        }
+                    }
+                });
+
+            let mostSleepMinutes = 0;
+            let mostSleepyGuardId;
+            for (const [guardId, minutes] of Object.entries(guards)) {
+                // Set the total sleep minutes and most occurring sleep minute, per guard
+                guards[guardId] = {
+                    totalAsleep: guards[guardId].reduce((sum, amount) => (sum + amount), 0),
+                    peakMinute: guards[guardId].indexOf(Math.max(...guards[guardId])),
+                };
+
+                if (guards[guardId].totalAsleep > mostSleepMinutes) {
+                    mostSleepMinutes = guards[guardId].totalAsleep;
+                    mostSleepyGuardId = guardId;
                 }
             }
 
-            // Find the guard that sleeps the most
-            const mostSleepyGuardId = guardIds
-                .map(guardId => ({
-                    guardId,
-                    asleepAmount: midnightHour.reduce((sum, minute) => sum + (minute[guardId] || 0), 0),
-                }))
-                .sort((a, b) => b.asleepAmount - a.asleepAmount)
-                .at(0)
-                .guardId;
-
-            // Find the minute at which the guard sleeps the most often
-            const mostAsleepMinute = midnightHour
-                .sort((a, b) => b[mostSleepyGuardId] - a[mostSleepyGuardId])
-                .filter(minute => minute[mostSleepyGuardId] !== undefined)
-                .at(0)
-                .minute;
-
-            document.querySelector('#answer').innerText = mostSleepyGuardId * mostAsleepMinute;
+            document.querySelector('#answer').innerText = mostSleepyGuardId * guards[mostSleepyGuardId].peakMinute;
         </script>
     </body>
 </html>
