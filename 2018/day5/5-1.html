@@ -16,10 +16,10 @@
             import Parser from './Parser.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            let polymer = await fileReader.parse();
-
             // Convert the polymer to a character code array
-            polymer = polymer.split('').map(unit => unit.charCodeAt(0));
+            let polymer = (await fileReader.parse())
+                .split('')
+                .map(unit => unit.charCodeAt(0));
 
             // Remove matching unit pairs
             while (true) {
