@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const claims = await fileReader.parse();
+
+            const startTime = new Date().getTime();
+
+            // See how much fabric (width/height) is needed to fit all claims
+            let requiredWidth = 0;
+            let requiredHeight = 0;
+            for (const claim of claims) {
+                requiredWidth = Math.max(requiredWidth, claim.x + claim.width);
+                requiredHeight = Math.max(requiredHeight, claim.y + claim.height);
+            }
+
+            // Create the fabric, with each inch unused (0)
+            const fabric = Array(requiredHeight).fill(undefined)
+                .map(row => Array(requiredWidth).fill(0));
+
+            // Set the amount of times each inch is used by all claims
+            for (const claim of claims) {
+                for (let y = claim.y; y < claim.y + claim.height; y++) {
+                    for (let x = claim.x; x < claim.x + claim.width; x++) {
+                        fabric[y][x]++;
+                    }
+                }
+            }
+
+            document.querySelector('#answer').innerText = fabric
+                .flat()
+                .filter(amount => amount > 1)
+                .length;
+        </script>
+    </body>
+</html>
