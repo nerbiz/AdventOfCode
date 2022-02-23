@@ -14,6 +14,7 @@ export default class
             size = size.split('x').map(number => number - 0);
 
             return {
+                id: id.replace('#', '') - 0,
                 x: coordinates[0],
                 y: coordinates[1],
                 width: size[0],
