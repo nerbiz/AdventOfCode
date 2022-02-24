@@ -161,16 +161,20 @@ export default class ArrayPrototype
     {
         Object.defineProperty(Array.prototype, 'countValues', {
             value: function countValues(asArray = false) {
-                const occurrences = {};
+                let occurrences = {};
 
                 for (let i = 0; i < this.length; i++) {
-                    occurrences[this[i]] = occurrences[this[i]] || 0;
-                    occurrences[this[i]]++;
+                    // Make value:[value, amount] entries
+                    occurrences[this[i]] = occurrences[this[i]] || [this[i], 0];
+                    occurrences[this[i]][1]++;
                 }
 
+                // Keep the values, which are [value, amount] arrays
+                occurrences = Object.values(occurrences);
+
                 return (asArray === true)
-                    ? Object.entries(occurrences)
-                    : occurrences;
+                    ? occurrences
+                    : Object.fromEntries(occurrences);
             },
             enumerable: false,
             writable: false,
