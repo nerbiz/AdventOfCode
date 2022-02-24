@@ -24,7 +24,7 @@
             document.querySelector('#answer').innerText = programs
                 .map(program => [program.name].concat(program.subTowers))
                 .flat()
-                .countValues(true)
+                .countValues()
                 .find(occurrences => occurrences[1] === 1)
                 .at(0);
         </script>

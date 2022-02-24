@@ -25,7 +25,7 @@
                 const character = messages
                     // Take the nth index of each row
                     .map(message => message[i])
-                    .countValues(true)
+                    .countValues()
                     .sort((a, b) => b[1] - a[1])
                     // Take the most occurring character
                     .at(0)

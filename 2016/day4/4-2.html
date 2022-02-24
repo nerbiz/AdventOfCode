@@ -32,7 +32,7 @@
                         ? 0
                         : (a < b) ? -1 : 1)
                     // Get the amount of character occurrences
-                    .countValues(true)
+                    .countValues()
                     // Sort by most occurrences first
                     .sort((a, b) => b[1] - a[1])
                     // Keep the first 5

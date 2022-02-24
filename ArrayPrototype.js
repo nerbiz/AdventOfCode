@@ -154,13 +154,13 @@ export default class ArrayPrototype
 
     /**
      * Counts the occurrences of values in an array
-     * @param {boolean} asArray Whether to return an array or object
+     * @param {boolean} asObject Whether to return an array or object
      * @returns {object}
      */
     static registerCountValues()
     {
         Object.defineProperty(Array.prototype, 'countValues', {
-            value: function countValues(asArray = false) {
+            value: function countValues(asObject = false) {
                 let occurrences = {};
 
                 for (let i = 0; i < this.length; i++) {
@@ -172,9 +172,9 @@ export default class ArrayPrototype
                 // Keep the values, which are [value, amount] arrays
                 occurrences = Object.values(occurrences);
 
-                return (asArray === true)
-                    ? occurrences
-                    : Object.fromEntries(occurrences);
+                return (asObject === true)
+                    ? Object.fromEntries(occurrences)
+                    : occurrences;
             },
             enumerable: false,
             writable: false,
