@@ -17,14 +17,14 @@ export default class ArrayPrototype
         this.registerTap();
     }
 
-    /**
-     * Create a clone of an array
-     * @param {boolean} completely Whether to make a shallow copy (false) or not (true)
-     * @returns {array}
-     */
     static registerClone()
     {
         Object.defineProperty(Array.prototype, 'clone', {
+            /**
+             * Create a clone of an array
+             * @param {boolean} completely Whether to make a shallow copy (false) or not (true)
+             * @returns {array}
+             */
             value: function clone(completely = false) {
                 return (completely === true)
                     // Clone everything, including array items
@@ -40,15 +40,15 @@ export default class ArrayPrototype
         });
     }
 
-    /**
-     * Like indexOf(), but finds all the indexes
-     * @param {any} searchElement The item to search for
-     * @param {number} fromIndex The index to start the search at
-     * @returns {array}
-     */
     static registerIndexesOf()
     {
         Object.defineProperty(Array.prototype, 'indexesOf', {
+            /**
+             * Like indexOf(), but finds all the indexes
+             * @param {any} searchElement The item to search for
+             * @param {number} fromIndex The index to start the search at
+             * @returns {array}
+             */
             value: function indexesOf(searchElement, fromIndex = 0) {
                 const indexes = [];
                 let index;
@@ -65,13 +65,13 @@ export default class ArrayPrototype
         });
     }
 
-    /**
-     * Remove duplicates from an array
-     * @returns {array}
-     */
     static registerUnique()
     {
         Object.defineProperty(Array.prototype, 'unique', {
+            /**
+             * Remove duplicates from an array
+             * @returns {array}
+             */
             value: function unique() {
                 const unique = [];
 
@@ -88,13 +88,13 @@ export default class ArrayPrototype
         });
     }
 
-    /**
-     * Calculate the sum of array items
-     * @returns {number}
-     */
     static registerSum()
     {
         Object.defineProperty(Array.prototype, 'sum', {
+            /**
+             * Calculate the sum of array items
+             * @returns {number}
+             */
             value: function sum() {
                 return this.reduce((sum, item) => (sum + item), 0);
             },
@@ -103,13 +103,13 @@ export default class ArrayPrototype
         });
     }
 
-    /**
-     * Calculate the product of array items
-     * @returns {number}
-     */
     static registerProduct()
     {
         Object.defineProperty(Array.prototype, 'product', {
+            /**
+             * Calculate the product of array items
+             * @returns {number}
+             */
             value: function product() {
                 return this.reduce((sum, item) => (sum * item), 1);
             },
@@ -118,14 +118,14 @@ export default class ArrayPrototype
         });
     }
 
-    /**
-     * Get array items that exist in the other arrays
-     * @param {array} arrays 1 or more arrays to compare with
-     * @returns {array}
-     */
     static registerIntersection()
     {
         Object.defineProperty(Array.prototype, 'intersection', {
+            /**
+             * Get array items that exist in the other arrays
+             * @param {array} arrays 1 or more arrays to compare with
+             * @returns {array}
+             */
             value: function intersection(...arrays) {
                 arrays = [].concat(...arrays);
                 return this.filter(item => arrays.includes(item));
@@ -135,14 +135,14 @@ export default class ArrayPrototype
         });
     }
 
-    /**
-     * Get items from array 1, that don't exist in the other arrays
-     * @param {array} arrays 1 or more arrays to compare with
-     * @returns {array}
-     */
     static registerDifference()
     {
         Object.defineProperty(Array.prototype, 'difference', {
+            /**
+             * Get items from array 1, that don't exist in the other arrays
+             * @param {array} arrays 1 or more arrays to compare with
+             * @returns {array}
+             */
             value: function difference(...arrays) {
                 arrays = [].concat(...arrays);
                 return this.filter(item => ! arrays.includes(item));
@@ -152,14 +152,14 @@ export default class ArrayPrototype
         });
     }
 
-    /**
-     * Counts the occurrences of values in an array
-     * @param {boolean} asObject Whether to return an array or object
-     * @returns {object}
-     */
     static registerCountValues()
     {
         Object.defineProperty(Array.prototype, 'countValues', {
+            /**
+             * Counts the occurrences of values in an array
+             * @param {boolean} asObject Whether to return an array or object
+             * @returns {object}
+             */
             value: function countValues(asObject = false) {
                 let occurrences = {};
 
@@ -181,14 +181,14 @@ export default class ArrayPrototype
         });
     }
 
-    /**
-     * Splits an array into chunks
-     * @param {number} chunkSize
-     * @returns {array}
-     */
     static registerChunk()
     {
         Object.defineProperty(Array.prototype, 'chunk', {
+            /**
+             * Splits an array into chunks
+             * @param {number} chunkSize
+             * @returns {array}
+             */
             value: function chunk(chunkSize) {
                 const chunks = [];
 
@@ -203,14 +203,14 @@ export default class ArrayPrototype
         });
     }
 
-    /**
-     * Apply a callback to every item and return the array itself unaltered
-     * @param {function} callback
-     * @returns {array}
-     */
     static registerTap()
     {
         Object.defineProperty(Array.prototype, 'tap', {
+            /**
+             * Apply a callback to every item and return the array itself unaltered
+             * @param {function} callback
+             * @returns {array}
+             */
             value: function tap(callback) {
                 this.forEach(callback);
                 return this;
