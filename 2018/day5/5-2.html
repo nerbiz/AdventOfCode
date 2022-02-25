@@ -19,8 +19,6 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const originalPolymer = await fileReader.parse();
 
-            const startTime = new Date().getTime();
-
             let shortestLength = Infinity;
             for (const type of 'abcdefghijklmnopqrstuvwxyz') {
                 let polymer = originalPolymer
@@ -66,8 +64,6 @@
 
                 shortestLength = Math.min(shortestLength, polymer.length);
             }
-
-            console.log('Time taken:', new Date().getTime() - startTime);
 
             document.querySelector('#answer').innerText = shortestLength;
         </script>
