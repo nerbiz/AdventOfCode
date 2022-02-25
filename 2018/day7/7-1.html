@@ -25,21 +25,23 @@
             let order = '';
 
             // Create a list of steps, with their required step(s)
+            let allSteps = [];
+            let stepsWithRequirements = [];
             let steps = {};
             for (const instruction of instructions) {
-                if (! (instruction.step in steps)) {
-                    steps[instruction.step] = [];
-                }
+                allSteps.push(instruction.step, instruction.required);
+                stepsWithRequirements.push(instruction.step);
 
+                steps[instruction.step] = steps[instruction.step] || [];
                 steps[instruction.step].push(instruction.required);
             }
 
+            allSteps = allSteps.unique();
+            stepsWithRequirements = stepsWithRequirements.unique();
             steps = Object.entries(steps);
-            const allRequiredSteps = steps.map(step => step[1]).flat().unique();
-            const stepsWithRequirements = steps.map(step => step[0]);
 
             // The first available steps are the ones that don't have required steps
-            const firstSteps = allRequiredSteps.difference(stepsWithRequirements);
+            const firstSteps = allSteps.difference(stepsWithRequirements);
             for (const firstStep of firstSteps) {
                 availableSteps.enqueue(firstStep.charCodeAt(0), firstStep);
             }
