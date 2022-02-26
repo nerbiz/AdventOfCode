@@ -15,6 +15,7 @@ export default class ArrayPrototype
         this.registerChunk();
         this.registerClone();
         this.registerTap();
+        this.registerTake();
     }
 
     static registerClone()
@@ -214,6 +215,38 @@ export default class ArrayPrototype
             value: function tap(callback) {
                 this.forEach(callback);
                 return this;
+            },
+            enumerable: false,
+            writable: false,
+        });
+    }
+
+    static registerTake()
+    {
+        Object.defineProperty(Array.prototype, 'take', {
+            /**
+             * Like filter, but also removes the found items from the array
+             * @param {function} callback
+             * @returns {array}
+             */
+            value: function take(callback) {
+                const taken = [];
+                const takenIndexes = [];
+
+                // Get items to take from the array
+                for (let index = 0; index < this.length; index++) {
+                    if (callback(this[index], index, this)) {
+                        taken.push(this[index]);
+                        takenIndexes.push(index);
+                    }
+                }
+
+                // Remove the taken items
+                for (const index of takenIndexes) {
+                    this.splice(index, 1);
+                }
+
+                return taken;
             },
             enumerable: false,
             writable: false,
