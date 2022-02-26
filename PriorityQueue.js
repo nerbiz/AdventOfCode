@@ -31,6 +31,15 @@ export default class PriorityQueue
     }
 
     /**
+     * Get all the items currently in queue, in order
+     * @return {array}
+     */
+    getAll()
+    {
+        return this.queue.map(item => item[1]);
+    }
+
+    /**
      * Add an item to the queue
      * @param {number} priority
      * @param {any} item
@@ -49,7 +58,16 @@ export default class PriorityQueue
     }
 
     /**
-     * Get the first item from the queue
+     * See which item is next in the queue
+     * @return {any}
+     */
+    peek()
+    {
+        return this.queue[0][1];
+    }
+
+    /**
+     * Take the first item from the queue
      * @returns {any}
      */
     dequeue()
