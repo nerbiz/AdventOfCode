@@ -777,7 +777,7 @@ export default class Array2d extends Array
     /**
      * Convert the array to string
      * @param {function} callback A callback to apply to every item
-     * @returns {array}
+     * @returns {string}
      */
     toString(callback = undefined)
     {
