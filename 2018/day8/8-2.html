@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
+
+            ArrayPrototype.extend();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const headers = await fileReader.parse();
+
+            const getValue = headers => {
+                const childNodesAmount = headers.shift();
+                const metadataAmount = headers.shift();
+                
+                // Get the values of child nodes (if any)
+                const childValues = {};
+                let index = 0;
+                while (++index <= childNodesAmount) {
+                    childValues[index] = getValue(headers);
+                }
+
+                // Get the metadata of the current node
+                const metadata = headers.take((data, index) => index < metadataAmount);
+
+                return (childNodesAmount === 0)
+                    // In case of no child nodes, sum up the metadata values
+                    ? metadata.reduce((sum, value) => (sum + value), 0)
+                    // Otherwise, the values are indexes, sum up the values of child node(s)
+                    : metadata.map(index => childValues[index] || 0)
+                        .reduce((sum, value) => (sum + value), 0);
+            };
+
+            document.querySelector('#answer').innerText = getValue(headers);
+        </script>
+    </body>
+</html>
