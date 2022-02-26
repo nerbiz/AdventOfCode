@@ -237,7 +237,7 @@ export default class ArrayPrototype
                 for (let index = 0; index < this.length; index++) {
                     if (callback(this[index], index, this)) {
                         taken.push(this[index]);
-                        takenIndexes.push(index);
+                        takenIndexes.unshift(index);
                     }
                 }
 
