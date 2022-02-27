@@ -20,7 +20,7 @@
             const {players, lastMarble} = await fileReader.parse();
             const circle = [0, 1];
             let currentIndex = 1;
-            const playerScores = {};
+            const playerScores = Array(players).fill(0);
             let currentPlayer = 0;
 
             for (let marble = 2; marble <= lastMarble; marble++) {
@@ -29,21 +29,14 @@
                 if (marble % 23 === 0) {
                     currentIndex = (circle.length + currentIndex - 7) % circle.length;
 
-                    // Remove the marble 7 places before the current marble
-                    const removed = circle.splice(currentIndex, 1)[0];
-
-                    // Increase the current player's score
-                    playerScores[currentPlayer + 1] = playerScores[currentPlayer + 1] || 0;
-                    playerScores[currentPlayer + 1] += marble + removed;
+                    // Add marble value + removed marble value to the score
+                    playerScores[currentPlayer] += marble + circle.splice(currentIndex, 1)[0];
                     continue;
                 }
 
                 // Insert the marble between the next 1 and 2 marbles
-                if ((currentIndex += 2) === circle.length) {
-                    circle.push(marble);
-                } else {
-                    circle.splice(currentIndex %= circle.length, 0, marble);
-                }
+                currentIndex = (currentIndex === circle.length - 1) ? 1 : currentIndex + 2;
+                circle.splice(currentIndex %= circle.length, 0, marble);
             }
 
             document.querySelector('#answer').innerText = Math.max(...Object.values(playerScores));
