@@ -458,6 +458,7 @@ export default class Array2d extends Array
      * @param {number} startY
      * @param {number} endX The X index before which to stop slicing
      * @param {number} endY The Y index before which to stop slicing
+     * @return {Array2d}
      */
     getSlice(startX, startY, endX, endY)
     {
