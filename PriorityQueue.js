@@ -47,14 +47,35 @@ export default class PriorityQueue
      */
     enqueue(priority, item)
     {
-        const insertBeforeIndex = this.queue.findIndex(entry => entry[0] > priority);
-
         const entry = [priority, item];
-        if (insertBeforeIndex === -1) {
+
+        // See if the item needs to be the last in the queue
+        if (this.isEmpty() || priority >= this.queue.at(-1)[0]) {
             this.queue.push(entry);
-        } else {
-            this.queue.splice(insertBeforeIndex, 0, entry);
+            return;
         }
+
+        // See if the item needs to be the first in the queue
+        if (priority <= this.queue.at(0)[0]) {
+            this.queue.splice(1, 0, entry);
+            return;
+        }
+
+        let minIndex = 0;
+        let maxIndex = this.queue.length - 1;
+
+        // Use a halving technique to find the insertion index
+        while (maxIndex - minIndex > 1) {
+            const middleIndex = Math.ceil((maxIndex - minIndex) / 2) + minIndex;
+
+            if (priority < this.queue[middleIndex][0]) {
+                maxIndex = middleIndex;
+            } else {
+                minIndex = middleIndex;
+            }
+        }
+
+        this.queue.splice(maxIndex, 0, entry);
     }
 
     /**
