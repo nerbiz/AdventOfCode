@@ -16,16 +16,13 @@ export default class
      * Read and parse the input file
      * @returns {any}
      */
-    async parse()
+    parse()
     {
-        let fileContents = await fetch(this.filePath)
-            .then(response => response.text());
-
-        // Trim the file contents if needed
-        if (this.trim === true) {
-            fileContents = fileContents.trim();
-        }
-
-        return this.parser.parse(fileContents.split("\n"));
+        return fetch(this.filePath)
+            .then(response => response.text())
+            // Trim the file contents if needed
+            .then(text => this.trim ? text.trim() : text)
+            // Parse the contents of the response
+            .then(text => this.parser.parse(text.split("\n")));
     }
 }
