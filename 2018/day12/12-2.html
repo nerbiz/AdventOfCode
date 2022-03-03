@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import ArrayPrototype from '../../ArrayPrototype.js';
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            ArrayPrototype.registerIndexesOf();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {pots, notes} = await fileReader.parse();
+            let newPots = '';
+            let previousState = pots;
+            let generations = 0;
+            let addedToLeft = 0;
+            let firstPlantIndex = 0;
+            let movePerGeneration;
+
+            while (++generations) {
+                // Expand the pots amount to the left and right
+                pots = '.'.repeat(5) + pots + '.'.repeat(5);
+                addedToLeft += 5;
+
+                for (let i = 0; i < pots.length; i++) {
+                    // Create the left-left-current-right-right pots pattern
+                    const pattern = pots.substring(i - 2, i).padStart(2, '.')
+                        + pots.substring(i, i + 3).padEnd(3, '.');
+
+                    newPots += (pattern in notes) ? notes[pattern] : '.';
+                }
+
+                pots = newPots;
+                newPots = '';
+
+                // If the state of pots/plants didn't change, this state will stay forever
+                const newState = pots.slice(pots.indexOf('#'), pots.lastIndexOf('#') + 1);
+                if (newState === previousState) {
+                    movePerGeneration = pots.indexOf('#') - firstPlantIndex - 5;
+                    firstPlantIndex = pots.indexOf('#');
+                    break;
+                }
+
+                previousState = newState;
+                firstPlantIndex = pots.indexOf('#');
+            }
+
+            // Determine the lowest index to start counting from
+            const lowestIndex = firstPlantIndex - addedToLeft + ((5e10 - generations) * movePerGeneration);
+
+            document.querySelector('#answer').innerText = pots
+                .slice(firstPlantIndex)
+                .split('')
+                .indexesOf('#')
+                .map(index => index + lowestIndex)
+                .reduce((sum, index) => (sum + index), 0);
+        </script>
+    </body>
+</html>
