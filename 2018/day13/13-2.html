@@ -23,29 +23,34 @@
             const map = new Array2d(await fileReader.parse());
             let carts = [];
             const directions = ['up', 'right', 'down', 'left'];
-            let crashLocation;
 
             map.forEach2d((track, x, y) => {
-                const directions = ['^', '>', 'v', '<'];
-                if (! directions.includes(track.value)) {
+                if (! ['<', '>', '^', 'v'].includes(track.value)) {
                     return;
                 }
 
                 // Add a cart object
-                const direction = directions.indexOf(track.value);
+                const direction = ['^', '>', 'v', '<'].indexOf(track.value);
                 carts.push({x, y, direction, nextTurn: 1});
 
                 // Replace the cart with a track in the map
                 track.value = (['<', '>'].includes(track.value)) ? '-' : '|';
             });
 
-            moveLoop: while (true) {
+            while (true) {
+                if (carts.length === 1) {
+                    break;
+                }
+
+                const removeIndexes = [];
+
                 // Sort by position, top-left to bottom-right
                 carts = carts.sortGrouped('y', (a, b) => a.y - b.y,
                     (a, b) => a.x - b.x);
 
                 // Move the carts 1 step
-                for (const cart of carts) {
+                for (let cartIndex = 0; cartIndex < carts.length; cartIndex++) {
+                    const cart = carts[cartIndex];
                     const currentLocation = map.getItem(cart.x, cart.y);
 
                     // Change direction at corners and intersections
@@ -74,17 +79,24 @@
                     cart.y = nextLocation.y;
 
                     // See if there is a collision
-                    const otherCarts = carts.filter(otherCart => otherCart !== cart);
-                    for (const otherCart of otherCarts) {
+                    for (let i = 0; i < carts.length; i++) {
+                        if (i === cartIndex) {
+                            continue;
+                        }
+
+                        const otherCart = carts[i];
                         if (otherCart.x === cart.x && otherCart.y === cart.y) {
-                            crashLocation = `${cart.x},${cart.y}`;
-                            break moveLoop;
+                            removeIndexes.push(cartIndex, i);
                         }
                     }
                 }
+
+                // Remove the crashed carts
+                removeIndexes.sort((a, b) => b - a)
+                    .forEach(index => carts.splice(index, 1));
             }
 
-            document.querySelector('#answer').innerText = crashLocation;
+            document.querySelector('#answer').innerText = `${carts[0].x},${carts[0].y}`;
         </script>
     </body>
 </html>
