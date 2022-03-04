@@ -16,6 +16,7 @@ export default class ArrayPrototype
         this.registerClone();
         this.registerTap();
         this.registerTake();
+        this.registerSortGrouped();
     }
 
     static registerClone()
@@ -247,6 +248,36 @@ export default class ArrayPrototype
                 }
 
                 return taken;
+            },
+            enumerable: false,
+            writable: false,
+        });
+    }
+
+    static registerSortGrouped()
+    {
+        Object.defineProperty(Array.prototype, 'sortGrouped', {
+            /**
+             * Group by with sorting, then sort the grouped items
+             * @param groupBy
+             * @param callback1
+             * @param callback2
+             * @return {array}
+             */
+            value: function sortGrouped(groupBy, callback1, callback2) {
+                const grouped = [];
+
+                this.map(item => item)
+                    .sort(callback1)
+                    .forEach((item, index, items) => {
+                        if (item[groupBy] === items[index - 1]?.[groupBy]) {
+                            grouped.at(-1).push(item);
+                        } else {
+                            grouped.push([item]);
+                        }
+                    });
+
+                return grouped.map(group => group.sort(callback2)).flat();
             },
             enumerable: false,
             writable: false,
