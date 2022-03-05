@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const recipesAmount = await fileReader.parse();
+            let board = '37';
+            const elfIndexes = [0, 1];
+
+            while (board.length < recipesAmount + 10) {
+                const score1 = board[elfIndexes[0]] - 0;
+                const score2 = board[elfIndexes[1]] - 0;
+                board += score1 + score2;
+                elfIndexes[0] = (elfIndexes[0] + 1 + score1) % board.length;
+                elfIndexes[1] = (elfIndexes[1] + 1 + score2) % board.length;
+            }
+
+            document.querySelector('#answer').innerText = board.slice(recipesAmount, recipesAmount + 10);
+        </script>
+    </body>
+</html>
