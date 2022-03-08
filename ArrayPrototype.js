@@ -160,7 +160,7 @@ export default class ArrayPrototype
             /**
              * Counts the occurrences of values in an array
              * @param {boolean} asObject Whether to return an array or object
-             * @returns {object}
+             * @returns {array|object}
              */
             value: function countValues(asObject = false) {
                 let occurrences = {};
