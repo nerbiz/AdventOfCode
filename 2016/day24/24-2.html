@@ -54,7 +54,7 @@
 
                 const targetNodes = numberNodes.filter(targetNode => targetNode !== node);
                 for (const targetNode of targetNodes) {
-                    node.paths[targetNode.value] = Pathfinding.aStar(map, node, targetNode, () => false);
+                    node.paths[targetNode.value] = Pathfinding.aStar(map, node, targetNode, node => node.value === false);
                 }
             }
 

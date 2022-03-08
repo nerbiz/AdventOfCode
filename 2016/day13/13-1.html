@@ -33,7 +33,7 @@
             // Find the shortest path
             const startNode = maze.getItem(1, 1);
             const endNode = maze.getItem(target[0], target[1]);
-            const path = Pathfinding.aStar(maze, startNode, endNode, () => false);
+            const path = Pathfinding.aStar(maze, startNode, endNode, node => node.value === false);
 
             // Visualize the path
             console.log(maze.toString(node => {
