@@ -1,4 +1,4 @@
-export default class
+export default class FileReader
 {
     /**
      * @param {string} filePath The path to the input file
