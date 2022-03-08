@@ -15,7 +15,8 @@
         <script type="module">
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
-            import Array2d, {Pathfinding} from '../../Array2d.js';
+            import Array2d from '../../Array2d.js';
+            import Pathfinding from '../../Pathfinding.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const {number, target} = await fileReader.parse();
