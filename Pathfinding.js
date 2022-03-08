@@ -8,7 +8,7 @@ export default class Pathfinding
      * @param {Array2dItem} startNode
      * @param {Array2dItem} targetNode
      * @param {function} isWall A function that checks if a node is a wall
-     * @returns {array} The shortest path as a nodes array
+     * @returns {array|boolean} The shortest path as a nodes array, or false if target is unreachable
      */
     static aStar(grid, startNode, targetNode, isWall)
     {
@@ -65,6 +65,10 @@ export default class Pathfinding
                     queue.push(neighbor);
                 }
             }
+        }
+
+        if (targetNode.previous === undefined) {
+            return false;
         }
 
         // Construct the path
