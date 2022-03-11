@@ -7,10 +7,10 @@ export default class Pathfinding
      * @param {Array2d} grid
      * @param {Array2dItem} startNode
      * @param {Array2dItem} targetNode
-     * @param {function} isWall A function that checks if a node is a wall
+     * @param {function} isObstacle A function that checks if a node is an obstacle
      * @returns {array|boolean} The shortest path as a nodes array, or false if target is unreachable
      */
-    static aStar(grid, startNode, targetNode, isWall)
+    static aStar(grid, startNode, targetNode, isObstacle)
     {
         // Reset pathfinding properties of all nodes
         grid.forEach2d(node => {
@@ -39,7 +39,7 @@ export default class Pathfinding
             for (const neighbor of currentNode.getAdjacentItems()) {
                 if (neighbor === undefined
                     // The node must not be an obstacle
-                    || isWall(neighbor)
+                    || isObstacle(neighbor)
                     // The node must not be visited yet
                     || visited.includes(neighbor)
                 ) {
