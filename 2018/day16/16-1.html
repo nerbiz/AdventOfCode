@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {samples} = await fileReader.parse();
+            let foundSamples = 0;
+
+            const operations = [
+                /* addr */ (registers, a, b) => (registers[a] - 0) + (registers[b] - 0),
+                /* addi */ (registers, a, b) => (registers[a] - 0) + b,
+                /* mulr */ (registers, a, b) => registers[a] * registers[b],
+                /* muli */ (registers, a, b) => registers[a] * b,
+                /* banr */ (registers, a, b) => registers[a] & registers[b],
+                /* bani */ (registers, a, b) => registers[a] & b,
+                /* borr */ (registers, a, b) => registers[a] | registers[b],
+                /* bori */ (registers, a, b) => registers[a] | b,
+                /* setr */ (registers, a) => registers[a],
+                /* seti */ (registers, a) => a,
+                /* gtir */ (registers, a, b) => Number(a > registers[b]),
+                /* gtri */ (registers, a, b) => Number(registers[a] > b),
+                /* gtrr */ (registers, a, b) => Number(registers[a] > registers[b]),
+                /* eqir */ (registers, a, b) => Number(a === registers[b]),
+                /* eqri */ (registers, a, b) => Number(registers[a] === b),
+                /* eqrr */ (registers, a, b) => Number(registers[a] === registers[b]),
+            ];
+
+            checkSample: for (const sample of samples) {
+                let matches = 0;
+                for (const operation of operations) {
+                    // Perform the operation on the registers
+                    const result = operation(sample.before, ...sample.instruction.slice(1, 3));
+
+                    // See if the result matches
+                    matches += Number(result === sample.after[sample.instruction[3]] - 0);
+                    if (matches === 3) {
+                        foundSamples++;
+                        continue checkSample;
+                    }
+                }
+            }
+
+            document.querySelector('#answer').innerText = foundSamples;
+        </script>
+    </body>
+</html>
