@@ -23,7 +23,7 @@
             const lights = Array2d.withData({value: false}, 1000, 1000);
 
             instructions.forEach(instruction => {
-                const slice = lights.getSlice(instruction.startX, instruction.startY,
+                const slice = lights.slice2d(instruction.startX, instruction.startY,
                     instruction.endX + 1, instruction.endY + 1);
 
                 slice.forEach2d(light => {

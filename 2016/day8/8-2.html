@@ -28,7 +28,7 @@
 
             instructions.forEach(instruction => {
                 if (instruction.type === 'rect') {
-                    screen.getSlice(0, 0, instruction.x, instruction.y)
+                    screen.slice2d(0, 0, instruction.x, instruction.y)
                         .forEach2d(pixel => pixel.value = true);
                 } else if (instruction.type === 'rotate') {
                     if (instruction.part === 'row') {

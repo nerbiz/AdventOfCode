@@ -34,7 +34,7 @@
                 },
             }, gridSize, gridSize);
 
-            grid.getSlice(1, 1, gridSize - 1, gridSize - 1)
+            grid.slice2d(1, 1, gridSize - 1, gridSize - 1)
                 .forEach2d(cell => {
                     cell.totalPower = cell.powerLevel
                         + cell.getSurroundingItems()

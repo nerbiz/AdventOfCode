@@ -451,20 +451,6 @@ export default class Array2d extends Array
     }
 
     /**
-     * Get a part of the 2D array
-     * @param {number} startX
-     * @param {number} startY
-     * @param {number} endX The X index before which to stop slicing
-     * @param {number} endY The Y index before which to stop slicing
-     * @return {Array2d}
-     */
-    getSlice(startX, startY, endX, endY)
-    {
-        return this.slice(startY, endY)
-            .map(row => row.slice(startX, endX));
-    }
-
-    /**
      * Get all columns
      * @returns {array}
      */
@@ -663,6 +649,20 @@ export default class Array2d extends Array
     containsAny(values)
     {
         return values.some(value => this.getAllValues(true).includes(value));
+    }
+
+    /**
+     * Get a part of the 2D array
+     * @param {number} startX
+     * @param {number} startY
+     * @param {number} endX The X index before which to stop slicing
+     * @param {number} endY The Y index before which to stop slicing
+     * @return {Array2d}
+     */
+    slice2d(startX, startY, endX, endY)
+    {
+        return this.slice(startY, endY)
+            .map(row => row.slice(startX, endX));
     }
 
     /**
