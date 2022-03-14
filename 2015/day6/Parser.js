@@ -1,4 +1,4 @@
-export default class
+export default class Parser
 {
     /**
      * Parse lines into data
@@ -16,7 +16,7 @@ export default class
             const [start, end] = instruction.slice(firstDigit.index).split(' through ');
             const [startX, startY] = start.split(',').map(number => parseInt(number, 10));
             const [endX, endY] = end.split(',').map(number => parseInt(number, 10));
-            
+
             return {
                 action: action[2] || action[0],
                 startX,

@@ -1,6 +1,6 @@
 import Utilities from '../../Utilities.js';
 
-export default class
+export default class Parser
 {
     constructor() {
         // Fix "'this' is undefined" error

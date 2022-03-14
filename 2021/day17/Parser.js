@@ -1,6 +1,6 @@
 import Utilities from '../../Utilities.js';
 
-export default class
+export default class Parser
 {
     /**
      * Parse lines into data
@@ -16,7 +16,7 @@ export default class
             .map(minMax => minMax.split('..'))
             .flat()
             .map(number => parseInt(number, 10));
-        
+
         return {
             xMin: target[0],
             xMax: target[1],

@@ -1,4 +1,4 @@
-export default class
+export default class Board
 {
     /**
      * @param {number} identifier The identifier of the board
@@ -20,7 +20,7 @@ export default class
         // Populate the columns
         for (let columnIndex = 0; columnIndex < 5; columnIndex++) {
             const column = [];
-            for (let i = 0; i < 5; i++) {                
+            for (let i = 0; i < 5; i++) {
                 column.push(boardNumbers[columnIndex + (i * 5)]);
             }
 
