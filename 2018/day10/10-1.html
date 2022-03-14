@@ -69,7 +69,7 @@
                 sky[y][x] = true;
             });
 
-            document.querySelector('#answer').textContent = sky
+            document.querySelector('#answer').innerText = sky
                 .map(row => row.map(point => point ? '█' : ' ').join('').trim())
                 .join('\n')
                 .trim();

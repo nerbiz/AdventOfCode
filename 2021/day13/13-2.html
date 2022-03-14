@@ -5,15 +5,15 @@
         <title>Advent of Code</title>
         <style>
             #answer {
+                font-family: monospace;
                 font-size: 20px;
-                width: 500px;
-                height: 140px;
                 line-height: 1;
+                white-space: pre;
             }
         </style>
     </head>
     <body>
-        <textarea id="answer"></textarea>
+        <p id="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -71,11 +71,11 @@
                 });
             });
 
-            dotsMap
+            document.querySelector('#answer').innerText = dotsMap
                 .map(row => row
                     .map(point => (point === null) ? ' ' : '█')
                     .join(''))
-                .forEach(line => answer.value += line + "\n");
+                .join('\n');
         </script>
     </body>
 </html>

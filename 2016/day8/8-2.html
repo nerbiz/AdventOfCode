@@ -5,15 +5,15 @@
         <title>Advent of Code</title>
         <style>
             #answer {
+                font-family: monospace;
                 font-size: 20px;
-                width: 630px;
-                height: 150px;
                 line-height: 1;
+                white-space: pre;
             }
         </style>
     </head>
     <body>
-        <textarea id="answer"></textarea>
+        <p id="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -53,7 +53,7 @@
                 }
             });
 
-            document.querySelector('#answer').value = screen
+            document.querySelector('#answer').innerText = screen
                 .toString(pixel => pixel.value ? '█' : ' ');
         </script>
     </body>
