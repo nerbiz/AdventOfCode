@@ -147,6 +147,19 @@ export default class Array2d extends Array
     }
 
     /**
+     * Initialize with custom data for every item
+     * @param {object} customData
+     * @param  {...any} values See constructor
+     * @returns {Array2d}
+     */
+    static withData(customData, ...values)
+    {
+        Array2d.customData = customData;
+
+        return new Array2d(...values);
+    }
+
+    /**
      * Calculate the amount of steps between 2 points
      * @param {number|Array2dItem} fromX
      * @param {number|Array2dItem} fromY
@@ -195,19 +208,6 @@ export default class Array2d extends Array
         const {x, y} = this.getSteps(fromX, fromY, toX, toY, true);
 
         return Math.sqrt(x ** 2 + y ** 2);
-    }
-
-    /**
-     * Initialize with custom data for every item
-     * @param {object} customData
-     * @param  {...any} values See constructor
-     * @returns {Array2d}
-     */
-    static withData(customData, ...values)
-    {
-        Array2d.customData = customData;
-
-        return new Array2d(...values);
     }
 
     /**
@@ -263,7 +263,10 @@ export default class Array2d extends Array
         // Empty the static extra data
         Array2d.customData = undefined;
 
-        super(...newArray);
+        super();
+        for (let i = 0; i < newArray.length; i++) {
+            this[i] = newArray[i];
+        }
 
         // Set the parent array in all items
         this.forEach2d(item => item.setParent(this));
