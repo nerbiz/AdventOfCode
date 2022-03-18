@@ -15,13 +15,16 @@
         <script type="module">
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
-            import Utilities from '../../Utilities.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
 
+            ArrayPrototype.registerUnique();
             const fileReader = new FileReader('./data.txt', new Parser());
             let distances = await fileReader.parse();
 
             // Create objects for every place
-            const places = Utilities.arrayUnique(distances.flatMap(distance => [distance.from, distance.to]))
+            const places = distances
+                .flatMap(distance => [distance.from, distance.to])
+                .unique()
                 .map(place => ({name: place, visited: false, distances: [], route: []}));
 
             // Set the distances between all places

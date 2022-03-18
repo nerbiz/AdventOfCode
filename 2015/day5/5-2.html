@@ -16,14 +16,16 @@
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
             import Utilities from '../../Utilities.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
 
+            ArrayPrototype.registerUnique();
             const fileReader = new FileReader('./data.txt', new Parser());
             const strings = await fileReader.parse();
 
             document.querySelector('#answer').innerText = strings.reduce((sum, string) => {
-                const inBetween = Utilities.arrayUnique(
-                    string.split('').map(character => character + '.' + character)
-                );
+                const inBetween = string.split('')
+                    .map(character => character + '.' + character)
+                    .unique();
                 const inBetweenRegExp = new RegExp(inBetween.join('|'));
 
                 // The string doesn't contain two same characters, with any in between
@@ -31,10 +33,10 @@
                     return sum;
                 }
 
-                const characterPairs = Utilities.arrayUnique(
-                    string.match(/../g)
+                const characterPairs = string
+                    .match(/../g)
                     .concat(string.substring(1).match(/../g))
-                );
+                    .unique();
 
                 for (const pair of characterPairs) {
                     if ([...string.matchAll(pair)].length > 1) {

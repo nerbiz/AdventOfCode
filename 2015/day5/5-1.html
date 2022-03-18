@@ -15,8 +15,9 @@
         <script type="module">
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
-            import Utilities from '../../Utilities.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
 
+            ArrayPrototype.registerUnique();
             const fileReader = new FileReader('./data.txt', new Parser());
             const strings = await fileReader.parse();
 
@@ -26,9 +27,9 @@
                     return sum;
                 }
 
-                const double = Utilities.arrayUnique(
-                    string.split('').map(character => character + character)
-                );
+                const double = string.split('')
+                    .map(character => character + character)
+                    .unique();
                 const doubleRegExp = new RegExp(double.join('|'));
 
                 // The string has no double characters

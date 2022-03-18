@@ -40,24 +40,6 @@ export default class Utilities
     }
 
     /**
-     * Remove duplicates from an array
-     * @param {array} array The input array
-     * @returns {array}
-     */
-    static arrayUnique(array)
-    {
-        const unique = [];
-
-        for (let i = 0; i < array.length; i++) {
-            if (unique.indexOf(array[i]) === -1) {
-                unique.push(array[i]);
-            }
-        }
-
-        return unique;
-    }
-
-    /**
      * Calculate the sum of array items
      * @param {array} array
      * @returns {number}

@@ -20,7 +20,7 @@
             const target = await fileReader.parse();
 
             /*
-            The Y velocity always returns to the same value, after any amount of steps.
+            The Y velocity always returns to the same value, after some amount of steps.
             The next step is (velocity = velocity * -1), which is 0.
             Then the next step is ((velocity + 1) * -1), which needs to be within the target.
             So the maximum velocity is the target yMin + 1, as absolute number.

@@ -16,7 +16,9 @@
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
             import Utilities from '../../Utilities.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
 
+            ArrayPrototype.registerUnique();
             const fileReader = new FileReader('./data.txt', new Parser());
             let octopusMap = await fileReader.parse();
             const steps = 195;
@@ -83,9 +85,10 @@
                 });
 
                 // Update the list of unique values
-                uniqueValues = Utilities.arrayUnique(
-                    octopusMap.map(row => row.map(octopus => octopus.value)).flat()
-                );
+                uniqueValues = octopusMap
+                    .map(row => row.map(octopus => octopus.value))
+                    .flat()
+                    .unique();
             }
             while (uniqueValues.length > 1);
 

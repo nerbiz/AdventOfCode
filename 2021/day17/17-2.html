@@ -16,7 +16,9 @@
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
             import Utilities from '../../Utilities.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
 
+            ArrayPrototype.registerUnique();
             const fileReader = new FileReader('./data.txt', new Parser());
             const target = await fileReader.parse();
 
@@ -99,20 +101,20 @@
                         .forEach(ySteps => yCollection.push(ySteps.y));
                 });
 
-                // Some X velocities result in the proper X position infitely
+                // Some X velocities result in the proper X position infinitely
                 // Check for Y velocities that take at least that amount of steps
                 if (xSteps.validSteps.includes(Infinity)) {
                     const validSteps = xSteps.validSteps.filter(stepAmount => stepAmount !== Infinity);
                     const minimumSteps = Math.max(...validSteps);
 
-                    const ySteps = yValidSteps
+                    yValidSteps
                         .filter(ySteps => ySteps.validSteps
                             .filter(stepAmount => stepAmount >= minimumSteps)
                             .length > 0)
                         .forEach(ySteps => yCollection.push(ySteps.y));
                 }
 
-                Utilities.arrayUnique(yCollection).forEach(y => possibilities.push([xSteps.x, y]))
+                yCollection.unique().forEach(y => possibilities.push([xSteps.x, y]));
             });
 
             document.querySelector('#answer').innerText = possibilities.length;

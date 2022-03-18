@@ -1,4 +1,6 @@
-import Utilities from '../../Utilities.js';
+import ArrayPrototype from '../../ArrayPrototype.js';
+
+ArrayPrototype.registerUnique();
 
 export default class Parser
 {
@@ -11,8 +13,8 @@ export default class Parser
     {
         // Get all the bots and outputs
         const joinedLines = linesArray.join('');
-        const bots = joinedLines.match(/bot \d+/g);
-        const outputs = joinedLines.match(/output \d+/g);
+        const bots = joinedLines.match(/bot \d+/g).unique();
+        const outputs = joinedLines.match(/output \d+/g).unique();
 
         // Parse the lines about value inputs
         const inputs = linesArray.filter(line => line.startsWith('value'))
@@ -32,11 +34,6 @@ export default class Parser
                 high: matches[3],
             }));
 
-        return {
-            bots: Utilities.arrayUnique(bots),
-            outputs: Utilities.arrayUnique(outputs),
-            inputs,
-            giving,
-        };
+        return {bots, outputs, inputs, giving};
     }
 }

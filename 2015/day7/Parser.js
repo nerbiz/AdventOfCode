@@ -1,4 +1,6 @@
-import Utilities from '../../Utilities.js';
+import ArrayPrototype from '../../ArrayPrototype.js';
+
+ArrayPrototype.registerUnique();
 
 export default class Parser
 {
@@ -15,13 +17,14 @@ export default class Parser
             .replace(/([a-z]+)/g, '$1,')
             .replaceAll(' ', '')
             .replace(/,$/, '')
-            .split(',');
+            .split(',')
+            .unique();
 
         return {
-            wireIds: Utilities.arrayUnique(wireIds),
+            wireIds,
             instructions: linesArray.map(line => {
                 const [operation, wireId] = line.split(' -> ');
-    
+
                 return {
                     wireId,
                     operation: operation.split(' '),

@@ -55,13 +55,13 @@
             });
 
             let nextBots;
-            givingLoop: while ((nextBots = bots.filter(bot => bot.holds.length === 2)).length > 0) {
+            while ((nextBots = bots.filter(bot => bot.holds.length === 2)).length > 0) {
                 for (const nextBot of nextBots) {
                     // Give low and high value chips to other bots/outputs
                     nextBot.holds.sort((a, b) => a - b);
                     nextBot.low.holds.push(nextBot.holds.shift());
                     nextBot.high.holds.push(nextBot.holds.shift());
-                };
+                }
             }
 
             document.querySelector('#answer').innerText = outputs

@@ -15,14 +15,16 @@
         <script type="module">
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
-            import Utilities from '../../Utilities.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
 
+            ArrayPrototype.registerUnique();
             const fileReader = new FileReader('./data.txt', new Parser());
             const relationships = await fileReader.parse();
 
             // Get a list of all unique names
-            const personNames = Utilities.arrayUnique(
-                relationships.flatMap(happiness => [happiness.person, happiness.nextTo]));
+            const personNames = relationships
+                .flatMap(happiness => [happiness.person, happiness.nextTo])
+                .unique();
 
             // Add another person, who is mutually indifferent about all persons
             const newPerson = 'new';
