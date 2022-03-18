@@ -3,7 +3,7 @@ export default class ArrayPrototype
     /**
      * Call all register...() functions
      */
-    static extend()
+    static registerAll()
     {
         this.registerIndexesOf();
         this.registerUnique();

@@ -17,7 +17,8 @@
             import Parser from './Parser.js';
             import ArrayPrototype from '../../ArrayPrototype.js';
 
-            ArrayPrototype.extend();
+            ArrayPrototype.registerUnique();
+            ArrayPrototype.registerCountValues();
             const fileReader = new FileReader('./data.txt', new Parser());
             const coordinates = await fileReader.parse();
 

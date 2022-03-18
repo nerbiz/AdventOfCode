@@ -18,7 +18,7 @@
             import Array2d from '../../Array2d.js';
             import ArrayPrototype from '../../ArrayPrototype.js';
 
-            ArrayPrototype.extend();
+            ArrayPrototype.registerUnique();
             const fileReader = new FileReader('./data.txt', new Parser());
             const {number, target} = await fileReader.parse();
             const valueFormula = (x, y) => {

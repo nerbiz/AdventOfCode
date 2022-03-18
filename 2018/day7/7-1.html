@@ -18,7 +18,8 @@
             import ArrayPrototype from '../../ArrayPrototype.js';
             import PriorityQueue from '../../PriorityQueue.js';
 
-            ArrayPrototype.extend();
+            ArrayPrototype.registerUnique();
+            ArrayPrototype.registerDifference();
             const fileReader = new FileReader('./data.txt', new Parser());
             const instructions = await fileReader.parse();
             const availableSteps = new PriorityQueue();

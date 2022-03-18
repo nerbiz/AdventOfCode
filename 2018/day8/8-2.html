@@ -17,14 +17,14 @@
             import Parser from './Parser.js';
             import ArrayPrototype from '../../ArrayPrototype.js';
 
-            ArrayPrototype.extend();
+            ArrayPrototype.registerTake();
             const fileReader = new FileReader('./data.txt', new Parser());
             const headers = await fileReader.parse();
 
             const getValue = headers => {
                 const childNodesAmount = headers.shift();
                 const metadataAmount = headers.shift();
-                
+
                 // Get the values of child nodes (if any)
                 const childValues = {};
                 let index = 0;

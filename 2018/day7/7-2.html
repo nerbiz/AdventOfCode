@@ -18,7 +18,8 @@
             import ArrayPrototype from '../../ArrayPrototype.js';
             import PriorityQueue from '../../PriorityQueue.js';
 
-            ArrayPrototype.extend();
+            ArrayPrototype.registerUnique();
+            ArrayPrototype.registerTake();
             const fileReader = new FileReader('./data.txt', new Parser());
             const instructions = await fileReader.parse();
             const availableSteps = new PriorityQueue();
@@ -35,7 +36,7 @@
                     // Seconds = 60 + 1, 2, 3, etc. for A, B, C, etc.
                     secondsRemaining: step[0].charCodeAt(0) - 4,
                 }));
-            
+
             // Create a list of steps that have required steps before it
             const stepsWithRequirements = [];
             for (const step of allSteps) {
@@ -64,7 +65,7 @@
 
                 for (let i = workers.length - 1; i >= 0; i--) {
                     const workerStep = workers[i];
-                    
+
                     // Check if the step is done
                     if (--workerStep.secondsRemaining === 0) {
                         // Add the step to the order

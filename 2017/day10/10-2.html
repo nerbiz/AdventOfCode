@@ -18,7 +18,7 @@
             import Utilities from '../../Utilities.js';
             import ArrayPrototype from '../../ArrayPrototype.js';
 
-            ArrayPrototype.extend();
+            ArrayPrototype.registerChunk();
             const fileReader = new FileReader('./data.txt', new Parser());
             let {listSize, lengths} = await fileReader.parse();
             let list = [...Array(256).keys()];

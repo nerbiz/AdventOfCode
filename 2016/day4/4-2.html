@@ -17,7 +17,7 @@
             import Parser from './Parser.js';
             import ArrayPrototype from '../../ArrayPrototype.js';
 
-            ArrayPrototype.extend();
+            ArrayPrototype.registerCountValues();
             const fileReader = new FileReader('./data.txt', new Parser());
             const rooms = await fileReader.parse();
             const spaceCharCode = ' '.charCodeAt(0);

@@ -17,7 +17,7 @@
             import Parser from './Parser.js';
             import ArrayPrototype from '../../ArrayPrototype.js';
 
-            ArrayPrototype.extend();
+            ArrayPrototype.registerDifference();
             const fileReader = new FileReader('./data.txt', new Parser());
             const pipes = await fileReader.parse();
             const queue = [0];

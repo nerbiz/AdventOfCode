@@ -21,7 +21,7 @@
             import ArrayPrototype from '../../ArrayPrototype.js';
             import Array2d from '../../Array2d.js';
 
-            ArrayPrototype.extend();
+            ArrayPrototype.registerTap();
             const fileReader = new FileReader('./data.txt', new Parser());
             let {screen, instructions} = await fileReader.parse();
             screen = Array2d.withData({value: false}, screen.rows, screen.columns);

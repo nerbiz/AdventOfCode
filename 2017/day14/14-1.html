@@ -18,7 +18,7 @@
             import ArrayPrototype from '../../ArrayPrototype.js';
             import Utilities from '../../Utilities.js';
 
-            ArrayPrototype.extend();
+            ArrayPrototype.registerChunk();
             const fileReader = new FileReader('./data.txt', new Parser());
             const keyString = await fileReader.parse();
 
