@@ -15,11 +15,13 @@
         <script type="module">
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
-            import Utilities from '../../Utilities.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
 
+            ArrayPrototype.registerSum();
+            ArrayPrototype.registerProduct();
             const fileReader = new FileReader('./data.txt', new Parser());
             const presents = (await fileReader.parse()).sort((a, b) => b - a);
-            const groupWeight = Utilities.arraySum(presents) / 4;
+            const groupWeight = presents.sum() / 4;
 
             // Find all the ways to make a group of the required weight
             const groups = [];
@@ -28,8 +30,7 @@
                 presents = presents.filter(present => present <= groupWeight);
 
                 // Check if the presents combined are heavy enough
-                const availableWeight = Utilities.arraySum(presents);
-                if (availableWeight < groupWeight) {
+                if (presents.sum() < groupWeight) {
                     return;
                 }
 
@@ -61,7 +62,7 @@
                 // Keep groups with the same lowest amount of presents
                 .filter(group => group.length === groups[0].length)
                 // Multiply the present weights
-                .map(group => Utilities.arrayProduct(group))
+                .map(group => group.product())
                 // Sort by lowest first
                 .sort((a, b) => a - b)
                 .at(0);

@@ -40,26 +40,6 @@ export default class Utilities
     }
 
     /**
-     * Calculate the sum of array items
-     * @param {array} array
-     * @returns {number}
-     */
-    static arraySum(array)
-    {
-        return array.reduce((sum, item) => (sum + item), 0);
-    }
-
-    /**
-     * Calculate the product of array items
-     * @param {array} array
-     * @returns {number}
-     */
-    static arrayProduct(array)
-    {
-        return array.reduce((sum, item) => (sum * item), 1);
-    }
-
-    /**
      * Get array items that exist in the other arrays
      * @param {array} array
      * @param {array} arrays 1 or more arrays to compare with
