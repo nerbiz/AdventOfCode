@@ -15,8 +15,9 @@
         <script type="module">
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
-            import Utilities from '../../Utilities.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
 
+            ArrayPrototype.registerCountValues();
             const fileReader = new FileReader('./data.txt', new Parser());
             let {polymer, insertionRules} = await fileReader.parse();
             const rounds = 10;
@@ -36,7 +37,7 @@
             }
 
             // Find the most and least occurring character amount
-            const valuesCount = Utilities.arrayCountValues(polymer);
+            const valuesCount = polymer.split('').countValues(true);
             let lowest = Number.MAX_SAFE_INTEGER;
             let highest = 0;
 

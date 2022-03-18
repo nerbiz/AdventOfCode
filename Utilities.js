@@ -40,40 +40,6 @@ export default class Utilities
     }
 
     /**
-     * Counts the occurrences of values in an array
-     * @param {array} array The array to count values of
-     * @returns {object}
-     */
-    static arrayCountValues(array)
-    {
-        const occurrences = {};
-
-        for (let i = 0; i < array.length; i++) {
-            occurrences[array[i]] = occurrences[array[i]] || 0;
-            occurrences[array[i]]++;
-        }
-
-        return occurrences;
-    }
-
-    /**
-     * Splits an array into chunks
-     * @param {array} array
-     * @param {number} chunkSize
-     * @returns {array}
-     */
-    static arrayChunk(array, chunkSize)
-    {
-        const chunks = [];
-
-        for (let count = 0; count < array.length; count += chunkSize) {
-            chunks.push(array.slice(count, count + chunkSize));
-        }
-
-        return chunks;
-    }
-
-    /**
      * Find an item deeply nested in an array, by a list of indexes
      * @param {array} array The array to search in
      * @param {array} indexes Indexes to search with, recursively
