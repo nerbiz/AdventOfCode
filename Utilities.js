@@ -40,34 +40,6 @@ export default class Utilities
     }
 
     /**
-     * Get array items that exist in the other arrays
-     * @param {array} array
-     * @param {array} arrays 1 or more arrays to compare with
-     * @returns {array}
-     */
-    static arrayIntersection(array, ...arrays)
-    {
-        // Concatenate the arrays to compare with
-        arrays = arrays.reduce((combined, array) => combined.concat(array), []);
-
-        return array.filter(item => arrays.includes(item));
-    }
-
-    /**
-     * Get items from array 1, that don't exist in the other arrays
-     * @param {array} array
-     * @param {array} arrays 1 or more arrays to compare with
-     * @returns {array}
-     */
-    static arrayDifference(array, ...arrays)
-    {
-        // Concatenate the arrays to compare with
-        arrays = arrays.reduce((combined, array) => combined.concat(array), []);
-
-        return array.filter(item => ! arrays.includes(item));
-    }
-
-    /**
      * Counts the occurrences of values in an array
      * @param {array} array The array to count values of
      * @returns {object}
