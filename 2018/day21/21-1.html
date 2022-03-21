@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            let input = 0;
+            let d = 0;
+            let f = 0;
+
+            program: while (true) {
+                d = f | 65536;
+                f = 9010242;
+
+                while (true) {
+                    f = (f + (d & 255)) & 16777215;
+                    f = (f * 65899) & 16777215;
+
+                    if (256 > d) {
+                        // This value of f is the first that halts the program
+                        input = f;
+
+                        if (f === input) {
+                            break program;
+                        }
+                    }
+
+                    d = Math.ceil(d / 256);
+                }
+            }
+
+            document.querySelector('#answer').innerText = input;
+        </script>
+    </body>
+</html>
