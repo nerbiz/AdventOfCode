@@ -49,18 +49,32 @@ export class Array2dItem
      */
     clone()
     {
-        const itemData = JSON.parse(JSON.stringify(this));
+        const cloneValue = value => {
+            if (value instanceof Array2dItem) {
+                return value.clone();
+            }
 
-        // Recreate the custom data object
+            if (typeof value === 'object' && value !== null) {
+                const copy = Array.isArray(value) ? [] : {};
+                for (const key in value) {
+                    copy[key] = cloneValue(value[key]);
+                }
+
+                return copy;
+            }
+
+            return value;
+        };
+
+        // Recreate the custom data object, skipping default properties
         const customData = {};
-        for (const key in itemData) {
-            // Skip default properties
+        for (const key in this) {
             if (! ['x', 'y', 'value', 'parent'].includes(key)) {
-                customData[key] = itemData[key];
+                customData[key] = cloneValue(this[key]);
             }
         }
 
-        return new Array2dItem(itemData.x, itemData.y, itemData.value, customData, this.parent);
+        return new Array2dItem(this.x, this.y, cloneValue(this.value), customData, this.parent);
     }
 
     /**
