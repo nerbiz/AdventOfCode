@@ -50,11 +50,11 @@ export class Array2dItem
     clone()
     {
         const cloneValue = value => {
-            if (value instanceof Array2dItem) {
-                return value.clone();
-            }
-
             if (typeof value === 'object' && value !== null) {
+                if (value instanceof Array2dItem) {
+                    return value.clone();
+                }
+
                 const copy = Array.isArray(value) ? [] : {};
                 for (const key in value) {
                     copy[key] = cloneValue(value[key]);
