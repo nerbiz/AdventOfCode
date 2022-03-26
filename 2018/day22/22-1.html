@@ -23,20 +23,21 @@
 
             cave.forEach2d((region, x, y) => {
                 // Determine the geologic index of the region
+                let geologicIndex;
                 if (x === 0 && y === 0 || x === target[0] && y === target[1]) {
-                    region.geologicIndex = 0;
+                    geologicIndex = 0;
                 } else if (y === 0) {
-                    region.geologicIndex = x * 16807;
+                    geologicIndex = x * 16807;
                 } else if (x === 0) {
-                    region.geologicIndex = y * 48271;
+                    geologicIndex = y * 48271;
                 } else {
                     const regionLeft = cave.getItem(x - 1, y);
                     const regionUp = cave.getItem(x, y - 1);
-                    region.geologicIndex = regionLeft.erosionLevel * regionUp.erosionLevel;
+                    geologicIndex = regionLeft.erosionLevel * regionUp.erosionLevel;
                 }
 
                 // Determine the erosion level and type of the region
-                region.erosionLevel = (region.geologicIndex + depth) % 20183;
+                region.erosionLevel = (geologicIndex + depth) % 20183;
                 region.type = region.erosionLevel % 3;
             });
 
