@@ -21,21 +21,21 @@
             const registers = Array(6).fill(0);
 
             const operations = {
-                addr: (registers, a, b) => (registers[a] - 0) + (registers[b] - 0),
-                addi: (registers, a, b) => (registers[a] - 0) + b,
+                addr: (registers, a, b) => registers[a] + registers[b],
+                addi: (registers, a, b) => registers[a] + b,
                 mulr: (registers, a, b) => registers[a] * registers[b],
                 muli: (registers, a, b) => registers[a] * b,
                 banr: (registers, a, b) => registers[a] & registers[b],
                 bani: (registers, a, b) => registers[a] & b,
                 borr: (registers, a, b) => registers[a] | registers[b],
                 bori: (registers, a, b) => registers[a] | b,
-                setr: (registers, a) => (registers[a] - 0),
+                setr: (registers, a) => registers[a],
                 seti: (registers, a) => a,
                 gtir: (registers, a, b) => Number(a > registers[b]),
                 gtri: (registers, a, b) => Number(registers[a] > b),
                 gtrr: (registers, a, b) => Number(registers[a] > registers[b]),
-                eqir: (registers, a, b) => Number(a === (registers[b] - 0)),
-                eqri: (registers, a, b) => Number((registers[a] - 0) === b),
+                eqir: (registers, a, b) => Number(a === registers[b]),
+                eqri: (registers, a, b) => Number(registers[a] === b),
                 eqrr: (registers, a, b) => Number(registers[a] === registers[b]),
             };
 
