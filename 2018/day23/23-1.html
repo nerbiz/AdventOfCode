@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const nanobots = await fileReader.parse();
+
+            // Find the nanobot with the largest signal radius
+            nanobots.sort((a, b) => b.radius - a.radius);
+            const strongestBot = nanobots[0];
+
+            // See how many nanobots are in range of the strongest
+            let amountInRange = 0;
+            for (const bot of nanobots) {
+                const distance = Math.abs(bot.x - strongestBot.x)
+                    + Math.abs(bot.y - strongestBot.y)
+                    + Math.abs(bot.z - strongestBot.z);
+
+                if (distance <= strongestBot.radius) {
+                    amountInRange++;
+                }
+            }
+
+            document.querySelector('#answer').innerText = amountInRange;
+        </script>
+    </body>
+</html>
