@@ -18,7 +18,8 @@
             import LinkedList from '../../LinkedList.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            const {players, lastMarble} = await fileReader.parse();
+            let {players, lastMarble} = await fileReader.parse();
+            lastMarble *= 100;
             const circle = new LinkedList({circular: true});
             const playerScores = Array(players).fill(0);
             let currentPlayer = 0;

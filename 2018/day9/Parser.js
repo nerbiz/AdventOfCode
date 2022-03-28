@@ -7,11 +7,11 @@ export default class Parser
      */
     parse(linesArray)
     {
-        const matches = linesArray.at(0).match(/(\d+).*?(\d+)/);
+        const matches = linesArray.at(0).match(/\d+/g);
 
         return {
-            players: matches[1] - 0,
-            lastMarble: matches[2] - 0,
+            players: matches[0] - 0,
+            lastMarble: matches[1] - 0,
         };
     }
 }
