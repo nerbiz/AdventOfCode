@@ -49,24 +49,17 @@ export default class LinkedList
      */
     add(value)
     {
-        const newNode = new LinkedListNode(value);
-
         // If the list is empty, the new node is the first node
         if (this.firstNode === null) {
-            this.firstNode = newNode;
+            this.firstNode = new LinkedListNode(value);
             this.firstNode.previous = this.firstNode;
             this.firstNode.next = this.firstNode;
+            this.size++;
             return;
         }
 
         // Add the new node at the end and update relations
-        const lastNode = this.firstNode.previous;
-        lastNode.next = newNode;
-        this.firstNode.previous = newNode;
-        newNode.previous = lastNode;
-        newNode.next = this.firstNode;
-
-        this.size++;
+        this.addAfter(this.firstNode.previous, value);
     }
 
     /**
@@ -172,6 +165,15 @@ export default class LinkedList
         }
 
         return nextNode;
+    }
+
+    /**
+     * Get the amount of nodes
+     * @returns {number}
+     */
+    getSize()
+    {
+        return this.size;
     }
 
     /**
