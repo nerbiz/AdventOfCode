@@ -19,7 +19,7 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const {players, lastMarble} = await fileReader.parse();
-            const circle = new LinkedList({circular: true});
+            const circle = new LinkedList();
             const playerScores = Array(players).fill(0);
             let currentPlayer = 0;
 

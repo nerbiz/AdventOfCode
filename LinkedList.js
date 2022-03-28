@@ -4,19 +4,19 @@ export class LinkedListNode
      * The value of the node
      * @type {any}
      */
-    value = null;
+    value;
 
     /**
      * The previous linked node
-     * @type {LinkedListNode|null}
+     * @type {LinkedListNode}
      */
-    previous = null;
+    previous;
 
     /**
      * The next linked node
-     * @type {LinkedListNode|null}
+     * @type {LinkedListNode}
      */
-    next = null;
+    next;
 
     /**
      * @param {any} value
@@ -43,16 +43,6 @@ export default class LinkedList
     size = 0;
 
     /**
-     * @param {object} options
-     * @constructor
-     */
-    constructor(options = {})
-    {
-        const {circular} = options;
-        this.circular = (circular !== undefined) ? circular : false;
-    }
-
-    /**
      * Add a node at the end of the list
      * @param {any} value
      * @returns {void}
@@ -64,28 +54,17 @@ export default class LinkedList
         // If the list is empty, the new node is the first node
         if (this.firstNode === null) {
             this.firstNode = newNode;
-
-            if (this.circular === true) {
-                this.firstNode.previous = this.firstNode;
-                this.firstNode.next = this.firstNode;
-            }
-
+            this.firstNode.previous = this.firstNode;
+            this.firstNode.next = this.firstNode;
             return;
         }
 
-        // Get the last node
-        let lastNode = this.firstNode;
-        while (lastNode.next !== null) {
-            lastNode = lastNode.next;
-        }
-
+        // Add the new node at the end and update relations
+        const lastNode = this.firstNode.previous;
         lastNode.next = newNode;
+        this.firstNode.previous = newNode;
         newNode.previous = lastNode;
-
-        if (this.circular === true) {
-            newNode.next = this.firstNode;
-            this.firstNode.previous = newNode;
-        }
+        newNode.next = this.firstNode;
 
         this.size++;
     }
@@ -100,17 +79,11 @@ export default class LinkedList
     {
         const newNode = new LinkedListNode(value);
 
-        // Set the new relations
+        // Add the new node and update relations
         newNode.previous = node.previous;
         newNode.next = node;
-        if (node.previous !== null) {
-            node.previous.next = newNode;
-        }
+        node.previous.next = newNode;
         node.previous = newNode;
-
-        if (this.circular === true && node.previous === node) {
-            node.previous = this.getLast();
-        }
 
         this.size++;
     }
@@ -125,17 +98,11 @@ export default class LinkedList
     {
         const newNode = new LinkedListNode(value);
 
-        // Set the new relations
+        // Add the new node and update relations
         newNode.previous = node;
         newNode.next = node.next;
-        if (node.next !== null) {
-            node.next.previous = newNode;
-        }
+        node.next.previous = newNode;
         node.next = newNode;
-
-        if (this.circular === true && node.previous === node) {
-            node.previous = this.getLast();
-        }
 
         this.size++;
     }
@@ -149,7 +116,6 @@ export default class LinkedList
     {
         node.next.previous = node.previous;
         node.previous.next = node.next;
-        node = null;
 
         this.size--;
     }
@@ -173,34 +139,20 @@ export default class LinkedList
             return null;
         }
 
-        let lastNode = this.firstNode;
-        while (lastNode.next !== null) {
-            // Prevent infinite loop in circular list
-            if (this.circular === true && lastNode.next === this.firstNode) {
-                break;
-            }
-
-            lastNode = lastNode.next;
-        }
-
-        return lastNode;
+        return this.firstNode.previous;
     }
 
     /**
      * Get a previous node, any amount of steps to the left
      * @param node
      * @param steps
-     * @returns {LinkedListNode|null}
+     * @returns {LinkedListNode}
      */
     getPrevious(node, steps = 1)
     {
         let previousNode = node;
         for (let i = 0; i < steps; i++) {
             previousNode = previousNode.previous;
-
-            if (previousNode === null) {
-                return null;
-            }
         }
 
         return previousNode;
@@ -210,17 +162,13 @@ export default class LinkedList
      * Get a next node, any amount of steps to the right
      * @param node
      * @param steps
-     * @returns {LinkedListNode|null}
+     * @returns {LinkedListNode}
      */
     getNext(node, steps = 1)
     {
         let nextNode = node;
         for (let i = 0; i < steps; i++) {
             nextNode = nextNode.next;
-
-            if (nextNode === null) {
-                return null;
-            }
         }
 
         return nextNode;
@@ -233,9 +181,9 @@ export default class LinkedList
     clear()
     {
         this.firstNode.next.previous = null;
-        if (this.circular === true) {
-            this.firstNode.previous.next = null;
-        }
+        this.firstNode.previous.next = null;
+        this.firstNode.previous = null;
+        this.firstNode.next = null;
         this.firstNode = null;
         this.size = 0;
     }
@@ -249,12 +197,12 @@ export default class LinkedList
         const values = [];
 
         let currentNode = this.firstNode;
-        while (currentNode !== null) {
+        while (true) {
             values.push(currentNode.value);
             currentNode = currentNode.next;
 
-            // Prevent infinite loop in circular list
-            if (this.circular === true && currentNode === this.firstNode) {
+            // Prevent infinite loop, nodes wrap from last to first
+            if (currentNode === this.firstNode) {
                 break;
             }
         }
