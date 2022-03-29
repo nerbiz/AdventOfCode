@@ -22,7 +22,7 @@
             const gridSize = 300;
             const grid = Array2d.withData({
                 totalPower: 0,
-                powerLevel: (x, y) => {
+                value: (x, y) => {
                     const rackId = (x + 11);
                     let powerLevel = rackId * (y + 1);
                     powerLevel += serialNumber;
@@ -34,12 +34,10 @@
                 },
             }, gridSize, gridSize);
 
-            grid.slice2d(1, 1, gridSize - 1, gridSize - 1)
-                .forEach2d(cell => {
-                    cell.totalPower = cell.powerLevel
-                        + cell.getSurroundingItems()
-                            .reduce((sum, cell) => (sum + cell.powerLevel), 0);
-                });
+            grid.slice2d(1, 1, gridSize - 1, gridSize - 1).forEach2d(cell =>
+                cell.totalPower = cell.value
+                    + cell.getSurroundingItems().reduce((sum, cell) => (sum + cell.value), 0)
+            );
 
             const cellWithMostPower = grid
                 .flat()
