@@ -18,15 +18,16 @@
             import LinkedList from '../../LinkedList.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            const recipesAmount = (await fileReader.parse()) - 0;
+            const recipesPattern = (await fileReader.parse()).toString();
             const scoreBoard = new LinkedList();
 
             // Set the first 2 recipes
             scoreBoard.add(3);
             scoreBoard.add(7);
             const currentRecipes = [scoreBoard.getFirst(), scoreBoard.getLast()];
+            let removeRecipes;
 
-            while (scoreBoard.getSize() < recipesAmount + 10) {
+            makeRecipes: while (true) {
                 const sum = currentRecipes[0].value + currentRecipes[1].value;
 
                 // Get the first digit of a two-digit number (it's 0 if there is only 1 digit)
@@ -40,11 +41,22 @@
                 // Set the new current recipes
                 currentRecipes[0] = scoreBoard.getNext(currentRecipes[0], 1 + currentRecipes[0].value);
                 currentRecipes[1] = scoreBoard.getNext(currentRecipes[1], 1 + currentRecipes[1].value);
+
+                // See if the recipes pattern exists at the end
+                let string = '';
+                let currentRecipe = scoreBoard.getFirst();
+                for (let i = 0; i < recipesPattern.length + 1; i++) {
+                    currentRecipe = currentRecipe.previous;
+                    string = currentRecipe.value + string;
+
+                    if (string.includes(recipesPattern)) {
+                        removeRecipes = i + 1;
+                        break makeRecipes;
+                    }
+                }
             }
 
-            document.querySelector('#answer').innerText = scoreBoard.toArray()
-                .slice(recipesAmount, recipesAmount + 10)
-                .join('');
+            document.querySelector('#answer').innerText = scoreBoard.getSize() - removeRecipes;
         </script>
     </body>
 </html>
