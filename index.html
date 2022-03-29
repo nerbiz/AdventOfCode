@@ -6,7 +6,7 @@
     </head>
     <body>
         <script>
-            const hashMatches = window.location.hash.match(/^#?(\d{4})\/(\d{1,2})\/([12])$/);
+            const hashMatches = window.location.hash.match(/^#?(\d{4})\/([12]?\d)\/([12])$/);
 
             if (hashMatches !== null) {
                 const [full, year, day, puzzle] = hashMatches;
