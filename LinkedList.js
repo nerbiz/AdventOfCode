@@ -182,10 +182,6 @@ export default class LinkedList
      */
     clear()
     {
-        this.firstNode.next.previous = null;
-        this.firstNode.previous.next = null;
-        this.firstNode.previous = null;
-        this.firstNode.next = null;
         this.firstNode = null;
         this.size = 0;
     }
