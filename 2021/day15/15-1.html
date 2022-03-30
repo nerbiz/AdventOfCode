@@ -26,13 +26,11 @@
             const path = Pathfinding.dijkstra(riskMap, startPoint, endPoint);
 
             // Show the path in the console
-            console.log(riskMap.toString(point => {
-                if (point === startPoint || path.includes(point)) {
-                    return '\x1b[35m' + point.value + '\x1b[0m';
-                } else {
-                    return '\x1b[37m' + point.value + '\x1b[0m';
-                }
-            }));
+            console.log(riskMap.toString(point =>
+                (point === startPoint || path.includes(point))
+                    ? '\x1b[35m' + point.value + '\x1b[0m'
+                    : '\x1b[37m' + point.value + '\x1b[0m'
+            ));
 
             document.querySelector('#answer').innerText = endPoint.distance;
         </script>
