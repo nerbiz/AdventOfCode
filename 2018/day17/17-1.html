@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {scan, minX, maxX, minY, maxY} = await fileReader.parse();
+            const ground = Array2d.withData({value: '.'}, maxY + 1, maxX + 2);
+
+            // Set the clay locations in the ground
+            for (const entry of scan) {
+                ground.slice2d(entry.x[0], entry.y[0], entry.x[1] + 1, entry.y[1] + 1)
+                    .forEach2d(position => position.value = '#');
+            }
+
+            // Get the spring (start) position
+            const spring = ground.getItem(500, 0);
+
+            // The queue of tiles from which water flows down
+            const queue = [spring];
+
+            nextSpring: while (queue.length > 0) {
+                let current = queue.shift();
+
+                // Water flows down until it hits clay or water
+                while (true) {
+                    const down = ground.getItem(current.x, current.y + 1);
+
+                    // The next tile is out of reach, or clay or water
+                    if (down === undefined) {
+                        continue nextSpring;
+                    } else if (down.value === '#') {
+                        break;
+                    }
+
+                    // Water can reach this tile
+                    if (down.y >= minY) {
+                        down.value = '~';
+                    }
+                    current = down;
+                }
+
+                while (true) {
+                    // Find the left and right boundaries
+                    let isWall = 0;
+                    for (const direction of [-1, 1]) {
+                        let step = current;
+
+                        while (true) {
+                            // See if the water hits clay to the side
+                            const next = ground.getItem(step.x + direction, step.y);
+                            if (next.value === '#') {
+                                isWall++;
+                                break;
+                            }
+
+                            const nextDown = ground.getItem(next.x, next.y + 1);
+
+                            // See if the water will overflow
+                            if (nextDown.value === '.') {
+                                // Add the new tile from which water flows down,
+                                // but only if it's not next to another
+                                if (step.isSpring !== true && next.isSpring !== true) {
+                                    queue.push(next);
+                                    next.isSpring = true;
+                                    next.value = '~';
+                                }
+                                break;
+                            }
+
+                            next.value = '~';
+                            step = next;
+                        }
+                    }
+
+                    // The water flowing doesn't settle, but overflows
+                    if (isWall < 2) {
+                        break;
+                    }
+
+                    // Define the water flowing 1 row up
+                    current = ground.getItem(current.x, current.y - 1);
+                    current.value = '~';
+                }
+            }
+
+            // Show the ground in the console
+            console.log(ground.slice2d(minX - 1, 0, maxX + 2, maxY + 1).toString());
+
+            document.querySelector('#answer').innerText = ground
+                .filter2d(tile => (tile.value === '~'), true)
+                .length;
+        </script>
+    </body>
+</html>
