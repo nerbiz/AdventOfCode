@@ -29,6 +29,7 @@
 
             // Get the spring (start) position
             const spring = ground.getItem(500, 0);
+            spring.value = '+';
 
             // The queue of tiles from which water flows down
             const queue = [spring];
@@ -48,14 +49,11 @@
                     }
 
                     // Water can reach this tile
-                    if (down.y >= minY) {
-                        down.value = '~';
-                    }
                     current = down;
                 }
 
                 while (true) {
-                    current.value = '~';
+                    const waterRow = [current];
 
                     // Find the left and right boundaries
                     let isWall = 0;
@@ -70,6 +68,7 @@
                                 break;
                             }
 
+                            waterRow.push(next);
                             const nextDown = ground.getItem(next.x, next.y + 1);
 
                             // See if the water will overflow
@@ -79,12 +78,10 @@
                                 if (step.isSpring !== true && next.isSpring !== true) {
                                     queue.push(next);
                                     next.isSpring = true;
-                                    next.value = '~';
                                 }
                                 break;
                             }
 
-                            next.value = '~';
                             step = next;
                         }
                     }
@@ -92,6 +89,11 @@
                     // The water flowing doesn't settle, but overflows
                     if (isWall < 2) {
                         break;
+                    }
+
+                    // The water settles, if both sides are a wall
+                    for (const tile of waterRow) {
+                        tile.value = '~';
                     }
 
                     // Define the water flowing 1 row up
