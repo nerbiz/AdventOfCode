@@ -19,8 +19,23 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const masses = await fileReader.parse();
 
+            const calculateFuel = mass => {
+                let fuel = 0;
+
+                while (true) {
+                    mass = Math.floor(mass / 3) - 2;
+                    if (mass <= 0) {
+                        break;
+                    }
+
+                    fuel += mass;
+                }
+
+                return fuel;
+            };
+
             document.querySelector('#answer').innerText = masses
-                .map(mass => Math.floor(mass / 3) - 2)
+                .map(calculateFuel)
                 .reduce((sum, fuel) => (sum + fuel), 0);
         </script>
     </body>
