@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const paths = await fileReader.parse();
+            const visited = {};
+
+            for (let pathNumber = 0; pathNumber < paths.length; pathNumber++) {
+                let x = 0;
+                let y = 0;
+
+                for (const [direction, amount] of paths[pathNumber]) {
+                    for (let i = 0; i < amount; i++) {
+                        switch (direction) {
+                            case 'U':
+                                y--;
+                                break;
+                            case 'R':
+                                x++;
+                                break;
+                            case 'D':
+                                y++;
+                                break;
+                            case 'L':
+                                x--;
+                                break;
+                        }
+
+                        // Set the first/second bit, according to path number
+                        visited[x + ',' + y] |= (pathNumber + 1);
+                    }
+                }
+            }
+
+            document.querySelector('#answer').innerText = Object.entries(visited)
+                // Find the locations that have been visited in both paths
+                .filter(entry => entry[1] === 3)
+                // Calculate the Manhattan distance of the locations
+                .map(entry => {
+                    const [x, y] = entry[0].split(',');
+                    return Math.abs(x - 0) + Math.abs(y - 0);
+                })
+                // Find the closest
+                .sort((a, b) => a - b)
+                .at(0);
+        </script>
+    </body>
+</html>
