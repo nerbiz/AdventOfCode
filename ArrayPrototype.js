@@ -259,9 +259,9 @@ export default class ArrayPrototype
         Object.defineProperty(Array.prototype, 'sortGrouped', {
             /**
              * Group by with sorting, then sort the grouped items
-             * @param groupBy
-             * @param callback1
-             * @param callback2
+             * @param {any} groupBy
+             * @param {function} callback1
+             * @param {function} callback2
              * @return {array}
              */
             value: function sortGrouped(groupBy, callback1, callback2) {
