@@ -19,14 +19,16 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const paths = await fileReader.parse();
             const visited = {};
-            const distances = [];
+            const intersections = {};
 
             for (let pathNumber = 0; pathNumber < paths.length; pathNumber++) {
                 let x = 0;
                 let y = 0;
+                let steps = 0;
 
                 for (const [direction, amount] of paths[pathNumber]) {
                     for (let i = 0; i < amount; i++) {
+                        steps++;
                         switch (direction) {
                             case 'U':
                                 y--;
@@ -44,18 +46,24 @@
 
                         const coordinates = x + ',' + y;
                         if (pathNumber === 0) {
-                            visited[coordinates] = true;
+                            if (! (coordinates in visited)) {
+                                // Set the amount of steps to the current point
+                                visited[coordinates] = steps;
+                            }
                         } else {
-                            // If points intersect, add the Manhattan distance
+                            // If points intersect, add the steps sum
                             if (coordinates in visited) {
-                                distances.push(Math.abs(x) + Math.abs(y));
+                                intersections[coordinates] = visited[coordinates] + steps;
                             }
                         }
                     }
                 }
             }
 
-            document.querySelector('#answer').innerText = distances.sort((a, b) => a - b).at(0);
+            document.querySelector('#answer').innerText = Object.entries(intersections)
+                .sort((a, b) => a[1] - b[1])
+                .at(0)
+                .at(1);
         </script>
     </body>
 </html>
