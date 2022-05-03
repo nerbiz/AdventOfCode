@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+
+            // Find all the sequence combinations
+            const phaseSequences = [];
+            (function findSequences(sequence, remaining) {
+                if (remaining.length === 0) {
+                    phaseSequences.push(sequence);
+                    return;
+                }
+
+                for (const phase of remaining) {
+                    const sequenceCopy = sequence.map(phase => phase);
+                    const remainingCopy = remaining.filter(otherPhase => otherPhase !== phase);
+                    sequenceCopy.push(phase);
+
+                    findSequences(sequenceCopy, remainingCopy);
+                }
+            })([], [0, 1, 2, 3, 4]);
+
+            let highestOutput = 0;
+
+            for (const sequence of phaseSequences) {
+                let output = 0;
+
+                for (const phase of sequence) {
+                    // Create an array to take inputs from
+                    let inputs = [phase, output];
+                    let index = 0;
+
+                    while (index < program.length) {
+                        const instruction = program[index];
+                        const opcode = instruction % 100;
+
+                        // Stop at opcode 99
+                        if (opcode === 99) {
+                            break;
+                        }
+
+                        // Get the modes for the parameters
+                        const mode1 = Math.floor(instruction % 1000 / 100);
+                        const mode2 = Math.floor(instruction % 10000 / 1000);
+                        let parameter1, parameter2;
+
+                        // Get the parameter values if needed
+                        if (opcode !== 3 && opcode !== 4) {
+                            parameter1 = (mode1 === 0)
+                                ? program[program[++index]]
+                                : program[++index];
+
+                            parameter2 = (mode2 === 0)
+                                ? program[program[++index]]
+                                : program[++index];
+                        }
+
+                        switch (opcode) {
+                            // Addition
+                            case 1:
+                                program[program[++index]] = parameter1 + parameter2;
+                                break;
+                            // Multiplication
+                            case 2:
+                                program[program[++index]] = parameter1 * parameter2;
+                                break;
+                            // Input
+                            case 3:
+                                program[program[++index]] = inputs.shift();
+                                break;
+                            // Output
+                            case 4:
+                                output = (mode1 === 0)
+                                    ? program[program[++index]]
+                                    : program[++index];
+
+                                // Add the output to the inputs list
+                                inputs.push(output);
+                                break;
+                            // Jump if true
+                            case 5:
+                                if (parameter1 !== 0) {
+                                    index = parameter2;
+                                    continue;
+                                }
+                                break;
+                            // Jump if false
+                            case 6:
+                                if (parameter1 === 0) {
+                                    index = parameter2;
+                                    continue;
+                                }
+                                break;
+                            // Less than
+                            case 7:
+                                program[program[++index]] = Number(parameter1 < parameter2);
+                                break;
+                            // Equal
+                            case 8:
+                                program[program[++index]] = Number(parameter1 === parameter2);
+                                break;
+                        }
+
+                        index++;
+                    }
+                }
+
+                highestOutput = Math.max(highestOutput, output);
+            }
+
+            document.querySelector('#answer').innerText = highestOutput;
+        </script>
+    </body>
+</html>
