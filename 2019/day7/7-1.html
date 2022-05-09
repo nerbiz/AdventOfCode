@@ -36,14 +36,14 @@
                 }
             })([], [0, 1, 2, 3, 4]);
 
-            let highestOutput = 0;
+            let highestSignal = 0;
 
             for (const sequence of phaseSequences) {
-                let output = 0;
+                let signal = 0;
 
                 for (const phase of sequence) {
                     // Create an array to take inputs from
-                    let inputs = [phase, output];
+                    let inputs = [phase, signal];
                     let index = 0;
 
                     while (index < program.length) {
@@ -86,12 +86,12 @@
                                 break;
                             // Output
                             case 4:
-                                output = (mode1 === 0)
+                                signal = (mode1 === 0)
                                     ? program[program[++index]]
                                     : program[++index];
 
-                                // Add the output to the inputs list
-                                inputs.push(output);
+                                // Add the signal to the inputs list
+                                inputs.push(signal);
                                 break;
                             // Jump if true
                             case 5:
@@ -121,10 +121,10 @@
                     }
                 }
 
-                highestOutput = Math.max(highestOutput, output);
+                highestSignal = Math.max(highestSignal, signal);
             }
 
-            document.querySelector('#answer').innerText = highestOutput;
+            document.querySelector('#answer').innerText = highestSignal;
         </script>
     </body>
 </html>
