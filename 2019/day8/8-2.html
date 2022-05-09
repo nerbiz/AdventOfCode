@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-family: monospace;
+                font-size: 20px;
+                line-height: 1;
+                white-space: pre;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
+
+            ArrayPrototype.registerChunk();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {width, height, digits} = await fileReader.parse();
+
+            // Create layers
+            const layers = [];
+            while (digits.length > 0) {
+                layers.push(digits.splice(0, width * height));
+            }
+
+            const image = [];
+            for (const layer of layers.reverse()) {
+                for (let i = 0; i < layer.length; i++) {
+                    // Skip transparent pixels
+                    if (layer[i] === 2) {
+                        continue;
+                    }
+
+                    // Overwrite the pixel with the front-most value
+                    image[i] = layer[i];
+                }
+            }
+
+            const answer = document.querySelector('#answer');
+            for (const row of image.chunk(width)) {
+                answer.textContent += row.map(pixel => (pixel === 0) ? ' ' : '█').join('') + '\n';
+            }
+        </script>
+    </body>
+</html>
