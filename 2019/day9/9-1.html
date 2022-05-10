@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            let signal = 1;
+            let relativeBase = 0;
+
+            // Get a position from the program, to get a value from
+            const getPosition = (mode, index) => {
+                // Immediate mode
+                return (mode === 1) ? index
+                    // Position mode
+                    : (mode === 0) ? program[index]
+                        // Relative mode
+                        : program[index] + relativeBase;
+            };
+
+            // Get a value from the program
+            const getValue = (mode, index) => program[getPosition(mode, index)] || 0;
+
+            let index = 0;
+            while (index < program.length) {
+                const instruction = program[index];
+                const opcode = instruction % 100;
+
+                // Stop at opcode 99
+                if (opcode === 99) {
+                    break;
+                }
+
+                // Get mode and parameter values
+                const mode1 = Math.floor(instruction % 1000 / 100);
+                const mode2 = Math.floor(instruction % 10000 / 1000);
+                const mode3 = Math.floor(instruction % 100000 / 10000);
+                const parameter1 = getValue(mode1, index + 1);
+                const parameter2 = getValue(mode2, index + 2);
+
+                switch (opcode) {
+                    // Addition
+                    case 1:
+                        program[getPosition(mode3, index + 3)] = parameter1 + parameter2;
+                        index += 4;
+                        break;
+                    // Multiplication
+                    case 2:
+                        program[getPosition(mode3, index + 3)] = parameter1 * parameter2;
+                        index += 4;
+                        break;
+                    // Input
+                    case 3:
+                        program[getPosition(mode1, index + 1)] = signal;
+                        index += 2;
+                        break;
+                    // Output
+                    case 4:
+                        signal = parameter1;
+                        index += 2;
+                        break;
+                    // Jump if true
+                    case 5:
+                        index = (parameter1 !== 0) ? parameter2 : index + 3;
+                        break;
+                    // Jump if false
+                    case 6:
+                        index = (parameter1 === 0) ? parameter2 : index + 3;
+                        break;
+                    // Less than
+                    case 7:
+                        program[getPosition(mode3, index + 3)] = Number(parameter1 < parameter2);
+                        index += 4;
+                        break;
+                    // Equal
+                    case 8:
+                        program[getPosition(mode3, index + 3)] = Number(parameter1 === parameter2);
+                        index += 4;
+                        break;
+                    // Change relative base
+                    case 9:
+                        relativeBase += parameter1;
+                        index += 2;
+                        break;
+                }
+            }
+
+            document.querySelector('#answer').innerText = signal;
+        </script>
+    </body>
+</html>
