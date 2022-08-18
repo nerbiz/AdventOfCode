@@ -20,6 +20,29 @@ export default class Utilities
     }
 
     /**
+     * See if a series of numbers are consecutive
+     * @param {array|number} numbers
+     * @return {boolean}
+     */
+    static numbersAreConsecutive(...numbers)
+    {
+        if (Array.isArray(numbers[0])) {
+             numbers = numbers[0];
+        }
+
+        // See if numbers are ascending or descending
+        const step = (numbers.at(-1) > numbers[0]) ? 1 : -1;
+
+        for (let i = 1; i < numbers.length; i++) {
+            if (numbers[i] !== numbers[i - 1] + step) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Like indexOf(), but finds all the indexes
      * @param {array} array The input array/string
      * @param {any} searchElement The item to search for
