@@ -3,11 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Advent of Code</title>
-        <style>
-            #answer {
-                font-size: 25px;
-            }
-        </style>
+        <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
         <p id="answer"></p>
@@ -21,7 +17,7 @@
 
             // Create wire objects from the wire IDs
             const wires = wireIds.map(id => ({id, signal: undefined}));
-            
+
             // Resolve an operand value for an operation
             const getOperandValue = operand => {
                 if (/^\d+$/.test(operand) === true) {
@@ -59,7 +55,7 @@
                         instruction.wire.signal = (~otherSignal >>> 0) % (2 ** 16);
                     };
                 }
-                
+
                 // The operation is AND, OR, LSHIFT or RSHIFT
                 else {
                     switch (instruction.operation[1]) {

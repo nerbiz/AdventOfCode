@@ -3,11 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Advent of Code</title>
-        <style>
-            #answer {
-                font-size: 25px;
-            }
-        </style>
+        <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
         <p id="answer"></p>
@@ -37,7 +33,7 @@
             }
 
             // Decides which array to keep (oxygen rules)
-            const keepOxygenRules = (zeroes, ones) => 
+            const keepOxygenRules = (zeroes, ones) =>
                 (ones.length > zeroes.length || ones.length === zeroes.length) ? ones : zeroes;
 
             // Decides which array to keep (co2 rules)

@@ -3,11 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Advent of Code</title>
-        <style>
-            #answer {
-                font-size: 25px;
-            }
-        </style>
+        <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
         <p id="answer"></p>
@@ -34,7 +30,7 @@
             occurrences.forEach(counters => {
                 // Majority of 1 becomes true, majority of 0 becomes false
                 const status = counters[1] > counters[0];
-                
+
                 // Convert true/false to 1/0
                 gammaRate += Number(status);
                 epsilonRate += Number(! status);

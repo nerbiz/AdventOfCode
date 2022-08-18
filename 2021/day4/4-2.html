@@ -3,11 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Advent of Code</title>
-        <style>
-            #answer {
-                font-size: 25px;
-            }
-        </style>
+        <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
         <p id="answer"></p>
@@ -29,7 +25,7 @@
                 // Loop backwards, because of splicing
                 for (let j = boards.length - 1; j > 0; j--) {
                     const board = boards[j];
-                    
+
                     if (board.checkWin(number) === true) {
                         winningBoards.push(boards.splice(j, 1)[0]);
                     }

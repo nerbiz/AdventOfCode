@@ -3,11 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Advent of Code</title>
-        <style>
-            #answer {
-                font-size: 25px;
-            }
-        </style>
+        <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
         <p id="answer"></p>
@@ -19,7 +15,7 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const coordinates = await fileReader.parse();
             const occurrences = {};
-            
+
             // Keep only horizontal lines
             coordinates.filter(({ from, to }) => (from.x === to.x || from.y === to.y))
                 .forEach(({from, to}) => {
@@ -47,7 +43,7 @@
                         occurrences[point]++;
                     }
                 });
-            
+
             // Find the points that have more than 1 occurrence
             let counter = 0;
             for (const point in occurrences) {

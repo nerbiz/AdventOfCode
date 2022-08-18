@@ -3,11 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Advent of Code</title>
-        <style>
-            #answer {
-                font-size: 25px;
-            }
-        </style>
+        <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
         <p id="answer"></p>
@@ -18,10 +14,10 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             let fishList = await fileReader.parse();
-            
+
             for (let i = 0; i < 80; i++) {
                 const newFishList = [];
-                
+
                 fishList.forEach((daysLeft, index) => {
                     // Decrease days left, add new fish if no days left anymore
                     if (--daysLeft === -1) {

@@ -3,11 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Advent of Code</title>
-        <style>
-            #answer {
-                font-size: 25px;
-            }
-        </style>
+        <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
         <p id="answer"></p>
@@ -53,20 +49,20 @@
                 // Get all east- and south-facing sea cucumbers
                 let eastMoving = seafloor.filter2d(position => position.value === '>').flat();
                 let southMoving = seafloor.filter2d(position => position.value === 'v').flat();
-    
+
                 eastMoving = eastMoving.map(prepareMove).filter(seaCucumber => seaCucumber.moveTo !== undefined);
                 moveAmount += eastMoving.length;
                 if (eastMoving.length > 0) {
                     eastMoving.forEach(move);
                 }
-                
+
                 southMoving = southMoving.map(prepareMove).filter(seaCucumber => seaCucumber.moveTo !== undefined);
                 moveAmount += southMoving.length;
                 if (moveAmount === 0) {
                     break;
                 }
                 southMoving.forEach(move);
-    
+
                 seafloor.forEach2d(position => position.moveTo = undefined);
             };
 

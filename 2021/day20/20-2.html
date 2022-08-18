@@ -3,11 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Advent of Code</title>
-        <style>
-            #answer {
-                font-size: 25px;
-            }
-        </style>
+        <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
         <p id="answer"></p>
@@ -45,7 +41,7 @@
                         const pixel = imageMap.getItem(x, y);
                         let pixels = imageMap.getSurroundingItems(pixel);
                         pixels.splice(4, 0, pixel);
-                        
+
                         // Use the infinite pixel status, if a surrounding item is undefined
                         const binary = pixels.map(pixel => (pixel === undefined) ? infinityPixel : pixel.value).join('');
                         const newPixel = algorithm[parseInt(binary, 2)];

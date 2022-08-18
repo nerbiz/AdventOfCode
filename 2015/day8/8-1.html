@@ -3,11 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Advent of Code</title>
-        <style>
-            #answer {
-                font-size: 25px;
-            }
-        </style>
+        <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
         <p id="answer"></p>
@@ -21,7 +17,7 @@
 
             document.querySelector('#answer').innerText = strings.map(string => {
                 const originalLength = string.length;
-                
+
                 // Remove leading and trailing double quotes
                 string = string.substring(1, string.length - 1)
                     // Unescape \x11 characters

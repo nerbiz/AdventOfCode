@@ -3,11 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Advent of Code</title>
-        <style>
-            #answer {
-                font-size: 25px;
-            }
-        </style>
+        <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
         <p id="answer"></p>
@@ -33,7 +29,7 @@
             for (const character of polymer) {
                 characterAmounts[character] = (characterAmounts[character] || 0) + 1;
             }
-            
+
             for (let round = 0; round < rounds; round++) {
                 // Clone the amounts, so that increasing doesn't influence the loop
                 pairAmountClone = Utilities.clone(pairAmounts);
@@ -43,7 +39,7 @@
                     if (pairAmounts[pair] === 0) {
                         continue;
                     }
-                    
+
                     // Each pair creates 2 new pairs per round
                     const newPairOne = pair[0] + insertionRules[pair];
                     const newPairTwo = insertionRules[pair] + pair[1];
