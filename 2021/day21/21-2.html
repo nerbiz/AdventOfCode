@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../../Utilities.js';
+
+            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const positions = await fileReader.parse();
+            const maxPosition = 10;
+            const addedScores = {
+                1: 0,
+                2: 0,
+            };
+
+            console.log('Starting positions');
+            console.log(positions);
+
+            const possibilities = [];
+
+            // Calculate the amount of times an outcome of three rolls occur
+            const rollsOutcomeOccurrences = {};
+            for (let roll1 = 1; roll1 <= 3; roll1++) {
+                for (let roll2 = 1; roll2 <= 3; roll2++) {
+                    for (let roll3 = 1; roll3 <= 3; roll3++) {
+                        const sum = roll1 + roll2 + roll3;
+                        rollsOutcomeOccurrences[sum] = (rollsOutcomeOccurrences[sum] || 0) + 1;
+                        possibilities.push([roll1, roll2, roll3, '->', sum]);
+                    }
+                }
+            }
+
+            /*
+            This reduces the possibilities per round:
+            - 3 rolls, 3 possibilities is normally 27 possibilities, now every outcome precalculated
+            - Many outcomes are the same, so they are grouped, leaving only 7 possibilities per round
+
+            Example: outcome 8 happens in 3 universes:
+            - 3 3 2
+            - 3 2 3
+            - 2 3 3
+
+            Example: outcome 6 happens in 7 universes:
+            - 1, 2, 3
+            - 1, 3, 2
+            - 2, 1, 3
+            - 2, 2, 2
+            - 2, 3, 1
+            - 3, 1, 2
+            - 3, 2, 1
+            */
+
+            const possibleRollsOutcomes = Object.keys(rollsOutcomeOccurrences).map(number => parseInt(number, 10));
+
+            console.log('All possible dice roll combinations and their outcomes');
+            console.log(JSON.parse(JSON.stringify(possibilities)));
+            console.log(possibilities.sort((a, b) => a[4] - b[4]));
+            
+            console.log('Amount of times every outcome occurs');
+            console.log(rollsOutcomeOccurrences);
+
+            console.log('All possible dice roll outcomes');
+            console.log(possibleRollsOutcomes);
+
+            /*
+            Amount of games won by a player:
+                The total amount of getting to 21 or higher
+                Minus the games where the other player won with 1 less turn
+            */
+
+            // Get all possible scores from all possible positions
+            // 3 dice rolls can amount to 3..9
+            // Example: from position 7: 10, 1, 2, 3, 4, 5, 6
+            const nextScores = {};
+            for (let position = 1; position <= 10; position++) {
+                nextScores[position] = [];
+
+                for (const outcome of possibleRollsOutcomes) {
+                    nextScores[position].push({
+                        outcome,
+                        score: (position + outcome - 1) % 10 + 1,
+                    });
+                }
+            }
+
+            console.log('All possible scores from all possible positions');
+            console.log(nextScores);
+
+
+
+            const players = {
+                1: {
+                    // Dice roll outcomes in all turns, up to reaching the target score
+                    turnsDiceRolls: [],
+                    // Textual reports of every way the player reached the target score
+                    // reports: [],
+                    // Amount of universes in all turns, up to reaching the target score
+                    turnsUniverses: [],
+                    // The amount of universes in which the target score is reached, grouped by turns amount
+                    testGrouped: {},
+                    turnsUniversesGrouped: {},
+                },
+                2: {
+                    turnsDiceRolls: [],
+                    // reports: [],
+                    turnsUniverses: [],
+                    testGrouped: {},
+                    turnsUniversesGrouped: {},
+                },
+            };
+
+
+            const targetScore = 21;
+            console.log('Target score', targetScore);
+
+            const reachTargetScore = (totalScore, diceOutcome, addScore, diceOutcomes, addedScores, playerNumber) => {
+                diceOutcomes = Utilities.clone(diceOutcomes);
+                addedScores = Utilities.clone(addedScores);
+                totalScore += addScore;
+                diceOutcomes.push(diceOutcome);
+                addedScores.push(addScore);
+
+                // Target reached
+                if (totalScore >= targetScore) {
+                    players[playerNumber].turnsDiceRolls.push(diceOutcomes);
+
+                    /* let total = 0;
+                    players[playerNumber].reports.push(diceOutcomes.map((outcome, index) => {
+                        return 'Rolled: ' + outcome
+                            + ', added score: ' + addedScores[index]
+                            + ', score: ' + (total += addedScores[index]);
+                    })); */
+
+                    return;
+                }
+
+                for (const nextScore of nextScores[addScore]) {
+                    reachTargetScore(totalScore, nextScore.outcome, nextScore.score, diceOutcomes, addedScores, playerNumber);
+                }
+            };
+
+
+
+            for (const playerNumber of [1, 2]) {
+                const player = players[playerNumber];
+
+                // Get to the target score from the starting position
+                for (const nextScore of nextScores[positions[playerNumber]]) {
+                    reachTargetScore(0, nextScore.outcome, nextScore.score, [], [], playerNumber);
+                }
+
+                player.turnsDiceRolls.sort((a, b) => (a.length - b.length));
+    
+                // Get the total amount of universes in which each outcome can occur
+                player.turnsUniverses = player.turnsDiceRolls
+                    .map(outcomes => outcomes.map(outcome => rollsOutcomeOccurrences[outcome] * 3));
+    
+                const leastTurns = player.turnsUniverses.at(0).length;
+                const mostTurns = player.turnsUniverses.at(-1).length;
+    
+                // Group the total amount of universes of reaching the target score, by amount of turns
+                for (let turns = leastTurns; turns <= mostTurns; turns++) {
+                    player.testGrouped[turns] = player.turnsUniverses
+                        .filter(turnsList => turnsList.length === turns)
+                        .map(turnsList => turnsList.reduce((total, universes) => (total * universes), 1));
+
+                    player.turnsUniversesGrouped[turns] = player.turnsUniverses
+                        .filter(turnsList => turnsList.length === turns)
+                        .map(turnsList => turnsList.reduce((total, universes) => (total * universes), 1))
+                        .reduce((total, universes) => (total + universes), 0);
+                }
+            }
+
+            console.log('Player 1 information');
+            console.log(players[1]);
+
+            console.log('Player 2 information');
+            console.log(players[2]);
+
+            /*
+            (Example: player 1 wins in 5 turns)
+            Player 1 goes first
+            Loop over all the universes in which player 1 reaches target score in turn 5
+                Find all universes in which player 2 did 4 turns and didn't reach the target score
+                    Get all possible universes: 3 rolls, 3 outcomes per dice, 4 turns ((3 ** 3) ** 4)
+                    Minus the amount in which player 2 reached the target score in 4 turns
+                Add:
+                    Amount of universes in which player 1 reaches the target score in 5 turns
+                    + amount of universes in which player 2 did 4 turns and didn't reach the target score
+            */
+
+            let finalResult = 0;
+            for (const turns in players[1].turnsUniversesGrouped) {
+                const universes = players[1].turnsUniversesGrouped[turns];
+                console.log('---');
+                console.log('Player 1, turns:', turns, 'universes', universes);
+
+                // Calculate the total amount of possible universes in one turn less
+                const totalPossibilities = (3 ** 3) ** (turns - 1);
+
+                // Subtract all the universes in which player 2 reached the target score
+                // in less turns than player 1
+                let subtractPossibilities = 0;
+                for (const turns2 in players[2].turnsUniversesGrouped) {
+                    if (turns2 > (turns - 1)) {
+                        break;
+                    }
+
+                    subtractPossibilities += players[2].turnsUniversesGrouped[turns2];
+                }
+
+                console.log(
+                    'Possible universes', totalPossibilities,
+                    'Subtract', subtractPossibilities,
+                );
+                console.log(
+                    'Add', totalPossibilities - subtractPossibilities,
+                    'Result', universes + (totalPossibilities - subtractPossibilities)
+                );
+
+                finalResult += universes + (totalPossibilities - subtractPossibilities);
+            }
+
+            const withThousandsSeparator = number =>
+                number.toString()
+                    .split('')
+                    .reverse()
+                    .map((value, index) => ((index + 1) % 3 === 0) ? '.' + value : value)
+                    .reverse()
+                    .join('')
+                    .replace(/^\./, '')
+                    .replace(/\.$/, '');
+
+            console.log('-----');
+            console.log('Final result:', withThousandsSeparator(finalResult));
+            console.log(' Needs to be:', withThousandsSeparator(444356092776315));
+
+
+
+
+
+
+
+
+
+
+
+            /* const winningScore = 10;
+            console.log('Winning score', winningScore);
+
+            const winningUniverses = {
+                1: 0,
+                2: 0,
+            };
+
+            const gameTurn = (positions, scores, outcomes) => {
+                positions = Utilities.clone(positions);
+                scores = Utilities.clone(scores);
+                outcomes = Utilities.clone(outcomes);
+
+                for (let playerNumber = 1; playerNumber <= 2; playerNumber++) {
+                    // Update the position (wrap from 10 back to 1) and score of the player
+                    positions[playerNumber] = ((positions[playerNumber] + outcomes[playerNumber].at(-1) - 1) % maxPosition) + 1;
+                    scores[playerNumber] += positions[playerNumber];
+    
+                    // The player won
+                    if (scores[playerNumber] >= winningScore) {
+                        // console.log('-----');
+                        // console.log('Player', playerNumber, 'won:');
+                        // console.log('Positions', positions, 'Scores', scores, 'Outcomes for 1', outcomes[1], 'Outcomes for 2', outcomes[2]);
+                        const universesAmount = outcomes[playerNumber].map(outcome => rollsOutcomeOccurrences[outcome])
+                            .reduce((sum, universes) => (sum + universes), 0);
+                        winningUniverses[playerNumber] += universesAmount;
+                        // console.log('Amount of universes', universesAmount);
+                        return;
+                    }
+                }
+
+                // console.log('Positions', positions, 'Scores', scores, 'Outcomes for 1', outcomes[1], 'Outcomes for 2', outcomes[2]);
+
+                for (const player1Outcome of possibleRollsOutcomes) {
+                    for (const player2Outcome of possibleRollsOutcomes) {
+                        gameTurn(positions, scores, {
+                            1: outcomes[1].concat(player1Outcome),
+                            2: outcomes[2].concat(player1Outcome),
+                        });
+                    }
+                }
+            };
+
+            for (const player1Outcome of possibleRollsOutcomes) {
+                for (const player2Outcome of possibleRollsOutcomes) {
+                    gameTurn(positions, addedScores, {
+                        1: [player1Outcome],
+                        2: [player2Outcome],
+                    });
+                }
+            }
+
+            console.log('Winning universes', winningUniverses); */
+        </script>
+    </body>
+</html>
