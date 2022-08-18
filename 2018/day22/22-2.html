@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../Array2d.js';
+
+            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const {depth, target} = await fileReader.parse();
+            const cave = new Array2d(target[1] * 1.5, target[0] * 1.5);
+            const NEITHER = 1;
+            const CLIMBING_GEAR = 2;
+            const TORCH = 4;
+
+            cave.forEach2d((region, x, y) => {
+                // Determine the geologic index of the region
+                let geologicIndex;
+                if (x === 0 && y === 0 || x === target[0] && y === target[1]) {
+                    geologicIndex = 0;
+                } else if (y === 0) {
+                    geologicIndex = x * 16807;
+                } else if (x === 0) {
+                    geologicIndex = y * 48271;
+                } else {
+                    const regionLeft = cave.getItem(x - 1, y);
+                    const regionUp = cave.getItem(x, y - 1);
+                    geologicIndex = regionLeft.erosionLevel * regionUp.erosionLevel;
+                }
+
+                // Determine the erosion level and type of the region
+                region.erosionLevel = (geologicIndex + depth) % 20183;
+                region.type = region.erosionLevel % 3;
+
+                // Determine which tools can be used in the region
+                switch (region.type) {
+                    case 0:
+                        region.tools = CLIMBING_GEAR | TORCH;
+                        break;
+                    case 1:
+                        region.tools = NEITHER | CLIMBING_GEAR;
+                        break;
+                    case 2:
+                        region.tools = NEITHER | TORCH;
+                        break;
+                }
+
+                region.value = (region.type === 0)
+                    ? '.'
+                    : (region.type === 1) ? '=' : '|';
+            });
+
+            const correctPath = [
+                cave.getItem(0, 0), cave.getItem(0, 1), cave.getItem(1, 1),
+                cave.getItem(2, 1), cave.getItem(3, 1), cave.getItem(4, 1),
+                cave.getItem(4, 2), cave.getItem(4, 3), cave.getItem(4, 4),
+                cave.getItem(4, 5), cave.getItem(4, 6), cave.getItem(4, 7),
+                cave.getItem(4, 8), cave.getItem(5, 8), cave.getItem(5, 9),
+                cave.getItem(5, 10), cave.getItem(5, 11), cave.getItem(6, 11),
+                cave.getItem(6, 12), cave.getItem(7, 12), cave.getItem(8, 12),
+                cave.getItem(9, 12), cave.getItem(10, 12), cave.getItem(10, 11),
+                cave.getItem(10, 10),
+            ];
+
+            console.log(cave.toString(region => (correctPath.includes(region)
+                ? '\x1b[34m' + region.value + '\x1b[0m'
+                : '\x1b[37m' + region.value + '\x1b[0m'
+            )));
+
+            // document.querySelector('#answer').innerText =
+        </script>
+    </body>
+</html>

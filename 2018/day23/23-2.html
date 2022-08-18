@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <style>
+            #answer {
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <p id="answer"></p>
+
+        <script type="module">
+            // https://i.pinimg.com/originals/82/9a/f6/829af626d193a4b3cda398745fd0ce4b.png
+            const names = ['Amy', 'Erin', 'Jack', 'Sally', 'Sue', 'Max', 'Joe', 'Jake',
+                'Tom', 'Liz', 'Ty', 'Jay', 'Lu', 'Jess', 'Ryan'];
+            let persons = {};
+            for (const name of names) {
+                persons[name] = {name};
+            }
+
+            persons.Liz.neighbours = ['Ty', 'Jay'];
+            persons.Ty.neighbours = ['Liz', 'Jay'];
+            persons.Jay.neighbours = ['Liz', 'Ty'];
+
+            persons.Amy.neighbours = ['Erin', 'Jack'];
+            persons.Erin.neighbours = ['Amy', 'Jack', 'Sally'];
+            persons.Jack.neighbours = ['Amy', 'Erin'];
+
+            persons.Sally.neighbours = ['Erin', 'Sue', 'Max', 'Tom', 'Jake'];
+            persons.Sue.neighbours = ['Sally', 'Max'];
+            persons.Max.neighbours = ['Sally', 'Sue'];
+
+            persons.Joe.neighbours = ['Lu'];
+
+            persons.Jake.neighbours = ['Sally', 'Tom', 'Lu', 'Jess', 'Ryan'];
+            persons.Tom.neighbours = ['Sally', 'Jake', 'Lu', 'Jess', 'Ryan'];
+            persons.Lu.neighbours = ['Joe', 'Jake', 'Tom', 'Jess', 'Ryan'];
+            persons.Jess.neighbours = ['Tom', 'Jake', 'Lu', 'Ryan'];
+            persons.Ryan.neighbours = ['Tom', 'Jake', 'Lu', 'Jess'];
+
+            for (const person in persons) {
+                persons[person].neighbours = persons[person].neighbours.map(name => persons[name]);
+            }
+
+            persons = new Set(Object.values(persons));
+
+            let chosen;
+            for (const choice of persons) {
+                if (choice.name === 'Max') {
+                    chosen = choice;
+                    break;
+                }
+            }
+
+            import SetPrototype from '../../SetPrototype.js';
+            SetPrototype.registerIntersection();
+            SetPrototype.registerDifference();
+            const groups = [];
+
+            /*
+            Start with Sally's neighbours
+                Make a new set ('copy') of the neighbours, because persons will be removed
+                Intersect each neighbour's neighbours with Sally's, including self
+
+                Erin -> {Erin, Sally}, all used, group complete
+                    Remove Erin from 'copy'
+                Sue -> {Sue, Sally, Max}, Max is unused
+                    Remove Sue from 'copy'
+                    Max -> {Max, Sue, Sally}, all used, group complete
+                        Remove Max from 'copy'
+                (Max -> removed)
+                Jake -> {Jake, Sally, Tom}, Tom is unused
+                    Remove Jake from 'copy'
+                    Tom -> {Tom, Sally, Jake}, all used, group complete
+                        Remove Tom from 'copy'
+                (Tom -> removed)
+
+            Possible optimization
+                While looping over neighbours
+                    Loop over already formed groups
+                    If person and neighbour exist in a group, skip to next neighbour
+            */
+
+            const makeGroup = (pool, group = new Set()) => {
+                if (pool.size === 0) {
+                    // console.log('Group done');
+                    // console.log({personGroup});
+                    // groups.push(personGroup);
+                    // return;
+                }
+
+                for (const neighbour of person.neighbours) {
+                }
+            }
+
+            // for (const person of persons) {
+            //     makeGroup(persons);
+            // }
+
+            for (const group of groups) {
+                console.log('---');
+                for (const person of group) {
+                    console.log(person);
+                }
+            }
+
+            throw new Error('Done');
+
+
+
+
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            // import SetPrototype from '../../SetPrototype.js';
+
+            // SetPrototype.registerIntersection();
+            const fileReader = new FileReader('./datatest2.txt', new Parser());
+            const nanobotObjects = await fileReader.parse();
+
+            console.time('Time taken');
+
+            const getDistance = (nanobot1, nanobot2) =>
+                Math.abs(nanobot1.x - nanobot2.x)
+                + Math.abs(nanobot1.y - nanobot2.y)
+                + Math.abs(nanobot1.z - nanobot2.z);
+
+            const nanobots = new Map();
+
+            for (let i = 0; i < nanobotObjects.length; i++) {
+                const nanobot = nanobotObjects[i];
+                let neighbours = nanobots.get(nanobot);
+                if (neighbours === undefined) {
+                    neighbours = new Set();
+                    nanobots.set(nanobot, neighbours);
+                }
+
+                for (const otherNanobot of nanobotObjects.slice(i + 1)) {
+                    let otherNeighbours = nanobots.get(otherNanobot);
+                    if (otherNeighbours === undefined) {
+                        otherNeighbours = new Set();
+                        nanobots.set(otherNanobot, otherNeighbours);
+                    }
+
+                    // Connect nanobots, if their ranges overlap
+                    if (getDistance(nanobot, otherNanobot) <= (nanobot.radius + otherNanobot.radius)) {
+                        neighbours.add(otherNanobot);
+                        otherNeighbours.add(nanobot);
+                    }
+                }
+            }
+
+            /*
+            Start with complete set
+                Take each node in order, with an empty group
+                Add node to group
+                Loop over neighbours of the node
+                    Add current node to exclude list of neighbour
+                        (Don't check the relation again)
+                    If group is subset of neighbour's neighbours
+                        Loop again with current neighbour
+                    Else
+                        Clique found
+            */
+
+            /*algorithm BronKerbosch1(R, P, X) is
+                if P and X are both empty then
+                    report R as a maximal clique
+                for each vertex v in P do
+                    BronKerbosch1(R ⋃ {v}, P ⋂ N(v), X ⋂ N(v))
+                    P := P \ {v}
+                    X := X ⋃ {v}*/
+
+            let largestClique = new Set();
+            let loopCount = -1;
+            const bronKerbosch = (candidates, result = new Set(), exclude = new Set()) => {
+                // console.log({candidates, result, exclude});
+                if (++loopCount === 1000) {
+                    throw new Error('Too many loops');
+                }
+
+                if (candidates.size === 0 && exclude.size === 0) {
+                    // Update the largest clique, if the current is larger
+                    if (result.size > largestClique.size) {
+                        largestClique = result;
+                    }
+
+                    return;
+                }
+
+                for (const nanobot of candidates) {
+                    const neighbours = nanobots.get(nanobot);
+
+                    bronKerbosch(
+                        candidates.intersection(neighbours),
+                        new Set(result).add(nanobot),
+                        exclude.intersection(neighbours)
+                    );
+
+                    exclude.add(nanobot);
+                    candidates.delete(nanobot);
+                }
+            };
+
+            bronKerbosch(new Set(nanobots.keys()));
+            console.log(largestClique);
+
+            console.timeEnd('Time taken');
+
+            /*for (const nanobot of nanobots) {
+                console.log(nanobot);
+                for (const otherNanobot of nanobot.neighbours) {
+                    console.log('   ', otherNanobot);
+                }
+            }*/
+
+            // document.querySelector('#answer').innerText =
+        </script>
+    </body>
+</html>
