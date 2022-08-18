@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -113,7 +113,7 @@
                 yCollection.unique().forEach(y => possibilities.push([xSteps.x, y]));
             });
 
-            document.querySelector('#answer').innerText = possibilities.length;
+            document.querySelector('.answer').innerText = possibilities.length;
         </script>
     </body>
 </html>

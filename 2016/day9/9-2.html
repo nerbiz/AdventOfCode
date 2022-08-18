@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -68,7 +68,7 @@
                 compressed = result.remainingCompressed;
             }
 
-            document.querySelector('#answer').innerText = total;
+            document.querySelector('.answer').innerText = total;
         </script>
     </body>
 </html>

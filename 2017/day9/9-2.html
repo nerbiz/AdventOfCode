@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -15,7 +15,7 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const stream = await fileReader.parse();
 
-            document.querySelector('#answer').innerText = stream
+            document.querySelector('.answer').innerText = stream
                 // Remove canceled characters, including the !
                 .replaceAll(/!./g, '')
                 // Find all garbage

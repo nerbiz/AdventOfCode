@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -38,7 +38,7 @@
                 currentRecipes[1] = scoreBoard.getNext(currentRecipes[1], 1 + currentRecipes[1].value);
             }
 
-            document.querySelector('#answer').innerText = scoreBoard.toArray()
+            document.querySelector('.answer').innerText = scoreBoard.toArray()
                 .slice(recipesAmount, recipesAmount + 10)
                 .join('');
         </script>

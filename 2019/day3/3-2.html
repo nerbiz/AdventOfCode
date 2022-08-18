@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -56,7 +56,7 @@
                 }
             }
 
-            document.querySelector('#answer').innerText = Object.entries(intersections)
+            document.querySelector('.answer').innerText = Object.entries(intersections)
                 .sort((a, b) => a[1] - b[1])
                 .at(0)
                 .at(1);

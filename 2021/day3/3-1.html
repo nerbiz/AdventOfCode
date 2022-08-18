@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -37,7 +37,7 @@
             });
 
             // Multiply the rates
-            document.querySelector('#answer').innerText = parseInt(gammaRate, 2) * parseInt(epsilonRate, 2);
+            document.querySelector('.answer').innerText = parseInt(gammaRate, 2) * parseInt(epsilonRate, 2);
         </script>
     </body>
 </html>

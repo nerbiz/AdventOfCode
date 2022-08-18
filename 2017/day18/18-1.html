@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -46,7 +46,7 @@
                 index += (result !== undefined) ? result : 1;
             }
 
-            document.querySelector('#answer').innerText = frequency;
+            document.querySelector('.answer').innerText = frequency;
         </script>
     </body>
 </html>

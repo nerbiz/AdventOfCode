@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -56,7 +56,7 @@
                 }
             }
 
-            document.querySelector('#answer').innerText = (Math.abs(x) + Math.abs(y) + Math.abs(z)) / 2;
+            document.querySelector('.answer').innerText = (Math.abs(x) + Math.abs(y) + Math.abs(z)) / 2;
         </script>
     </body>
 </html>

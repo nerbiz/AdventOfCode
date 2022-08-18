@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -59,7 +59,7 @@
                 code.push(keypad[current[0]][current[1]]);
             });
 
-            document.querySelector('#answer').innerText = code.join('');
+            document.querySelector('.answer').innerText = code.join('');
         </script>
     </body>
 </html>

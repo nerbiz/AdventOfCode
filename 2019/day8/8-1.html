@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -28,7 +28,7 @@
                 .sort((a, b) => a[0] - b[0])
                 .at(0);
 
-            document.querySelector('#answer').innerText = fewestZeroes[1] * fewestZeroes[2];
+            document.querySelector('.answer').innerText = fewestZeroes[1] * fewestZeroes[2];
         </script>
     </body>
 </html>

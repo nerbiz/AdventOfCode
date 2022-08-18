@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -156,7 +156,7 @@
             });
 
             // Sum up all the output numbers
-            document.querySelector('#answer').innerText = outputNumbers
+            document.querySelector('.answer').innerText = outputNumbers
                 .map(number => parseInt(number, 10))
                 .reduce((sum, number) => (sum + number), 0);
         </script>

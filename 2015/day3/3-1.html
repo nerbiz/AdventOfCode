@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -42,7 +42,7 @@
                 visited[`${x},${y}`] = (visited[`${x},${y}`] || 0) + 1;
             });
 
-            document.querySelector('#answer').innerText = Object.keys(visited).length;
+            document.querySelector('.answer').innerText = Object.keys(visited).length;
         </script>
     </body>
 </html>

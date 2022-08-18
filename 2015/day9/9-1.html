@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -61,7 +61,7 @@
                 place.routeDistance = place.route.reduce((sum, travel) => (sum + travel.distance), 0);
             });
 
-            document.querySelector('#answer').innerText = places
+            document.querySelector('.answer').innerText = places
                 .sort((a, b) => a.routeDistance - b.routeDistance)
                 .at(0)
                 .routeDistance;

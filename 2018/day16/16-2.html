@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -74,7 +74,7 @@
                 registers[register] = matchedOperations[opcode](registers, arg1, arg2);
             }
 
-            document.querySelector('#answer').innerText = registers[0];
+            document.querySelector('.answer').innerText = registers[0];
         </script>
     </body>
 </html>

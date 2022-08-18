@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -17,7 +17,7 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const strings = await fileReader.parse();
 
-            document.querySelector('#answer').innerText = strings.reduce((sum, string) => {
+            document.querySelector('.answer').innerText = strings.reduce((sum, string) => {
                 // The string contains forbidden substrings
                 if (string.match(/ab|cd|pq|xy/) !== null) {
                     return sum;

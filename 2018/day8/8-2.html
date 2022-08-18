@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -39,7 +39,7 @@
                         .reduce((sum, value) => (sum + value), 0);
             };
 
-            document.querySelector('#answer').innerText = getValue(headers);
+            document.querySelector('.answer').innerText = getValue(headers);
         </script>
     </body>
 </html>

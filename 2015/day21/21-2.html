@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -57,7 +57,7 @@
                 }
             }
 
-            document.querySelector('#answer').innerText = combinations
+            document.querySelector('.answer').innerText = combinations
                 .sort((a, b) => b.cost - a.cost)
                 .find(combination => {
                     // Each character does at least 1 damage per turn

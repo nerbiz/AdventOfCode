@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import ArrayPrototype from '../../ArrayPrototype.js';
@@ -40,7 +40,7 @@
             const addedToLeft = generations * 5;
             const lowestIndex = firstPlantIndex - addedToLeft;
 
-            document.querySelector('#answer').innerText = pots
+            document.querySelector('.answer').innerText = pots
                 .slice(firstPlantIndex)
                 .split('')
                 .indexesOf('#')

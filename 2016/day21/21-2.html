@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -92,7 +92,7 @@
                     functions[operation[0]](...operation.slice(1))
                 });
 
-            document.querySelector('#answer').innerText = password.join('');
+            document.querySelector('.answer').innerText = password.join('');
         </script>
     </body>
 </html>

@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer" class="monospace"></p>
+        <p class="answer monospace"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -62,7 +62,7 @@
                 sky[y][x] = true;
             });
 
-            document.querySelector('#answer').innerText = sky
+            document.querySelector('.answer').innerText = sky
                 .map(row => row.map(point => point ? '█' : ' ').join('').trim())
                 .join('\n')
                 .trim();

@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -82,7 +82,7 @@
                 }
             });
 
-            document.querySelector('#answer').innerText = allBasins
+            document.querySelector('.answer').innerText = allBasins
                 // Sort by size (descending)
                 .sort((a, b) => b.length - a.length)
                 // Take the 3 largest

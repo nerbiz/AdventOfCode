@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -96,7 +96,7 @@
                 groups = groups.filter(group => group.units > 0);
             }
 
-            document.querySelector('#answer').innerText = groups
+            document.querySelector('.answer').innerText = groups
                 .map(group => group.units)
                 .reduce((sum, units) => (sum + units), 0);
         </script>

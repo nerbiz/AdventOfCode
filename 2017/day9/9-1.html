@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -18,7 +18,7 @@
             // The counter for each group score
             let counter = 0;
 
-            document.querySelector('#answer').innerText = stream
+            document.querySelector('.answer').innerText = stream
                 // Remove canceled characters
                 .replaceAll(/!./g, '!')
                 // Remove garbage

@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -59,7 +59,7 @@
                 .unique();
 
             // Subtract the weight difference from the heaviest sub-tower weight
-            document.querySelector('#answer').innerText = anomalyProgram.subTowers
+            document.querySelector('.answer').innerText = anomalyProgram.subTowers
                 .find(subTower => subTower.weight === Math.max(...weights))
                 .initialWeight
                 - Math.abs(weights[0] - weights[1]);

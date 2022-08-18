@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -92,7 +92,7 @@
                     .forEach(index => carts.splice(index, 1));
             }
 
-            document.querySelector('#answer').innerText = `${carts[0].x},${carts[0].y}`;
+            document.querySelector('.answer').innerText = `${carts[0].x},${carts[0].y}`;
         </script>
     </body>
 </html>

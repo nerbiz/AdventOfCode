@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -40,7 +40,7 @@
                     .join('');
             } while (string.length % 2 === 0);
 
-            document.querySelector('#answer').innerText = string;
+            document.querySelector('.answer').innerText = string;
         </script>
     </body>
 </html>

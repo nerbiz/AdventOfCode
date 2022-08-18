@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -46,7 +46,7 @@
                 }
             });
 
-            document.querySelector('#answer').innerText = screen
+            document.querySelector('.answer').innerText = screen
                 .filter2d(pixel => (pixel.value === true), true)
                 .length;
         </script>

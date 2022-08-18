@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -47,7 +47,7 @@
                 }
             }
 
-            document.querySelector('#answer').innerText = asteroids
+            document.querySelector('.answer').innerText = asteroids
                 .sort((a, b) => b.slopes.size - a.slopes.size)
                 .at(0)
                 .slopes

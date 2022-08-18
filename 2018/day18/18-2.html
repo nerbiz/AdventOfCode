@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -70,7 +70,7 @@
             // then use the resulting remainder as the index within the repeating chunk
             const indexWhenFinished = (totalMinutes - currentMinute) % repeatingInfinitely.length;
 
-            document.querySelector('#answer').innerText = repeatingInfinitely[indexWhenFinished];
+            document.querySelector('.answer').innerText = repeatingInfinitely[indexWhenFinished];
         </script>
     </body>
 </html>

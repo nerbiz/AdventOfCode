@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -24,7 +24,7 @@
                 buffer.splice(index, 0, ++value);
             }
 
-            document.querySelector('#answer').innerText = buffer[index + 1];
+            document.querySelector('.answer').innerText = buffer[index + 1];
         </script>
     </body>
 </html>

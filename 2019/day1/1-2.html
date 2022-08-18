@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -30,7 +30,7 @@
                 return fuel;
             };
 
-            document.querySelector('#answer').innerText = masses
+            document.querySelector('.answer').innerText = masses
                 .map(calculateFuel)
                 .reduce((sum, fuel) => (sum + fuel), 0);
         </script>

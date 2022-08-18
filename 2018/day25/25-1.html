@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -67,7 +67,7 @@
                 constellations.push(makeConstellation(point));
             }
 
-            document.querySelector('#answer').innerText = constellations.length;
+            document.querySelector('.answer').innerText = constellations.length;
         </script>
     </body>
 </html>

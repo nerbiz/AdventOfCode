@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -15,7 +15,7 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const numbers = await fileReader.parse();
 
-            document.querySelector('#answer').innerText = numbers
+            document.querySelector('.answer').innerText = numbers
                 .reduce((increased, current, index) => (increased + (current > numbers[index - 1])), 0);
         </script>
     </body>

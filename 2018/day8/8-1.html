@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -33,7 +33,7 @@
                 return metadata;
             };
 
-            document.querySelector('#answer').innerText = getMetadata(originalHeaders)
+            document.querySelector('.answer').innerText = getMetadata(originalHeaders)
                 .reduce((sum, entry) => (sum + entry), 0);
         </script>
     </body>

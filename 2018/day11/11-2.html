@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -64,7 +64,7 @@
                 }
             });
 
-            document.querySelector('#answer').innerText = [bestSquare.x, bestSquare.y, bestSquare.size].join(',');
+            document.querySelector('.answer').innerText = [bestSquare.x, bestSquare.y, bestSquare.size].join(',');
         </script>
     </body>
 </html>

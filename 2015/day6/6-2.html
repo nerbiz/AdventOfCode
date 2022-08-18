@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -37,7 +37,7 @@
                 });
             });
 
-            document.querySelector('#answer').innerText = lights
+            document.querySelector('.answer').innerText = lights
                 .reduce2d((sum, light) => (sum + light.value), 0);
         </script>
     </body>

@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -15,7 +15,7 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const triangles = await fileReader.parse();
 
-            document.querySelector('#answer').innerText = triangles
+            document.querySelector('.answer').innerText = triangles
                 .reduce((valid, triangle) => valid + Number(
                     triangle[0] + triangle[1] > triangle[2]
                     && triangle[0] + triangle[2] > triangle[1]

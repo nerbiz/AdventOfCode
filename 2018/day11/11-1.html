@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -42,7 +42,7 @@
 
             // Because the grid indexes should be 1-based, but they are 0-based
             // The top-left fuel cell coordinates are those of the cell with the most power
-            document.querySelector('#answer').innerText = cellWithMostPower.x + ',' + cellWithMostPower.y;
+            document.querySelector('.answer').innerText = cellWithMostPower.x + ',' + cellWithMostPower.y;
         </script>
     </body>
 </html>

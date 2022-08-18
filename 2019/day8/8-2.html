@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer" class="monospace"></p>
+        <p class="answer monospace"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -36,7 +36,7 @@
                 }
             }
 
-            const answer = document.querySelector('#answer');
+            const answer = document.querySelector('.answer');
             for (const row of image.chunk(width)) {
                 answer.textContent += row.map(pixel => (pixel === 0) ? ' ' : '█').join('') + '\n';
             }

@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -40,7 +40,7 @@
                 .points++;
             }
 
-            document.querySelector('#answer').innerText = reindeer
+            document.querySelector('.answer').innerText = reindeer
                 .sort((a, b) => b.points - a.points)
                 .at(0)
                 .points;

@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script src="./blueimp-JavaScript-MD5/md5.min.js"></script>
         <script type="module">
@@ -30,7 +30,7 @@
                 password += hash[5];
             }
 
-            document.querySelector('#answer').innerText = password;
+            document.querySelector('.answer').innerText = password;
         </script>
     </body>
 </html>

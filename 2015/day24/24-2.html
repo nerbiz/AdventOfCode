@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -52,7 +52,7 @@
 
             findGroups(presents, groupWeight);
 
-            document.querySelector('#answer').innerText = groups
+            document.querySelector('.answer').innerText = groups
                 // Sort by group with the least presents first
                 .sort((a, b) => a.length - b.length)
                 // Keep groups with the same lowest amount of presents

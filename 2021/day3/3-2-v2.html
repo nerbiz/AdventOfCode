@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -44,7 +44,7 @@
             const oxygenGeneratorRating = reduceArray(binaryStrings, keepOxygenRules);
             const co2ScrubberRating = reduceArray(binaryStrings, keepCo2Rules);
 
-            document.querySelector('#answer').innerText = parseInt(oxygenGeneratorRating, 2) * parseInt(co2ScrubberRating, 2);
+            document.querySelector('.answer').innerText = parseInt(oxygenGeneratorRating, 2) * parseInt(co2ScrubberRating, 2);
         </script>
     </body>
 </html>

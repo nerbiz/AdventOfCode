@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -184,7 +184,7 @@
             }
 
             // Get the highest distance between any two scanners
-            document.querySelector('#answer').innerText = scanners
+            document.querySelector('.answer').innerText = scanners
                 .map(scanner => scanners.filter(otherScanner => otherScanner !== scanner)
                     .map(otherScanner =>
                         Math.abs(otherScanner.coordinates.x - scanner.coordinates.x)

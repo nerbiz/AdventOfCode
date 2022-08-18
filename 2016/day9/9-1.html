@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -45,7 +45,7 @@
                 index = index + startIndex + amount;
             }
 
-            document.querySelector('#answer').innerText = decompressed.length;
+            document.querySelector('.answer').innerText = decompressed.length;
         </script>
     </body>
 </html>

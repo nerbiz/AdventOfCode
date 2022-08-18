@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -28,7 +28,7 @@
                 queue.push(...pipes[current].difference(group, queue));
             }
 
-            document.querySelector('#answer').innerText = group.length;
+            document.querySelector('.answer').innerText = group.length;
         </script>
     </body>
 </html>

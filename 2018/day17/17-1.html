@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -98,7 +98,7 @@
             // Show the ground in the console
             console.log(ground.slice2d(minX - 1, 0, maxX + 2, maxY + 1).toString());
 
-            document.querySelector('#answer').innerText = ground
+            document.querySelector('.answer').innerText = ground
                 .filter2d(tile => (tile.value === '~'), true)
                 .length;
         </script>

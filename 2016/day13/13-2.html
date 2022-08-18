@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -94,7 +94,7 @@
                 return node.value ? '.' : '#';
             }));
 
-            document.querySelector('#answer').innerText = visited.unique().length;
+            document.querySelector('.answer').innerText = visited.unique().length;
         </script>
     </body>
 </html>

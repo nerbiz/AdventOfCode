@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -77,7 +77,7 @@
 
             // Get the location that is the furthest away,
             // divide the steps by 2, because 2 steps were taken at each move
-            document.querySelector('#answer').innerText = map
+            document.querySelector('.answer').innerText = map
                 .flat()
                 .filter(location => location.G !== undefined)
                 .sort((a, b) => b.G - a.G)

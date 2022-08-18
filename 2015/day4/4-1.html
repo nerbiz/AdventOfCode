@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/core.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/md5.js"></script>
@@ -23,7 +23,7 @@
                 hash = CryptoJS.MD5(secretKey + ++number).toString();
             } while (hash.substring(0, 5) !== '00000');
 
-            document.querySelector('#answer').innerText = number;
+            document.querySelector('.answer').innerText = number;
         </script>
     </body>
 </html>

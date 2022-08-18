@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -37,7 +37,7 @@
                     .match(trapRegExp) !== null);
             });
 
-            document.querySelector('#answer').innerText = tiles
+            document.querySelector('.answer').innerText = tiles
                 .filter2d(tile => tile.value === 0)
                 .flat()
                 .length;

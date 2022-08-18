@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -60,7 +60,7 @@
                 }
             }
 
-            document.querySelector('#answer').innerText = outputs
+            document.querySelector('.answer').innerText = outputs
                 .filter(output => output.number < 3)
                 .map(output => output.holds[0])
                 .reduce((total, value) => (total * value), 1);

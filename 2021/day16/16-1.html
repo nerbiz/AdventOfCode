@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -88,7 +88,7 @@
             // Start the packet tree parsing
             getNextPacket();
 
-            document.querySelector('#answer').innerText = versionsSum;
+            document.querySelector('.answer').innerText = versionsSum;
         </script>
     </body>
 </html>

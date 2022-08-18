@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -53,7 +53,7 @@
             // Sort all the combinations by length (ascending)
             allCombinations.sort((a, b) => a.length - b.length);
 
-            document.querySelector('#answer').innerText = allCombinations
+            document.querySelector('.answer').innerText = allCombinations
                 .filter(combinations => combinations.length === allCombinations.at(0).length)
                 .length;
         </script>

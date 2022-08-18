@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script src="./blueimp-JavaScript-MD5/md5.min.js"></script>
         <script type="module">
@@ -58,7 +58,7 @@
 
             findPaths(startRoom);
 
-            document.querySelector('#answer').innerText = validPaths
+            document.querySelector('.answer').innerText = validPaths
                 .sort((a, b) => b.length - a.length)
                 .at(0)
                 .length;

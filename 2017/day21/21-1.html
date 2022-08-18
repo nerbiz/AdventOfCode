@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -102,7 +102,7 @@
                 grid = joinChunks(grid);
             }
 
-            document.querySelector('#answer').innerText = grid
+            document.querySelector('.answer').innerText = grid
                 .flat()
                 .filter(pixel => pixel === '#')
                 .length;

@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -53,7 +53,7 @@
 
             // If the lowest blocked number is higher than 0, the lowest is 0,
             // Otherwise it's the first number after the higher boundary of the first range
-            document.querySelector('#answer').innerText = (ranges[0][0] > 0)
+            document.querySelector('.answer').innerText = (ranges[0][0] > 0)
                 ? 0
                 : ranges[0][1] + 1;
         </script>

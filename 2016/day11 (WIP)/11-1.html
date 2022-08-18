@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -128,7 +128,7 @@
 
             console.log('Done in ms:', new Date().getTime() - startTime);
 
-            document.querySelector('#answer').innerText = fewestSteps;
+            document.querySelector('.answer').innerText = fewestSteps;
         </script>
     </body>
 </html>

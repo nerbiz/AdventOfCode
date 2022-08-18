@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -19,7 +19,7 @@
             const spaceCharCode = ' '.charCodeAt(0);
             const aCharCode = 'a'.charCodeAt(0);
 
-            document.querySelector('#answer').innerText = rooms
+            document.querySelector('.answer').innerText = rooms
                 // Compare the checksum with the most occurring characters
                 .filter(room => (room.checksum === room.name
                     .replaceAll('-', '')

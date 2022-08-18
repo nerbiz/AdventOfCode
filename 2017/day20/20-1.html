@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -17,7 +17,7 @@
 
             let lowestAcceleration = Infinity;
 
-            document.querySelector('#answer').innerText = particles
+            document.querySelector('.answer').innerText = particles
                 // Calculate the acceleration sums
                 .map(particle => {
                     particle.accelerationSum = particle.acceleration

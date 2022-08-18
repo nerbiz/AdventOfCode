@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -23,7 +23,7 @@
             const abaBabRegExp = /(?<!\[.*)([a-z])(?!\1)([a-z])\1.*\[.*(\2\1\2)/;
 
             // 405 is too high
-            document.querySelector('#answer').innerText = ipAddresses
+            document.querySelector('.answer').innerText = ipAddresses
                 // Place hypernet sequences at the end
                 .map(parts => {
                     parts.sort((a, b) => a.startsWith('[') ? 1 : -1);

@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -85,7 +85,7 @@
                 } while (x < number);
             }
 
-            document.querySelector('#answer').innerText = currentLocation.value;
+            document.querySelector('.answer').innerText = currentLocation.value;
         </script>
     </body>
 </html>

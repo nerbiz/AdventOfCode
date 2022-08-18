@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -93,7 +93,7 @@
                 instruction.isResolved = true;
             });
 
-            document.querySelector('#answer').innerText = wires.find(wire => wire.id === 'a').signal;
+            document.querySelector('.answer').innerText = wires.find(wire => wire.id === 'a').signal;
         </script>
     </body>
 </html>

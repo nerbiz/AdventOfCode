@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -43,7 +43,7 @@
             const trees = area.filter2d(acre => (acre.value === '|'), true);
             const lumberyards = area.filter2d(acre => (acre.value === '#'), true);
 
-            document.querySelector('#answer').innerText = trees.length * lumberyards.length;
+            document.querySelector('.answer').innerText = trees.length * lumberyards.length;
         </script>
     </body>
 </html>

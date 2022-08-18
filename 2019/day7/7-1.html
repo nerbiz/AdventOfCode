@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -120,7 +120,7 @@
                 highestSignal = Math.max(highestSignal, signal);
             }
 
-            document.querySelector('#answer').innerText = highestSignal;
+            document.querySelector('.answer').innerText = highestSignal;
         </script>
     </body>
 </html>

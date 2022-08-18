@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -51,7 +51,7 @@
                 .sort((a, b) => a - b);
 
             // Output the middle score (median)
-            document.querySelector('#answer').innerText = scores[Math.floor(scores.length / 2)];
+            document.querySelector('.answer').innerText = scores[Math.floor(scores.length / 2)];
         </script>
     </body>
 </html>

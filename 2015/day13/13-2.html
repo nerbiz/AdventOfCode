@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -73,7 +73,7 @@
             });
 
             // 709 is too high
-            document.querySelector('#answer').innerText = scoreTotals
+            document.querySelector('.answer').innerText = scoreTotals
                 .sort((a, b) => b - a)
                 .at(0);
         </script>

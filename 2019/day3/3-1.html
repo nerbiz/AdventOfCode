@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -51,7 +51,7 @@
                 }
             }
 
-            document.querySelector('#answer').innerText = distances.sort((a, b) => a - b).at(0);
+            document.querySelector('.answer').innerText = distances.sort((a, b) => a - b).at(0);
         </script>
     </body>
 </html>

@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -16,7 +16,7 @@
             const reindeer = await fileReader.parse();
             const seconds = 2503;
 
-            document.querySelector('#answer').innerText = reindeer
+            document.querySelector('.answer').innerText = reindeer
                 .map(reindeer =>
                     // Seconds moved = number of move+rest intervals * duration
                     (Math.floor(seconds / (reindeer.duration + reindeer.rest))

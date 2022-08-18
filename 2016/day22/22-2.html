@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -40,7 +40,7 @@
             console.log('It takes 5 moves to move a node to the left');
             console.log('The answer is 58 + (31 * 5):', 58 + (31 * 5));
 
-            document.querySelector('#answer').innerText = 58 + (31 * 5) + ' (open the console)';
+            document.querySelector('.answer').innerText = 58 + (31 * 5) + ' (open the console)';
         </script>
     </body>
 </html>

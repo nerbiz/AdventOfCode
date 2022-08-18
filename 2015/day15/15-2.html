@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -34,7 +34,7 @@
                 }
             }
 
-            document.querySelector('#answer').innerText = combinations
+            document.querySelector('.answer').innerText = combinations
                 .filter(combination =>
                     (combination[0] * ingredients[0][4]
                     + combination[1] * ingredients[1][4]

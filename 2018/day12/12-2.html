@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import ArrayPrototype from '../../ArrayPrototype.js';
@@ -54,7 +54,7 @@
             // Determine the lowest index to start counting from
             const lowestIndex = firstPlantIndex - addedToLeft + ((5e10 - generations) * movePerGeneration);
 
-            document.querySelector('#answer').innerText = pots
+            document.querySelector('.answer').innerText = pots
                 .slice(firstPlantIndex)
                 .split('')
                 .indexesOf('#')

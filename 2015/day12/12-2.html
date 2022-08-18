@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -33,7 +33,7 @@
                 }
             })(json);
 
-            document.querySelector('#answer').innerText = JSON.stringify(json)
+            document.querySelector('.answer').innerText = JSON.stringify(json)
                 .match(/-?\d+/g)
                 .map(number => parseInt(number, 10))
                 .reduce((sum, number) => sum + number, 0);

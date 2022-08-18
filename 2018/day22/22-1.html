@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -37,7 +37,7 @@
                 region.type = region.erosionLevel % 3;
             });
 
-            document.querySelector('#answer').innerText = cave
+            document.querySelector('.answer').innerText = cave
                 .flat()
                 .reduce((sum, region) => (sum + region.type), 0);
         </script>

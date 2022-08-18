@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -61,7 +61,7 @@
                 }
             }
 
-            document.querySelector('#answer').innerText = Math.abs(coordinates[0] + coordinates[1]);
+            document.querySelector('.answer').innerText = Math.abs(coordinates[0] + coordinates[1]);
         </script>
     </body>
 </html>

@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -28,7 +28,7 @@
                     : '\x1b[37m' + point.value + '\x1b[0m'
             ));
 
-            document.querySelector('#answer').innerText = endPoint.distance;
+            document.querySelector('.answer').innerText = endPoint.distance;
         </script>
     </body>
 </html>

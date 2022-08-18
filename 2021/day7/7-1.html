@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -23,7 +23,7 @@
                 : positions[Math.floor(middleIndex)];
 
             // Sum up the steps between each position and the median
-            document.querySelector('#answer').innerText = positions.reduce((sum, position) => {
+            document.querySelector('.answer').innerText = positions.reduce((sum, position) => {
                 if (Number.isInteger(median)) {
                     return sum + Math.abs(position - median);
                 }

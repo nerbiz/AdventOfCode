@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             import FileReader from '../../FileReader.js';
@@ -20,7 +20,7 @@
             // followed by the second and first character
             const abbaRegExp = /([a-z])(?!\1)([a-z])\2\1/g;
 
-            document.querySelector('#answer').innerText = ipAddresses
+            document.querySelector('.answer').innerText = ipAddresses
                 // Keep IP address parts that match the pattern
                 .map(parts => parts.filter(part => part.match(abbaRegExp)))
                 // At least 1 part needed, except when it's a hypernet sequence
