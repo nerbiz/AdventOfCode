@@ -26,7 +26,7 @@ export default class IntcodeComputer
 
     /**
      * @param {array} program
-     * @param {number|null} input The first signal for the program
+     * @param {number|null} input The first input for the program
      * @constructor
      */
     constructor(program, input = null)
