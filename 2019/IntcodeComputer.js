@@ -6,10 +6,10 @@ export default class IntcodeComputer {
     program = [];
 
     /**
-     * The current signal
-     * @type {number}
+     * All the outputted signals
+     * @type {array}
      */
-    signal;
+    signals = [];
 
     /**
      * The relative base for relative mode
@@ -18,13 +18,19 @@ export default class IntcodeComputer {
     relativeBase = 0;
 
     /**
+     * The generator producing signals
+     * @type {Generator|null}
+     */
+    generator = null;
+
+    /**
      * @param {array} program
      * @param {number} input The first signal for the program
      * @constructor
      */
     constructor(program, input = 1) {
         this.program = program;
-        this.signal = input;
+        this.signals.push(input);
     }
 
     /**
@@ -57,17 +63,23 @@ export default class IntcodeComputer {
     }
 
     /**
+     * Get the mext signal from the program
      * @returns {number}
      */
-    getSignal() {
-        return this.signal;
+    getNextSignal() {
+        if (this.generator === null) {
+            this.generator = this.start();
+        }
+
+        return this.generator.next().value;
     }
 
     /**
      * Run the program
-     * @returns {void}
+     * @yields {number}
+     * @returns {Generator}
      */
-    run() {
+    *start() {
         let index = 0;
 
         while (index < this.program.length) {
@@ -99,12 +111,13 @@ export default class IntcodeComputer {
                     break;
                 // Input
                 case 3:
-                    this.program[this.getPosition(mode1, index + 1)] = this.signal;
+                    this.program[this.getPosition(mode1, index + 1)] = this.signals.at(-1);
                     index += 2;
                     break;
                 // Output
                 case 4:
-                    this.signal = parameter1;
+                    this.signals.push(parameter1);
+                    yield parameter1;
                     index += 2;
                     break;
                 // Jump if true

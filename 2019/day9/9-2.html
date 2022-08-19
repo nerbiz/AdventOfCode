@@ -17,9 +17,7 @@
             const program = await fileReader.parse();
 
             const intcodeComputer = new IntcodeComputer(program, 2);
-            intcodeComputer.run();
-
-            document.querySelector('.answer').innerText = intcodeComputer.getSignal();
+            document.querySelector('.answer').innerText = intcodeComputer.getNextSignal();
         </script>
     </body>
 </html>
