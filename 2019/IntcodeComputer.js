@@ -114,22 +114,25 @@ export default class IntcodeComputer
             const mode3 = Math.floor(instruction % 100000 / 10000);
             const parameter1 = this.getValue(mode1, index + 1);
             const parameter2 = this.getValue(mode2, index + 2);
+            let targetPosition;
 
             switch (opcode) {
                 // Addition
                 case 1:
-                    this.program[this.getPosition(mode3, index + 3)] = parameter1 + parameter2;
+                    targetPosition = this.getPosition(mode3, index + 3);
+                    this.program[targetPosition] = parameter1 + parameter2;
                     index += 4;
                     break;
                 // Multiplication
                 case 2:
-                    this.program[this.getPosition(mode3, index + 3)] = parameter1 * parameter2;
+                    targetPosition = this.getPosition(mode3, index + 3);
+                    this.program[targetPosition] = parameter1 * parameter2;
                     index += 4;
                     break;
                 // Input
                 case 3:
-                    console.log('input!', this.input);
-                    this.program[this.getPosition(mode1, index + 1)] = this.input;
+                    targetPosition = this.getPosition(mode1, index + 1);
+                    this.program[targetPosition] = this.input;
                     index += 2;
                     break;
                 // Output
@@ -137,22 +140,28 @@ export default class IntcodeComputer
                     yield parameter1;
                     index += 2;
                     break;
-                // Jump if true
+                // Jump if true (non-zero)
                 case 5:
-                    index = (parameter1 !== 0) ? parameter2 : index + 3;
+                    index = (parameter1 !== 0)
+                        ? parameter2
+                        : index + 3;
                     break;
-                // Jump if false
+                // Jump if false (zero)
                 case 6:
-                    index = (parameter1 === 0) ? parameter2 : index + 3;
+                    index = (parameter1 === 0)
+                        ? parameter2
+                        : index + 3;
                     break;
                 // Less than
                 case 7:
-                    this.program[this.getPosition(mode3, index + 3)] = Number(parameter1 < parameter2);
+                    targetPosition = this.getPosition(mode3, index + 3);
+                    this.program[targetPosition] = Number(parameter1 < parameter2);
                     index += 4;
                     break;
                 // Equal
                 case 8:
-                    this.program[this.getPosition(mode3, index + 3)] = Number(parameter1 === parameter2);
+                    targetPosition = this.getPosition(mode3, index + 3);
+                    this.program[targetPosition] = Number(parameter1 === parameter2);
                     index += 4;
                     break;
                 // Change relative base
