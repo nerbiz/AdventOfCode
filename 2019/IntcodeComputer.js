@@ -1,4 +1,5 @@
-export default class IntcodeComputer {
+export default class IntcodeComputer
+{
     /**
      * The program to run
      * @type {array}
@@ -25,18 +26,23 @@ export default class IntcodeComputer {
 
     /**
      * @param {array} program
-     * @param {number} input The first signal for the program
+     * @param {number|null} input The first signal for the program
      * @constructor
      */
-    constructor(program, input = 1) {
+    constructor(program, input = null)
+    {
         this.program = program;
-        this.setInput(input);
+
+        if (input !== null) {
+            this.setInput(input);
+        }
     }
 
     /**
      * @param {number} input
      */
-    setInput(input) {
+    setInput(input)
+    {
         this.input = input;
     }
 
@@ -46,7 +52,8 @@ export default class IntcodeComputer {
      * @param {number} index
      * @returns {number}
      */
-    getPosition(mode, index) {
+    getPosition(mode, index)
+    {
         // Immediate mode
         return (mode === 1)
             ? index
@@ -63,7 +70,8 @@ export default class IntcodeComputer {
      * @param {number} index
      * @returns {number}
      */
-    getValue(mode, index) {
+    getValue(mode, index)
+    {
         const position = this.getPosition(mode, index);
 
         return this.program[position] || 0;
@@ -73,7 +81,8 @@ export default class IntcodeComputer {
      * Get the mext signal from the program
      * @returns {number}
      */
-    getNextSignal() {
+    getNextSignal()
+    {
         if (this.generator === null) {
             this.generator = this.start();
         }
@@ -86,7 +95,8 @@ export default class IntcodeComputer {
      * @yields {number}
      * @returns {Generator}
      */
-    *start() {
+    *start()
+    {
         let index = 0;
 
         while (index < this.program.length) {
@@ -118,6 +128,7 @@ export default class IntcodeComputer {
                     break;
                 // Input
                 case 3:
+                    console.log('input!', this.input);
                     this.program[this.getPosition(mode1, index + 1)] = this.input;
                     index += 2;
                     break;
