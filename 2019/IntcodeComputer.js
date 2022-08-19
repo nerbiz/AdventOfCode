@@ -6,10 +6,10 @@ export default class IntcodeComputer {
     program = [];
 
     /**
-     * All the outputted signals
-     * @type {array}
+     * The current input value for the program
+     * @type {number}
      */
-    signals = [];
+    input;
 
     /**
      * The relative base for relative mode
@@ -30,7 +30,14 @@ export default class IntcodeComputer {
      */
     constructor(program, input = 1) {
         this.program = program;
-        this.signals.push(input);
+        this.setInput(input);
+    }
+
+    /**
+     * @param {number} input
+     */
+    setInput(input) {
+        this.input = input;
     }
 
     /**
@@ -111,12 +118,11 @@ export default class IntcodeComputer {
                     break;
                 // Input
                 case 3:
-                    this.program[this.getPosition(mode1, index + 1)] = this.signals.at(-1);
+                    this.program[this.getPosition(mode1, index + 1)] = this.input;
                     index += 2;
                     break;
                 // Output
                 case 4:
-                    this.signals.push(parameter1);
                     yield parameter1;
                     index += 2;
                     break;
