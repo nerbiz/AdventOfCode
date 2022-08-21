@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {steps, positions} = await fileReader.parse();
+            const axes = ['x', 'y', 'z'];
+
+            // Create moon objects
+            const moons = positions.map(position => ({
+                position,
+                velocity: {x: 0, y: 0, z: 0},
+                others: [],
+            }));
+
+            // Link moons to each other
+            for (let i = 0; i < moons.length; i++) {
+                for (const otherMoon of moons.slice(i + 1)) {
+                    moons[i].others.push(otherMoon);
+                    otherMoon.others.push(moons[i]);
+                }
+            }
+
+            /**
+             * Get the velocity for an axis of a moon
+             * @param {object} moon
+             * @param {string} axis
+             * @returns {number}
+             */
+            const getVelocity = (moon, axis) =>
+                moon.others
+                    // Get the difference as -1, 0 or 1 (per other moon)
+                    .map(other => {
+                        const difference = other.position[axis] - moon.position[axis];
+
+                        return (difference === 0)
+                            ? 0
+                            : difference / Math.abs(difference);
+                    })
+                    // Sum up the differences
+                    .reduce((sum, velocity) => (sum + velocity), 0);
+
+            for (let step = 1; step <= steps; step++) {
+                // Calculate the velocities of each moon
+                for (const moon of moons) {
+                    for (const axis of axes) {
+                        moon.velocity[axis] += getVelocity(moon, axis);
+                    }
+                }
+
+                // Apply the velocities to each moon's position
+                for (const moon of moons) {
+                    for (const axis of axes) {
+                        moon.position[axis] += moon.velocity[axis];
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = moons
+                .map(moon => {
+                    let potentialEnergy = 0;
+                    let kineticEnergy = 0;
+
+                    for (const axis of axes) {
+                        potentialEnergy += Math.abs(moon.position[axis]);
+                        kineticEnergy += Math.abs(moon.velocity[axis]);
+                    }
+
+                    return potentialEnergy * kineticEnergy;
+                })
+                .reduce((sum, energy) => (sum + energy), 0);
+        </script>
+    </body>
+</html>
