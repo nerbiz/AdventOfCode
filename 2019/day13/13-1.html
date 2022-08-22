@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import IntcodeComputer from '../IntcodeComputer.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            const intcodeComputer = new IntcodeComputer(program);
+            let blockTileAmount = 0;
+
+            while (true) {
+                if (intcodeComputer.getNextSignal() === undefined) {
+                    break;
+                }
+
+                // Every third signal is a tile ID
+                intcodeComputer.getNextSignal();
+                const tileId = intcodeComputer.getNextSignal();
+                blockTileAmount += Number(tileId === 2);
+            }
+
+            document.querySelector('.answer').innerText = blockTileAmount;
+        </script>
+    </body>
+</html>
