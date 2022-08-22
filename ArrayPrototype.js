@@ -17,6 +17,7 @@ export default class ArrayPrototype
         this.registerTap();
         this.registerTake();
         this.registerSortGrouped();
+        this.registerSameContents();
     }
 
     static registerClone()
@@ -278,6 +279,37 @@ export default class ArrayPrototype
                     });
 
                 return grouped.map(group => group.sort(callback2)).flat();
+            },
+            enumerable: false,
+            writable: false,
+        });
+    }
+
+    static registerSameContents()
+    {
+        Object.defineProperty(Array.prototype, 'sameContents', {
+            /**
+             * Check if 1 or more arrays have the same contents as the current
+             * @param {array} arrays 1 or more arrays to compare
+             * @returns {boolean}
+             */
+            value: function sameContents(...arrays) {
+                // Check for equal length first
+                for (const other of arrays) {
+                    if (other.length !== this.length) {
+                        return false;
+                    }
+                }
+
+                for (let i = 0; i < this.length; i++) {
+                    for (const other of arrays) {
+                        if (other[i] !== this[i]) {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
             },
             enumerable: false,
             writable: false,
