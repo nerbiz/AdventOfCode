@@ -14,7 +14,6 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const {steps, positions} = await fileReader.parse();
-            const axes = ['x', 'y', 'z'];
 
             // Create moon objects
             const moons = positions.map(position => ({
@@ -42,25 +41,23 @@
                     // Get the difference as -1, 0 or 1 (per other moon)
                     .map(other => {
                         const difference = other.position[axis] - moon.position[axis];
-
-                        return (difference === 0)
-                            ? 0
+                        return (difference === 0) ? 0
                             : difference / Math.abs(difference);
                     })
                     // Sum up the differences
                     .reduce((sum, velocity) => (sum + velocity), 0);
 
-            for (let step = 1; step <= steps; step++) {
+            for (let step = 0; step < steps; step++) {
                 // Calculate the velocities of each moon
                 for (const moon of moons) {
-                    for (const axis of axes) {
+                    for (const axis in moon.velocity) {
                         moon.velocity[axis] += getVelocity(moon, axis);
                     }
                 }
 
                 // Apply the velocities to each moon's position
                 for (const moon of moons) {
-                    for (const axis of axes) {
+                    for (const axis in moon.position) {
                         moon.position[axis] += moon.velocity[axis];
                     }
                 }
@@ -71,7 +68,7 @@
                     let potentialEnergy = 0;
                     let kineticEnergy = 0;
 
-                    for (const axis of axes) {
+                    for (const axis in moon.position) {
                         potentialEnergy += Math.abs(moon.position[axis]);
                         kineticEnergy += Math.abs(moon.velocity[axis]);
                     }
