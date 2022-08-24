@@ -17,7 +17,7 @@
             let oreNeeded = 0;
 
             // The available/surplus resources
-            const stock = {};
+            let stock = {};
 
             const getChemical = (name, amountNeeded) => {
                 // There is no formula for ORE, just add the required amount
@@ -53,11 +53,11 @@
 
             let fuelAmount = 1e6;
             let step = fuelAmount;
-            let halving = false;
             const oreAvailable = 1e12;
 
             while (true) {
                 oreNeeded = 0;
+                stock = {};
                 getChemical('FUEL', fuelAmount);
 
                 // Stop if the right amount has been found
@@ -65,12 +65,8 @@
                     break;
                 }
 
-                // Change to halving mode only once
-                if (oreNeeded > oreAvailable && halving === false) {
-                    halving = true;
-                }
-
-                if (halving === true) {
+                // If the target is exceeded, divide the step in half
+                if (oreNeeded > oreAvailable) {
                     step = Math.round(step / 2);
                 }
 
