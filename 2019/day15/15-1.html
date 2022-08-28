@@ -57,21 +57,21 @@
             })(startNode);
 
             // Get the shortest path to the target node
-            const targetNode = grid.find2d(item => item.value === 2);
+            const targetNode = grid.find2d(node => node.value === 2);
             const path = Pathfinding.aStar(grid, startNode, targetNode, node => node.value === 0);
 
             // Visualize the path
-            console.log(grid.toString(item => {
-                if (item.value === undefined) {
+            console.log(grid.toString(node => {
+                if (node.value === undefined) {
                     return ' ';
-                } else if (item === startNode) {
+                } else if (node === startNode) {
                     return '\x1b[33m' + '✯' + '\x1b[0m';
-                } else if (item === targetNode) {
+                } else if (node === targetNode) {
                     return '\x1b[33m' + '⚑' + '\x1b[0m';
-                } else if (path.includes(item)) {
+                } else if (path.includes(node)) {
                     return '\x1b[34m' + '.' + '\x1b[0m';
                 } else {
-                    return (item.value === 0)
+                    return (node.value === 0)
                         ? '\x1b[31m' + '#' + '\x1b[0m'
                         : '\x1b[37m' + '.' + '\x1b[0m';
                 }
