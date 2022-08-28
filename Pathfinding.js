@@ -36,33 +36,33 @@ export default class Pathfinding
                 break;
             }
 
-            for (const neighbor of currentNode.getAdjacentItems()) {
-                if (neighbor === undefined
+            for (const neighbour of currentNode.getAdjacentItems()) {
+                if (neighbour === undefined
                     // The node must not be an obstacle
-                    || isObstacle(neighbor)
+                    || isObstacle(neighbour)
                     // The node must not be visited yet
-                    || visited.includes(neighbor)
+                    || visited.includes(neighbour)
                 ) {
                     continue;
                 }
 
-                // Calculate the F value of the neighbor
+                // Calculate the F value of the neighbour
                 const G = (currentNode.G + 1);
-                const F = G + Math.abs(targetNode.x - neighbor.x)
-                    + Math.abs(targetNode.y - neighbor.y);
+                const F = G + Math.abs(targetNode.x - neighbour.x)
+                    + Math.abs(targetNode.y - neighbour.y);
 
-                // Update the neighbor's values if it's not in the queue,
+                // Update the neighbour's values if it's not in the queue,
                 // or if it is in the queue, but the F is lower
-                const inQueue = queue.includes(neighbor);
-                if (! inQueue || (inQueue && F < neighbor.F)) {
-                    neighbor.G = G;
-                    neighbor.F = F;
-                    neighbor.previous = currentNode;
+                const inQueue = queue.includes(neighbour);
+                if (! inQueue || (inQueue && F < neighbour.F)) {
+                    neighbour.G = G;
+                    neighbour.F = F;
+                    neighbour.previous = currentNode;
                 }
 
-                // Add the neighbor to the queue
+                // Add the neighbour to the queue
                 if (! inQueue) {
-                    queue.push(neighbor);
+                    queue.push(neighbour);
                 }
             }
         }
