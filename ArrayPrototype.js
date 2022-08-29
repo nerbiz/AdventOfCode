@@ -18,6 +18,7 @@ export default class ArrayPrototype
         this.registerTake();
         this.registerSortGrouped();
         this.registerSameContents();
+        this.registerRepeatValues();
     }
 
     static registerClone()
@@ -310,6 +311,27 @@ export default class ArrayPrototype
                 }
 
                 return true;
+            },
+            enumerable: false,
+            writable: false,
+        });
+    }
+
+    static registerRepeatValues()
+    {
+        Object.defineProperty(Array.prototype, 'repeatValues', {
+            /**
+             * Repeat the values of an array, up to a certain length
+             * @param {number} targetLength
+             * @returns {array}
+             */
+            value: function repeatValues(targetLength) {
+                let newArray = this;
+                while (newArray.length < targetLength) {
+                    newArray = newArray.concat(this);
+                }
+
+                return newArray.slice(0, targetLength);
             },
             enumerable: false,
             writable: false,
