@@ -25,7 +25,7 @@
             const patterns = Utilities.range(1, digits.length)
                 .map(position => mainPattern
                     .flatMap(value => new Array(position).fill(value))
-                    .repeatValues(digits.length + 1)
+                    .repeatValues(null, digits.length + 1)
                     .slice(1)
                 );
 

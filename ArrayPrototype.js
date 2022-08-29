@@ -301,16 +301,30 @@ export default class ArrayPrototype
         Object.defineProperty(Array.prototype, 'repeatValues', {
             /**
              * Repeat the values of an array, up to a certain length
-             * @param {number} targetLength
+             * @param {number|null} amount
+             * @param {number|null} maxLength
              * @returns {array}
              */
-            value: function repeatValues(targetLength) {
+            value: function repeatValues(amount, maxLength = null) {
                 let newArray = this;
-                while (newArray.length < targetLength) {
-                    newArray = newArray.concat(this);
+
+                if (amount === null) {
+                    while (newArray.length < maxLength) {
+                        newArray = newArray.concat(this);
+                    }
+                } else {
+                    for (let i = 0; i < amount - 1; i++) {
+                        newArray = newArray.concat(this);
+
+                        if (maxLength !== null && newArray.length >= maxLength) {
+                            break;
+                        }
+                    }
                 }
 
-                return newArray.slice(0, targetLength);
+                return (maxLength !== null)
+                    ? newArray.slice(0, maxLength)
+                    : newArray;
             },
             enumerable: false,
             writable: false,
