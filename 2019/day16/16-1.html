@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
+            import Utilities from '../../Utilities.js';
+
+            ArrayPrototype.registerRepeatValues();
+            ArrayPrototype.registerSum();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let digits = await fileReader.parse();
+            const mainPattern = [0, 1, 0, -1];
+            const phases = 100;
+
+            // Create patterns with repeated values
+            const patterns = Utilities.range(1, digits.length)
+                .map(position => mainPattern
+                    .flatMap(value => new Array(position).fill(value))
+                    .repeatValues(digits.length + 1)
+                    .slice(1)
+                );
+
+            for (let phase = 0; phase < phases; phase++) {
+                digits = digits.map((digit, index) => {
+                    const result = patterns[index]
+                        .map((value, index2) => value * digits[index2])
+                        .sum();
+
+                    return Math.abs(result % 10);
+                });
+
+            }
+
+            document.querySelector('.answer').innerText = digits.slice(0, 8).join('');
+        </script>
+    </body>
+</html>
