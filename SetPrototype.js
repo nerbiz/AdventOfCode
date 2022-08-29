@@ -1,15 +1,5 @@
 export default class SetPrototype
 {
-    static registerAll()
-    {
-        this.registerIsSubsetOf();
-        this.registerUnion();
-        this.registerJoin();
-        this.registerIntersection();
-        this.registerDifference();
-        this.registerMutualDifference();
-    }
-
     static registerIsSubsetOf()
     {
         Object.defineProperty(Set.prototype, 'isSubsetOf', {

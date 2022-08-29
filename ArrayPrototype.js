@@ -1,26 +1,5 @@
 export default class ArrayPrototype
 {
-    /**
-     * Call all register...() functions
-     */
-    static registerAll()
-    {
-        this.registerIndexesOf();
-        this.registerUnique();
-        this.registerSum();
-        this.registerProduct();
-        this.registerIntersection();
-        this.registerDifference();
-        this.registerCountValues();
-        this.registerChunk();
-        this.registerClone();
-        this.registerTap();
-        this.registerTake();
-        this.registerSortGrouped();
-        this.registerSameContents();
-        this.registerRepeatValues();
-    }
-
     static registerClone()
     {
         Object.defineProperty(Array.prototype, 'clone', {
