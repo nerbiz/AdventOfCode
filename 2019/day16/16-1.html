@@ -11,33 +11,31 @@
         <script type="module">
             import FileReader from '../../FileReader.js';
             import Parser from './Parser.js';
-            import ArrayPrototype from '../../ArrayPrototype.js';
-            import Utilities from '../../Utilities.js';
 
-            ArrayPrototype.registerRepeatValues();
-            ArrayPrototype.registerSum();
             const fileReader = new FileReader('./data.txt', new Parser());
             let digits = await fileReader.parse();
-            const mainPattern = [0, 1, 0, -1];
+            const pattern = [0, 1, 0, -1];
             const phases = 100;
 
-            // Create patterns with repeated values
-            const patterns = Utilities.range(1, digits.length)
-                .map(position => mainPattern
-                    .flatMap(value => new Array(position).fill(value))
-                    .repeatValues(null, digits.length + 1)
-                    .slice(1)
-                );
-
             for (let phase = 0; phase < phases; phase++) {
-                digits = digits.map((digit, index) => {
-                    const result = patterns[index]
-                        .map((value, index2) => value * digits[index2])
-                        .sum();
+                for (let position = 1; position <= digits.length; position++) {
+                    let patternIndex = 0;
+                    let repeater = 0;
+                    let sum = 0;
 
-                    return Math.abs(result % 10);
-                });
+                    for (const digit of digits) {
+                        // Repeat the current pattern value based on the position
+                        if (++repeater % position === 0) {
+                            patternIndex++;
+                        }
 
+                        // Multiply the digit with the pattern value
+                        sum += digit * pattern[patternIndex % pattern.length];
+                    }
+
+                    // Keep only the rightmost digit
+                    digits[position - 1] = Math.abs(sum % 10);
+                }
             }
 
             document.querySelector('.answer').innerText = digits.slice(0, 8).join('');
