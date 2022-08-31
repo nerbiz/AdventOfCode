@@ -8,9 +8,9 @@ export default class IntcodeComputer
 
     /**
      * The current input value for the program
-     * @type {number}
+     * @type {array}
      */
-    input;
+    input = [];
 
     /**
      * The relative base for relative mode
@@ -39,9 +39,9 @@ export default class IntcodeComputer
     }
 
     /**
-     * @param {number} input
+     * @param {...number} input
      */
-    setInput(input)
+    setInput(...input)
     {
         this.input = input;
     }
@@ -132,7 +132,7 @@ export default class IntcodeComputer
                 // Input
                 case 3:
                     targetPosition = this.getPosition(mode1, index + 1);
-                    this.program[targetPosition] = this.input;
+                    this.program[targetPosition] = this.input.shift();
                     index += 2;
                     break;
                 // Output
