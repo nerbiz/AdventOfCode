@@ -1,26 +1,18 @@
 export default class Benchmark
 {
     /**
-     * Test case A
-     * @type {function}
+     * An array of tests
+     * @type {array}
      */
-    testA;
+    tests;
 
     /**
-     * Test case B
-     * @type {function}
-     */
-    testB;
-
-    /**
-     * @param {function} testA
-     * @param {function} testB
+     * @param {...function} tests
      * @constructor
      */
-    constructor(testA, testB)
+    constructor(...tests)
     {
-        this.testA = testA;
-        this.testB = testB;
+        this.tests = tests;
     }
 
     /**
@@ -30,16 +22,11 @@ export default class Benchmark
      */
     run(times)
     {
-        console.time('Test A took');
-        for (let i = 0; i < times; i++) {
-            this.testA();
+        for (let i = 0; i < this.tests.length; i++) {
+            const timerName = 'Test ' + i + ' took';
+            console.time(timerName);
+            this.tests[i]();
+            console.timeEnd(timerName);
         }
-        console.timeEnd('Test A took');
-
-        console.time('Test B took');
-        for (let i = 0; i < times; i++) {
-            this.testB();
-        }
-        console.timeEnd('Test B took');
     }
 }
