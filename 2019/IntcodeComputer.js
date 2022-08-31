@@ -26,15 +26,15 @@ export default class IntcodeComputer
 
     /**
      * @param {array} program
-     * @param {number|null} input The first input for the program
+     * @param {...number} input The first input for the program
      * @constructor
      */
-    constructor(program, input = null)
+    constructor(program, ...input)
     {
         this.program = program;
 
         if (input !== null) {
-            this.setInput(input);
+            this.setInput(...input);
         }
     }
 
