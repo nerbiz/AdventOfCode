@@ -13,24 +13,20 @@
             import Parser from './Parser.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            let digits = await fileReader.parse();
+            const digits = await fileReader.parse();
             const pattern = [0, 1, 0, -1];
             const phases = 100;
 
             for (let phase = 0; phase < phases; phase++) {
                 for (let position = 1; position <= digits.length; position++) {
-                    let patternIndex = 0;
-                    let repeater = 0;
                     let sum = 0;
 
-                    for (const digit of digits) {
-                        // Repeat the current pattern value based on the position
-                        if (++repeater % position === 0) {
-                            patternIndex++;
-                        }
+                    // Skip the first digits, because they will be multiplied by 0, not changing the sum
+                    for (let index = position - 1; index < digits.length; index++) {
+                        // The multiplier changes at every step that is a multiple of the position
+                        const patternIndex = Math.floor((index + 1) / position) % pattern.length;
 
-                        // Multiply the digit with the pattern value
-                        sum += digit * pattern[patternIndex % pattern.length];
+                        sum += digits[index] * pattern[patternIndex];
                     }
 
                     // Keep only the rightmost digit
