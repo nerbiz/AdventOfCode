@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import IntcodeComputer from '../IntcodeComputer.js';
+            import Array2d from '../../Array2d.js';
+            import ArrayPrototype from '../../ArrayPrototype.js';
+
+            ArrayPrototype.registerSum();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            const intcodeComputer = new IntcodeComputer(program);
+
+            // Get all the characters from the program
+            let mapString = '';
+            let signal;
+            while ((signal = intcodeComputer.getNextSignal()) !== undefined) {
+                mapString += String.fromCharCode(signal);
+            }
+
+            // Create a map of all the characters
+            const map = new Array2d(
+                mapString.split('\n').map(row => row.split(''))
+            );
+
+            document.querySelector('.answer').innerText = map
+                // Keep only scaffold locations
+                .filter2d(location => (location.value === '#'), true)
+                // Find intersections (scaffold with more than 2 scaffold neighbours)
+                .filter(location => location
+                    .getAdjacentItems()
+                    .filter(location => location !== undefined && location.value === '#')
+                    .length > 2)
+                .map(location => location.x * location.y)
+                .sum();
+        </script>
+    </body>
+</html>
