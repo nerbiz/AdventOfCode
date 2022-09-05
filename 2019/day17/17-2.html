@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../FileReader.js';
+            import Parser from './Parser.js';
+            import IntcodeComputer from '../IntcodeComputer.js';
+            import Array2d from '../../Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            program[0] = 2;
+            const intcodeComputer = new IntcodeComputer(program);
+            intcodeComputer.enableWaiting();
+
+            // Get all the signals up to the first prompt
+            let mapString = '';
+            let signal;
+            while ((signal = intcodeComputer.getNextSignal()) !== undefined) {
+                mapString += String.fromCharCode(signal);
+            }
+
+            // Create a map of all the characters
+            const map = new Array2d(
+                mapString.split('\n').map(row => row.split(''))
+            );
+
+            let currentLocation = map.find2d(location => location.value === '^');
+            currentLocation.value = 'x';
+            let currentDirection = 0;
+            let pathString = '';
+
+            while (true) {
+                // Get the next direction
+                const {up, right, down, left} = currentLocation.getAdjacentItems(true);
+                const nextDirection = [up, right, down, left].findIndex(neighbour =>
+                    neighbour !== undefined
+                    && neighbour.value === '#'
+                );
+
+                // Stop when the end is reached
+                if (nextDirection === -1) {
+                    break;
+                }
+
+                // Directions: up (0), right (1), down (2), left (3)
+                // To left, examples: from 2 to 1, or 0 to 3
+                const difference = nextDirection - currentDirection;
+                pathString += (difference === -1 || difference === 3) ? 'L' : 'R';
+                currentDirection = nextDirection;
+
+                let steps = 0;
+                while (true) {
+                    const {up, right, down, left} = currentLocation.getAdjacentItems(true);
+                    const nextLocation = [up, right, down, left][currentDirection];
+
+                    // Continue until an empty location is reached
+                    if (nextLocation === undefined || nextLocation.value === '.') {
+                        break;
+                    }
+
+                    currentLocation = nextLocation;
+                    currentLocation.value = 'x';
+                    steps++;
+                }
+
+                // Add the amount of steps to the path
+                pathString += steps;
+            }
+
+            const functions = [];
+            let functionOrder = pathString;
+            const functionNames = ['A', 'B', 'C'];
+            for (let i = 0; i < functionNames.length; i++) {
+                let pattern;
+                const path = pathString.match(/[LR]\d+/g);
+
+                let sliceEnd = 1;
+                while (true) {
+                    const newPattern = path.slice(0, ++sliceEnd).join('');
+                    const regex = new RegExp(newPattern, 'g');
+                    const matches = pathString.match(regex);
+                    if (matches === null || matches.length < 2) {
+                        break;
+                    }
+
+                    pattern = newPattern;
+                }
+
+                // Store the pattern as a 'function', remove the pattern form the string
+                functions[i] = pattern;
+                pathString = pathString.replaceAll(pattern, '_');
+                // Replace the pattern with the 'function' name for the order
+                functionOrder = functionOrder.replaceAll(pattern, functionNames[i]);
+            }
+
+            const inputs = [
+                // Main routine
+                functionOrder.split('').join(','),
+                // Function A
+                functions[0].match(/[LR]\d+/g)
+                    .map(direction => direction.replace(/([LR])/, '$1,'))
+                    .join(','),
+                // Function B
+                functions[1].match(/[LR]\d+/g)
+                    .map(direction => direction.replace(/([LR])/, '$1,'))
+                    .join(','),
+                // Function C
+                functions[2].match(/[LR]\d+/g)
+                    .map(direction => direction.replace(/([LR])/, '$1,'))
+                    .join(','),
+                // Continuous video feed
+                'N',
+            ];
+
+            let lastSignal;
+            while (inputs.length > 0) {
+                const input = inputs.shift()
+                    .split('')
+                    .concat('\n')
+                    .map(character => character.charCodeAt(0));
+                intcodeComputer.setInput(...input);
+
+                while ((signal = intcodeComputer.getNextSignal()) !== undefined) {
+                    lastSignal = signal;
+                }
+            }
+
+            document.querySelector('.answer').innerText = lastSignal;
+        </script>
+    </body>
+</html>
