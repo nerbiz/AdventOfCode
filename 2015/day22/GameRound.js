@@ -1,4 +1,4 @@
-import Utilities from '../../Utilities.js';
+import Utilities from '../../classes/Utilities.js';
 import GameWins from './GameWins.js';
 
 export default class GameRound

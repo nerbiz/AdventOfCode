@@ -9,11 +9,11 @@
         <p class="answer monospace"></p>
 
         <script type="module">
-            import FileReader from '../../FileReader.js';
+            import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
             import IntcodeComputer from '../IntcodeComputer.js';
-            import Array2d from '../../Array2d.js';
-            import ArrayPrototype from '../../ArrayPrototype.js';
+            import Array2d from '../../classes/Array2d.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
 
             ArrayPrototype.registerTap();
             const fileReader = new FileReader('./data.txt', new Parser());

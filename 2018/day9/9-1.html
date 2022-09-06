@@ -9,9 +9,9 @@
         <p class="answer"></p>
 
         <script type="module">
-            import FileReader from '../../FileReader.js';
+            import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
-            import LinkedList from '../../LinkedList.js';
+            import LinkedList from '../../classes/LinkedList.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const {players, lastMarble} = await fileReader.parse();

@@ -1,4 +1,4 @@
-import Utilities from '../../Utilities.js';
+import Utilities from '../../classes/Utilities.js';
 
 export default class Parser
 {

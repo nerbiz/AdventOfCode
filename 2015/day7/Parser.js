@@ -1,4 +1,4 @@
-import ArrayPrototype from '../../ArrayPrototype.js';
+import ArrayPrototype from '../../classes/ArrayPrototype.js';
 
 ArrayPrototype.registerUnique();
 

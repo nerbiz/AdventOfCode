@@ -9,9 +9,9 @@
         <p class="answer monospace"></p>
 
         <script type="module">
-            import FileReader from '../../FileReader.js';
+            import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
-            import Utilities from '../../Utilities.js';
+            import Utilities from '../../classes/Utilities.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const {dots, folds} = await fileReader.parse();
