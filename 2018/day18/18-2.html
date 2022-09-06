@@ -44,8 +44,8 @@
                 area.forEach2d(acre => acre.value = acre.nextValue);
 
                 // Calculate the resource value and see if it exists already
-                const trees = area.filter2d(acre => (acre.value === '|'), true);
-                const lumberyards = area.filter2d(acre => (acre.value === '#'), true);
+                const trees = area.filter2d(acre => acre.value === '|');
+                const lumberyards = area.filter2d(acre => acre.value === '#');
                 const resourceValue = trees.length * lumberyards.length;
                 const existingIndex = resourceValues.lastIndexOf(resourceValue);
 

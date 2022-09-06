@@ -72,10 +72,9 @@
                 }
 
                 const locationsWithRemainingAmphipods = burrow
-                    .filter2d(location => (
+                    .filter2d(location =>
                         location.amphipod !== undefined
-                        && location.amphipod.atDestination === false
-                    ), true)
+                        && location.amphipod.atDestination === false)
                     .sort((a, b) => a.amphipod.energyPerStep - b.amphipod.energyPerStep);
 
                 // See if all amphipods are at their destination
@@ -100,7 +99,7 @@
 
                     // Destinations take precedence
                     const destinations = burrow
-                        .filter2d(location => (location.destinationFor === amphipod.type), true)
+                        .filter2d(location => location.destinationFor === amphipod.type)
                         .sort((a, b) => a.y - b.y);
                     if (destinations[1].amphipod === undefined) {
                         targetLocations.unshift(destinations[1]);

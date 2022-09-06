@@ -12,7 +12,9 @@
             import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
             import Array2d from '../../classes/Array2d.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
 
+            ArrayPrototype.registerTap();
             const fileReader = new FileReader('./data.txt', new Parser());
             const lightsArray = await fileReader.parse();
             let lights = new Array2d(lightsArray);
@@ -30,7 +32,7 @@
             for (let step = 0; step < steps; step++) {
                 // Update all lights, except the 4 corner items
                 lights.filter2d(light => ! fourCorners.includes(light))
-                    .tap2d(light => {
+                    .tap(light => {
                         // Find surrounding lights that are on
                         const surrounding = light.getSurroundingItems()
                             .filter(light => light !== undefined && light.value === true);
@@ -40,11 +42,11 @@
                             || (light.value === false && surrounding.length === 3);
                     })
                     // Update the values
-                    .forEach2d(light => light.value = light.nextValue);
+                    .forEach(light => light.value = light.nextValue);
             }
 
             document.querySelector('.answer').innerText = lights
-                .filter2d(light => light.value === true, true)
+                .filter2d(light => light.value === true)
                 .length;
         </script>
     </body>

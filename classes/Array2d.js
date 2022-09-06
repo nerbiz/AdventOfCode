@@ -732,9 +732,9 @@ export default class Array2d extends Array
      * Keep items based on a callback for every item
      * @param {function} callback
      * @param {boolean} flatten
-     * @returns {Array2d}
+     * @returns {array}
      */
-    filter2d(callback, flatten = false)
+    filter2d(callback, flatten = true)
     {
         const result = this.map((row, y) => row.filter((item, x) => callback(item, x, y, this)));
 

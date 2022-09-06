@@ -34,7 +34,7 @@
 
             document.querySelector('.answer').innerText = map
                 // Keep only scaffold locations
-                .filter2d(location => (location.value === '#'), true)
+                .filter2d(location => location.value === '#')
                 // Find intersections (scaffold with more than 2 scaffold neighbours)
                 .filter(location => location
                     .getAdjacentItems()

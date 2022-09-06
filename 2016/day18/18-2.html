@@ -27,7 +27,6 @@
 
             const getSafeTilesAmount = tiles => tiles
                 .filter2d(tile => tile.value === 0)
-                .flat()
                 .length;
 
             let safeTilesAmount = getSafeTilesAmount(tiles);

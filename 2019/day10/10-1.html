@@ -15,7 +15,7 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const map = new Array2d(await fileReader.parse());
-            const asteroids = map.filter2d(position => (position.value === '#'), true);
+            const asteroids = map.filter2d(position => position.value === '#');
 
             // Create sets for unique slope entries
             for (const asteroid of asteroids) {

@@ -49,7 +49,7 @@
             }
 
             document.querySelector('.answer').innerText = grid
-                .filter2d((item => item.visited === true), true)
+                .filter2d(item => item.visited === true)
                 .length;
         </script>
     </body>

@@ -38,7 +38,7 @@
             });
 
             document.querySelector('.answer').innerText = lights
-                .filter2d(light => light.value === true)
+                .filter2d(light => (light.value === true), false)
                 .flat()
                 .length;
         </script>

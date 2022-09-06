@@ -21,7 +21,7 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const map = new Array2d(await fileReader.parse());
             const unitAmounts = {E: 0, G: 0};
-            map.filter2d(location => ['E', 'G'].includes(location.value), true)
+            map.filter2d(location => ['E', 'G'].includes(location.value))
                 .forEach(location => {
                     // Create a unit object
                     location.unit = {
@@ -62,7 +62,7 @@
             let unitLocations;
             let completedRounds = 0;
             battle: while (true) {
-                unitLocations = map.filter2d(location => (location.unit !== undefined), true);
+                unitLocations = map.filter2d(location => location.unit !== undefined);
 
                 for (let i = 0; i < unitLocations.length; i++) {
                     const currentUnit = unitLocations[i].unit;

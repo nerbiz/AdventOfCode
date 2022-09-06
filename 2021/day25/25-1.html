@@ -47,8 +47,8 @@
                 let moveAmount = 0;
 
                 // Get all east- and south-facing sea cucumbers
-                let eastMoving = seafloor.filter2d(position => position.value === '>').flat();
-                let southMoving = seafloor.filter2d(position => position.value === 'v').flat();
+                let eastMoving = seafloor.filter2d(position => position.value === '>');
+                let southMoving = seafloor.filter2d(position => position.value === 'v');
 
                 eastMoving = eastMoving.map(prepareMove).filter(seaCucumber => seaCucumber.moveTo !== undefined);
                 moveAmount += eastMoving.length;
@@ -64,7 +64,7 @@
                 southMoving.forEach(move);
 
                 seafloor.forEach2d(position => position.moveTo = undefined);
-            };
+            }
 
             document.querySelector('.answer').innerText = steps;
         </script>

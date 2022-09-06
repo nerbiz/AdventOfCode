@@ -90,7 +90,7 @@
 
             new Array2d(rows)
                 .filter2d(square => square.value)
-                .forEach2d(square => {
+                .forEach(square => {
                     if (used.includes(square)) {
                         return;
                     }

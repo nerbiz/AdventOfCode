@@ -75,7 +75,7 @@
 
                 minutes++;
 
-                oxygenNodes = grid.filter2d(node => (node.value === 'O'), true);
+                oxygenNodes = grid.filter2d(node => node.value === 'O');
             }
 
             // -1, because of the last loop
