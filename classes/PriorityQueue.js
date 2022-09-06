@@ -1,9 +1,10 @@
 export default class PriorityQueue
 {
-    constructor()
-    {
-        this.queue = [];
-    }
+    /**
+     * The main queue
+     * @type {array}
+     */
+    queue = [];
 
     /**
      * Checks whether the queue is empty
