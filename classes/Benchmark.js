@@ -17,15 +17,21 @@ export default class Benchmark
 
     /**
      * Run the test cases
-     * @param {number} times
+     * @param {number} rounds
      * @returns {void}
      */
-    run(times)
+    run(rounds)
     {
-        for (let i = 0; i < this.tests.length; i++) {
-            const timerName = 'Test ' + i + ' took';
+        // Loop over all the tests
+        for (let testIndex = 0; testIndex < this.tests.length; testIndex++) {
+            const timerName = 'Test ' + (testIndex + 1) + ' took';
             console.time(timerName);
-            this.tests[i]();
+
+            // Execute each test the given amount of times
+            for (let round = 0; round < rounds; round++) {
+                this.tests[testIndex]();
+            }
+
             console.timeEnd(timerName);
         }
     }
