@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+            import Pathfinding from '../../classes/Pathfinding.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            console.time('Time taken');
+
+            ArrayPrototype.registerTap();
+            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const grid = new Array2d(await fileReader.parse());
+
+            console.log(grid.toString());
+
+            const keyNodeRegExp = /[a-z@]/;
+            const doorRegExp = /[A-Z]/;
+            const isObstacle = node => node.value === '#';
+            const sortByPathLength = (a, b) => (a.steps - b.steps);
+
+            const keyNodes = grid.filter2d(node => keyNodeRegExp.test(node.value))
+                .tap(node => node.others = {})
+                .tap((keyNode, index, keyNodes) => {
+                    for (const otherKeyNode of keyNodes.slice(index + 1)) {
+                        // Get the shortest path to the other node
+                        const path = Pathfinding.aStar(grid, keyNode, otherKeyNode, isObstacle);
+
+                        // Get the door names as lowercase characters (for easier comparison with keys)
+                        const doors = path.filter(node => doorRegExp.test(node.value))
+                            .map(door => door.value.toLowerCase())
+                            .join('');
+
+                        // Set the path information in the current and other node
+                        keyNode.others[otherKeyNode.value] = {target: otherKeyNode, steps: path.length, doors};
+                        otherKeyNode.others[keyNode.value] = {target: keyNode, steps: path.length, doors};
+                    }
+
+                    // keyNode.others.sort(sortByPathLength);
+                });
+
+            console.log({keyNodesAmount: keyNodes.length});
+
+
+
+
+            let loopCount = -1;
+            let fewestSteps = Infinity;
+            const allKeyNames = keyNodes.map(node => node.value).join('').replace('@', '');
+            const findFewestSteps = (pathInfo, keysRemaining = allKeyNames, stepsTaken = 0/*, indent = 0*/) => {
+                if (++loopCount === 1e7) {
+                    console.timeEnd('Time taken');
+                    throw new Error('Too much recursion 🥲');
+                }
+
+                // console.log(' '.repeat(indent), '');
+                // console.log(' '.repeat(indent), 'From', fromNode.value, 'to', pathInfo.node.value);
+
+                // Can't reach the key if there is at least 1 locked door in front of it
+                for (const doorName of pathInfo.doors) {
+                    if (keysRemaining.includes(doorName)) {
+                        // console.log(' '.repeat(indent), 'Nope 🥺');
+                        return;
+                    }
+                }
+
+                // console.log(' '.repeat(indent), 'Ok 🙃');
+                keysRemaining = keysRemaining.replace(pathInfo.target.value, '');
+                stepsTaken += pathInfo.steps;
+                // console.log(' '.repeat(indent), {stepsTaken, keysCollected});
+
+                // Stop if the current path is already longer than the shortest,
+                // or if fewer steps are impossible with the remaining keys (at least 1 step per key)
+                if (stepsTaken + keysRemaining.length >= fewestSteps) {
+                    return;
+                }
+
+                // All keys have been collected
+                if (keysRemaining.length === 0) {
+                    if (stepsTaken < fewestSteps) {
+                        // console.log(' '.repeat(indent), 'Found in', stepsTaken, 'steps! 🎉');
+                        console.log('Found in', stepsTaken, 'steps 🎉');
+                        fewestSteps = stepsTaken;
+                    }
+
+                    return;
+                }
+
+                for (const keyName of keysRemaining) {
+                    findFewestSteps(pathInfo.target.others[keyName], keysRemaining, stepsTaken/*, indent + 4*/);
+                }
+            };
+
+            const startNode = keyNodes.find(node => node.value === '@');
+            for (const pathInfo of Object.values(startNode.others)) {
+                findFewestSteps(pathInfo);
+            }
+
+            console.log('');
+            console.log({fewestSteps});
+            document.querySelector('.answer').innerText = fewestSteps;
+            console.timeEnd('Time taken');
+        </script>
+    </body>
+</html>
