@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import IntcodeComputer from '../IntcodeComputer.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            const grid = new Array2d(50, 50);
+
+            document.querySelector('.answer').innerText = grid
+                .map2d(node => new IntcodeComputer(program.slice(0), node.x, node.y).getNextSignal())
+                .flat()
+                .filter(value => value === 1)
+                .length;
+        </script>
+    </body>
+</html>
