@@ -5,17 +5,17 @@ export default class ArrayPrototype
         Object.defineProperty(Array.prototype, 'clone', {
             /**
              * Create a clone of an array
-             * @param {boolean} completely Whether to make a shallow copy (false) or not (true)
+             * @param {boolean} deep Whether to make a shallow copy (false) or deep (true)
              * @returns {array}
              */
-            value: function clone(completely = false) {
-                return (completely === true)
+            value: function clone(deep = false) {
+                return (deep === true)
                     // Clone everything, including array items
                     ? JSON.parse(JSON.stringify(this))
                     // Shallow copy: create a new array,
                     // with the same item references (in case of objects)
                     : this.map(item => (Array.isArray(item))
-                        ? item.clone(completely)
+                        ? item.clone(deep)
                         : item);
             },
             enumerable: false,
