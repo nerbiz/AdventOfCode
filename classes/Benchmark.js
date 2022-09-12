@@ -24,7 +24,7 @@ export default class Benchmark
     {
         // Loop over all the tests
         for (let testIndex = 0; testIndex < this.tests.length; testIndex++) {
-            const timerName = 'Test ' + (testIndex + 1) + ' took';
+            const timerName = 'Test ' + (testIndex + 1);
             console.time(timerName);
 
             // Execute each test the given amount of times
