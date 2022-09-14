@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerTap();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const map = new Array2d(await fileReader.parse());
+
+            const getDegrees = (deltaX, deltaY) => (
+                Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90 + 360
+            ) % 360;
+
+            const bestLocation = map
+                .filter2d(position => position.value === '#')
+                // Add placeholders for angle calculations
+                .tap(asteroid => {
+                    asteroid.others = [];
+                    asteroid.uniqueDegrees = new Set();
+                })
+                // Add the angles between all asteroids
+                .tap((asteroid, index, asteroids) => {
+                    for (const other of asteroids.slice(index + 1)) {
+                        let degrees = getDegrees(other.x - asteroid.x, other.y - asteroid.y);
+                        const distance = Math.abs(other.x - asteroid.x) + Math.abs(other.y - asteroid.y);
+                        asteroid.others.push({degrees, distance, asteroid: other});
+                        asteroid.uniqueDegrees.add(degrees);
+
+                        degrees = (degrees + 180) % 360;
+                        other.others.push({degrees, distance, asteroid});
+                        other.uniqueDegrees.add(degrees);
+                    }
+                })
+                // Get the best location (seeing the most asteroids)
+                .sort((a, b) => b.uniqueDegrees.size - a.uniqueDegrees.size)
+                .at(0);
+
+            // Sort the visible asteroids by degrees and distance
+            bestLocation.others.sort((a, b) =>
+                (a.degrees === b.degrees)
+                    ? a.distance - b.distance
+                    : a.degrees - b.degrees);
+
+            // Make a vaporisation order as [degrees, [...asteroids]] entries
+            bestLocation.vaporiseOrder = bestLocation.others
+                .reduce((order, entry) => {
+                    const lastOrderEntry = order.at(-1);
+
+                    (entry.degrees === lastOrderEntry?.[0])
+                        ? lastOrderEntry[1].push(entry.asteroid)
+                        : order.push([entry.degrees, [entry.asteroid]]);
+
+                    return order;
+                }, []);
+
+            // Make a linear order of all asteroids being vaporised
+            let order = [];
+            while (bestLocation.vaporiseOrder.length > 0) {
+                // Add all the asteroids that are the closest
+                const nextRound = bestLocation.vaporiseOrder
+                    .map(entry => entry[1].shift());
+                order = order.concat(nextRound);
+
+                // Remove empty entries (no asteroids at that angle anymore)
+                bestLocation.vaporiseOrder = bestLocation.vaporiseOrder
+                    .filter(entry => entry[1].length > 0);
+            }
+
+            document.querySelector('.answer').innerText = (order[199].x * 100) + order[199].y;
+        </script>
+    </body>
+</html>
