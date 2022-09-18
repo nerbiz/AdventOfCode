@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {deckSize, steps} = await fileReader.parse();
+            let deck = new Array(deckSize).fill(null).map((item, index) => index);
+
+            const techniques = {
+                new: deck => deck.reverse(),
+                cut: (deck, amount) => deck.slice(amount)
+                    .concat(deck.slice(0, amount)),
+                increment: (deck, amount) => {
+                    const shuffled = [];
+
+                    for (let i = 0; i < deck.length; i++) {
+                        shuffled[(i * amount) % deck.length] = deck[i];
+                    }
+
+                    return shuffled;
+                },
+            };
+
+            for (const [type, amount] of steps) {
+                deck = techniques[type](deck, amount);
+            }
+
+            document.querySelector('.answer').innerText = deck
+                .findIndex(card => card === 2019)
+        </script>
+    </body>
+</html>
