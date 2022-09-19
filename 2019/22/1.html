@@ -14,7 +14,9 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const {deckSize, steps} = await fileReader.parse();
-            let deck = new Array(deckSize).fill(null).map((item, index) => index);
+            let deck = new Array(deckSize)
+                .fill(null)
+                .map((item, index) => index);
 
             const techniques = {
                 new: deck => deck.reverse(),
@@ -36,7 +38,7 @@
             }
 
             document.querySelector('.answer').innerText = deck
-                .findIndex(card => card === 2019)
+                .findIndex(card => card === 2019);
         </script>
     </body>
 </html>

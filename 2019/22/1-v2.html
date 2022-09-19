@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {deckSize, steps} = await fileReader.parse();
+            let deck = new Array(deckSize)
+                .fill(null)
+                .map((item, index) => ({
+                    index,
+                    value: index,
+                }));
+
+            const techniques = {
+                new: () => {
+                    for (const card of deck) {
+                        card.index = deck.length - card.index - 1;
+                    }
+                },
+                cut: amount => {
+                    for (const card of deck) {
+                        if (amount > 0) {
+                            card.index = (card.index < amount)
+                                ? card.index += (deck.length - amount)
+                                : card.index -= amount;
+                        } else {
+                            card.index = (card.index < (deck.length + amount))
+                                ? card.index -= amount
+                                : card.index -= (deck.length + amount);
+                        }
+                    }
+                },
+                increment: amount => {
+                    for (const card of deck) {
+                        card.index = (card.index * amount) % deck.length;
+                    }
+                },
+            };
+
+            for (const [type, amount] of steps) {
+                techniques[type](amount);
+            }
+
+            document.querySelector('.answer').innerText = deck
+                .find(card => card.value === 2019)
+                .index;
+        </script>
+    </body>
+</html>
