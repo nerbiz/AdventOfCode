@@ -76,20 +76,21 @@ export default class IntcodeComputer
 
     /**
      * Get a position from the program, to get a value from
+     * Mode 0 = position mode
+     * Mode 1 = immediate mode
+     * Mode 2 = relative mode
      * @param {number} mode
      * @param {number} index
      * @returns {number}
      */
     getPosition(mode, index)
     {
-        // Immediate mode
-        return (mode === 1)
-            ? index
-            // Position mode
-            : (mode === 0)
-                ? this.program[index]
-                // Relative mode
-                : this.program[index] + this.relativeBase;
+        if (mode === 1) {
+            return index;
+        }
+
+        return this.program[index]
+            + (mode === 2 ? this.relativeBase : 0);
     }
 
     /**
