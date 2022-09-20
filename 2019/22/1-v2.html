@@ -28,16 +28,15 @@
                     }
                 },
                 cut: amount => {
+                    // Ensure the amount is positive (cut -3 == cut 7)
+                    if (amount < 0) {
+                        amount = (deck.length + amount) % deck.length;
+                    }
+
                     for (const card of deck) {
-                        if (amount > 0) {
-                            card.index = (card.index < amount)
-                                ? card.index += (deck.length - amount)
-                                : card.index -= amount;
-                        } else {
-                            card.index = (card.index < (deck.length + amount))
-                                ? card.index -= amount
-                                : card.index -= (deck.length + amount);
-                        }
+                        card.index = (card.index < amount)
+                            ? card.index += (deck.length - amount)
+                            : card.index -= amount;
                     }
                 },
                 increment: amount => {
