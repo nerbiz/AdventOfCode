@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {deckSize, steps} = await fileReader.parse();
+            let cardIndex = 2019;
+
+            for (let [type, amount] of steps) {
+                switch (type) {
+                    case 'new':
+                        cardIndex = deckSize - cardIndex - 1;
+                        break;
+                    case 'cut':
+                        // Ensure the amount is positive (cut -3 == cut 7)
+                        if (amount < 0) {
+                            amount = (deckSize + amount) % deckSize;
+                        }
+
+                        cardIndex = (cardIndex < amount)
+                            ? cardIndex += (deckSize - amount)
+                            : cardIndex -= amount;
+                        break;
+                    case 'increment':
+                        cardIndex = (cardIndex * amount) % deckSize;
+                        break;
+                }
+            }
+
+            document.querySelector('.answer').innerText = cardIndex;
+        </script>
+    </body>
+</html>
