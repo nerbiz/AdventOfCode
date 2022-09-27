@@ -67,11 +67,11 @@ export default class IntcodeComputer
     }
 
     /**
-     * @param {number} input
+     * @param {...number} input
      */
-    addInput(input)
+    addInput(...input)
     {
-        this.input.push(input);
+        this.input.push(...input);
     }
 
     /**
