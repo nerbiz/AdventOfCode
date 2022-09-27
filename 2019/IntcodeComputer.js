@@ -19,6 +19,18 @@ export default class IntcodeComputer
     input = [];
 
     /**
+     * The output values of the program
+     * @type {array}
+     */
+    output = [];
+
+    /**
+     * The fallback input value, if there are no inputs
+     * @type {number|undefined}
+     */
+    fallbackInput;
+
+    /**
      * Whether the program pauses when asking for input
      * @type {boolean}
      */
@@ -37,6 +49,18 @@ export default class IntcodeComputer
     generator = null;
 
     /**
+     * Whether the program has halted
+     * @type {boolean}
+     */
+    halted = false;
+
+    /**
+     * Whether the program has finished
+     * @type {boolean}
+     */
+    finished = false;
+
+    /**
      * @param {array} program
      * @param {...number} input The first input for the program
      * @constructor
@@ -51,11 +75,35 @@ export default class IntcodeComputer
     }
 
     /**
+     * @param {number} input
+     */
+    setFallbackInput(input)
+    {
+        this.fallbackInput = input;
+    }
+
+    /**
      * Make the program wait, when asking for input
      * @returns {void}
      */
     enableWaiting() {
         this.waitForInput = true;
+    }
+
+    /**
+     * @return {boolean}
+     */
+    isHalted()
+    {
+        return this.halted;
+    }
+
+    /**
+     * @return {boolean}
+     */
+    isFinished()
+    {
+        return this.finished;
     }
 
     /**
@@ -107,102 +155,118 @@ export default class IntcodeComputer
     }
 
     /**
-     * Get the mext signal from the program
-     * @returns {number}
+     * Execute the next step of the program
+     * @returns {number|undefined}
      */
-    getNextSignal()
+    nextStep()
     {
-        if (this.generator === null) {
-            this.generator = this.start();
+        const instruction = this.program[this.programIndex];
+        const opcode = instruction % 100;
+
+        // Stop at opcode 99
+        if (opcode === 99) {
+            this.halted = true;
+            this.finished = true;
+            return;
         }
 
-        return this.generator.next().value;
+        // Get mode and parameter values
+        const mode1 = Math.floor(instruction % 1000 / 100);
+        const mode2 = Math.floor(instruction % 10000 / 1000);
+        const mode3 = Math.floor(instruction % 100000 / 10000);
+        const parameter1 = this.getValue(mode1, this.programIndex + 1);
+        const parameter2 = this.getValue(mode2, this.programIndex + 2);
+        let targetPosition;
+
+        switch (opcode) {
+            // Addition
+            case 1:
+                targetPosition = this.getPosition(mode3, this.programIndex + 3);
+                this.program[targetPosition] = parameter1 + parameter2;
+                this.programIndex += 4;
+                break;
+            // Multiplication
+            case 2:
+                targetPosition = this.getPosition(mode3, this.programIndex + 3);
+                this.program[targetPosition] = parameter1 * parameter2;
+                this.programIndex += 4;
+                break;
+            // Input
+            case 3:
+                let nextInput = this.input.shift();
+                if (nextInput === undefined) {
+                    // Stop looping if the program needs to wait for input
+                    if (this.waitForInput === true) {
+                        this.halted = true;
+                        return;
+                    }
+
+                    // Use the fallback input value
+                    nextInput = this.fallbackInput;
+                }
+
+                targetPosition = this.getPosition(mode1, this.programIndex + 1);
+                this.program[targetPosition] = nextInput;
+                this.programIndex += 2;
+                break;
+            // Output
+            case 4:
+                this.output.push(parameter1);
+                this.programIndex += 2;
+                this.halted = true;
+                return;
+            // Jump if true (non-zero)
+            case 5:
+                this.programIndex = (parameter1 !== 0)
+                    ? parameter2
+                    : this.programIndex + 3;
+                break;
+            // Jump if false (zero)
+            case 6:
+                this.programIndex = (parameter1 === 0)
+                    ? parameter2
+                    : this.programIndex + 3;
+                break;
+            // Less than
+            case 7:
+                targetPosition = this.getPosition(mode3, this.programIndex + 3);
+                this.program[targetPosition] = Number(parameter1 < parameter2);
+                this.programIndex += 4;
+                break;
+            // Equal
+            case 8:
+                targetPosition = this.getPosition(mode3, this.programIndex + 3);
+                this.program[targetPosition] = Number(parameter1 === parameter2);
+                this.programIndex += 4;
+                break;
+            // Change relative base
+            case 9:
+                this.relativeBase += parameter1;
+                this.programIndex += 2;
+                break;
+        }
     }
 
     /**
-     * Run the program
-     * @yields {number}
-     * @returns {Generator}
+     * Get the mext signal from the program
+     * @returns {number|undefined}
      */
-    *start()
+    getNextSignal()
     {
-        programLoop: while (this.programIndex < this.program.length) {
-            const instruction = this.program[this.programIndex];
-            const opcode = instruction % 100;
+        if (this.isFinished()) {
+            return;
+        }
 
-            // Stop at opcode 99
-            if (opcode === 99) {
+        this.halted = false;
+
+        while (this.programIndex < this.program.length) {
+            this.nextStep();
+
+            if (this.isHalted()) {
                 break;
             }
-
-            // Get mode and parameter values
-            const mode1 = Math.floor(instruction % 1000 / 100);
-            const mode2 = Math.floor(instruction % 10000 / 1000);
-            const mode3 = Math.floor(instruction % 100000 / 10000);
-            const parameter1 = this.getValue(mode1, this.programIndex + 1);
-            const parameter2 = this.getValue(mode2, this.programIndex + 2);
-            let targetPosition;
-
-            switch (opcode) {
-                // Addition
-                case 1:
-                    targetPosition = this.getPosition(mode3, this.programIndex + 3);
-                    this.program[targetPosition] = parameter1 + parameter2;
-                    this.programIndex += 4;
-                    break;
-                // Multiplication
-                case 2:
-                    targetPosition = this.getPosition(mode3, this.programIndex + 3);
-                    this.program[targetPosition] = parameter1 * parameter2;
-                    this.programIndex += 4;
-                    break;
-                // Input
-                case 3:
-                    const nextInput = this.input.shift();
-                    if (this.waitForInput === true && nextInput === undefined) {
-                        this.generator = null;
-                        break programLoop;
-                    }
-
-                    targetPosition = this.getPosition(mode1, this.programIndex + 1);
-                    this.program[targetPosition] = nextInput;
-                    this.programIndex += 2;
-                    break;
-                // Output
-                case 4:
-                    yield parameter1;
-                    this.programIndex += 2;
-                    break;
-                // Jump if true (non-zero)
-                case 5:
-                    this.programIndex = (parameter1 !== 0)
-                        ? parameter2
-                        : this.programIndex + 3;
-                    break;
-                // Jump if false (zero)
-                case 6:
-                    this.programIndex = (parameter1 === 0)
-                        ? parameter2
-                        : this.programIndex + 3;
-                    break;
-                // Less than
-                case 7:
-                    targetPosition = this.getPosition(mode3, this.programIndex + 3);
-                    this.program[targetPosition] = Number(parameter1 < parameter2);
-                    this.programIndex += 4;
-                    break;
-                // Equal
-                case 8:
-                    targetPosition = this.getPosition(mode3, this.programIndex + 3);
-                    this.program[targetPosition] = Number(parameter1 === parameter2);
-                    this.programIndex += 4;
-                    break;
-                // Change relative base
-                case 9:
-                    this.relativeBase += parameter1;
-                    this.programIndex += 2;
-                    break;
-            }
         }
+
+        return this.output.shift();
     }
 }
