@@ -148,6 +148,24 @@ export default class IntcodeComputer
     }
 
     /**
+     * See how many output items there are
+     * @return {number}
+     */
+    getOutputAmount()
+    {
+        return this.output.length;
+    }
+
+    /**
+     * Take all the output values
+     * @return {array}
+     */
+    takeOutput()
+    {
+        return this.output.splice(0);
+    }
+
+    /**
      * Execute the next step of the program
      * @returns {number|undefined}
      */
