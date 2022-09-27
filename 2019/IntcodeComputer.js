@@ -43,17 +43,16 @@ export default class IntcodeComputer
     relativeBase = 0;
 
     /**
-     * Possible statuses of the program
-     * @type {object}
+     * Whether the program is waiting for input
+     * @type {boolean}
      */
-    status = {
-        // Whether the program is paused (after outputting a signal)
-        paused: false,
-        // Whether the program is waiting for input
-        waiting: false,
-        // Whether the program has finished
-        finished: false,
-    };
+    waiting = false;
+
+    /**
+     * Whether the program has finished
+     * @type {boolean}
+     */
+    finished = false;
 
     /**
      * @param {array} program
@@ -103,17 +102,9 @@ export default class IntcodeComputer
     /**
      * @return {boolean}
      */
-    isPaused()
-    {
-        return this.status.paused;
-    }
-
-    /**
-     * @return {boolean}
-     */
     isWaiting()
     {
-        return this.status.waiting;
+        return this.waiting;
     }
 
     /**
@@ -121,17 +112,16 @@ export default class IntcodeComputer
      */
     isFinished()
     {
-        return this.status.finished;
+        return this.finished;
     }
 
     /**
      * Reset the status, except for the finished status
      * @returns {void}
      */
-    resetStatus()
+    resetWaitingStatus()
     {
-        this.status.paused = false;
-        this.status.waiting = false;
+        this.waiting = false;
     }
 
     /**
@@ -186,7 +176,7 @@ export default class IntcodeComputer
 
     /**
      * Execute the next step of the program
-     * @returns {number|undefined}
+     * @returns {boolean|undefined}
      */
     nextStep()
     {
@@ -195,8 +185,8 @@ export default class IntcodeComputer
 
         // Stop at opcode 99
         if (opcode === 99) {
-            this.status.finished = true;
-            return;
+            this.finished = true;
+            return false;
         }
 
         // Get mode and parameter values
@@ -226,8 +216,8 @@ export default class IntcodeComputer
                 if (nextInput === undefined) {
                     // Stop looping if the program needs to wait for input
                     if (this.waitForInput === true) {
-                        this.status.waiting = true;
-                        return;
+                        this.waiting = true;
+                        return false;
                     }
 
                     // Use the fallback input value
@@ -242,8 +232,7 @@ export default class IntcodeComputer
             case 4:
                 this.output.push(parameter1);
                 this.programIndex += 2;
-                this.status.paused = true;
-                return;
+                return false;
             // Jump if true (non-zero)
             case 5:
                 this.programIndex = (parameter1 !== 0)
@@ -286,12 +275,10 @@ export default class IntcodeComputer
             return;
         }
 
-        this.resetStatus();
+        this.resetWaitingStatus();
 
         while (this.programIndex < this.program.length) {
-            this.nextStep();
-
-            if (this.isFinished() || this.isPaused() || this.isWaiting()) {
+            if (this.nextStep() === false) {
                 break;
             }
         }
