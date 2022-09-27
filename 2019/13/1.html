@@ -18,12 +18,9 @@
             const intcodeComputer = new IntcodeComputer(program);
             let blockTileAmount = 0;
 
-            while (true) {
-                if (intcodeComputer.getNextSignal() === undefined) {
-                    break;
-                }
-
+            while (! intcodeComputer.isFinished()) {
                 // Every third signal is a tile ID
+                intcodeComputer.getNextSignal();
                 intcodeComputer.getNextSignal();
                 const tileId = intcodeComputer.getNextSignal();
                 blockTileAmount += Number(tileId === 2);

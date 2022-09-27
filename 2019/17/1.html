@@ -22,9 +22,8 @@
 
             // Get all the characters from the program
             let mapString = '';
-            let signal;
-            while ((signal = intcodeComputer.getNextSignal()) !== undefined) {
-                mapString += String.fromCharCode(signal);
+            while (! intcodeComputer.isFinished()) {
+                mapString += String.fromCharCode(intcodeComputer.getNextSignal());
             }
 
             // Create a map of all the characters

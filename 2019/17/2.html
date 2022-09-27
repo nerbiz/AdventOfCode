@@ -22,10 +22,10 @@
 
             // Get all the signals up to the first prompt
             let mapString = '';
-            let signal;
-            while ((signal = intcodeComputer.getNextSignal()) !== undefined) {
-                mapString += String.fromCharCode(signal);
+            while (! intcodeComputer.isWaiting()) {
+                mapString += String.fromCharCode(intcodeComputer.getNextSignal());
             }
+            intcodeComputer.resetStatus();
 
             // Create a map of all the characters
             const map = new Array2d(
@@ -120,6 +120,7 @@
                 'N',
             ];
 
+            let signal;
             let lastSignal;
             while (inputs.length > 0) {
                 const input = inputs.shift()
