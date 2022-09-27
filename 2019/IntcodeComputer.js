@@ -43,12 +43,6 @@ export default class IntcodeComputer
     relativeBase = 0;
 
     /**
-     * The generator producing signals
-     * @type {Generator|null}
-     */
-    generator = null;
-
-    /**
      * Whether the program has halted
      * @type {boolean}
      */
@@ -75,6 +69,22 @@ export default class IntcodeComputer
     }
 
     /**
+     * @param {...number} input
+     */
+    setInput(...input)
+    {
+        this.input = input;
+    }
+
+    /**
+     * @param {...number} input
+     */
+    addInput(...input)
+    {
+        this.input.push(...input);
+    }
+
+    /**
      * @param {number} input
      */
     setFallbackInput(input)
@@ -83,7 +93,6 @@ export default class IntcodeComputer
     }
 
     /**
-     * Make the program wait, when asking for input
      * @returns {void}
      */
     enableWaiting() {
@@ -104,22 +113,6 @@ export default class IntcodeComputer
     isFinished()
     {
         return this.finished;
-    }
-
-    /**
-     * @param {...number} input
-     */
-    setInput(...input)
-    {
-        this.input = input;
-    }
-
-    /**
-     * @param {...number} input
-     */
-    addInput(...input)
-    {
-        this.input.push(...input);
     }
 
     /**
