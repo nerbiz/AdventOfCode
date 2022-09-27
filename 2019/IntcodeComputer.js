@@ -43,16 +43,17 @@ export default class IntcodeComputer
     relativeBase = 0;
 
     /**
-     * Whether the program has halted
-     * @type {boolean}
+     * Possible statuses of the program
+     * @type {object}
      */
-    halted = false;
-
-    /**
-     * Whether the program has finished
-     * @type {boolean}
-     */
-    finished = false;
+    status = {
+        // Whether the program is paused (after outputting a signal)
+        paused: false,
+        // Whether the program is waiting for input
+        waiting: false,
+        // Whether the program has finished
+        finished: false,
+    };
 
     /**
      * @param {array} program
@@ -102,9 +103,17 @@ export default class IntcodeComputer
     /**
      * @return {boolean}
      */
-    isHalted()
+    isPaused()
     {
-        return this.halted;
+        return this.status.paused;
+    }
+
+    /**
+     * @return {boolean}
+     */
+    isWaiting()
+    {
+        return this.status.waiting;
     }
 
     /**
@@ -112,7 +121,17 @@ export default class IntcodeComputer
      */
     isFinished()
     {
-        return this.finished;
+        return this.status.finished;
+    }
+
+    /**
+     * Reset the status, except for the finished status
+     * @returns {void}
+     */
+    resetStatus()
+    {
+        this.status.paused = false;
+        this.status.waiting = false;
     }
 
     /**
@@ -176,8 +195,7 @@ export default class IntcodeComputer
 
         // Stop at opcode 99
         if (opcode === 99) {
-            this.halted = true;
-            this.finished = true;
+            this.status.finished = true;
             return;
         }
 
@@ -208,7 +226,7 @@ export default class IntcodeComputer
                 if (nextInput === undefined) {
                     // Stop looping if the program needs to wait for input
                     if (this.waitForInput === true) {
-                        this.halted = true;
+                        this.status.waiting = true;
                         return;
                     }
 
@@ -224,7 +242,7 @@ export default class IntcodeComputer
             case 4:
                 this.output.push(parameter1);
                 this.programIndex += 2;
-                this.halted = true;
+                this.status.paused = true;
                 return;
             // Jump if true (non-zero)
             case 5:
@@ -268,12 +286,12 @@ export default class IntcodeComputer
             return;
         }
 
-        this.halted = false;
+        this.resetStatus();
 
         while (this.programIndex < this.program.length) {
             this.nextStep();
 
-            if (this.isHalted()) {
+            if (this.isFinished() || this.isPaused() || this.isWaiting()) {
                 break;
             }
         }
