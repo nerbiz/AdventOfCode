@@ -24,7 +24,7 @@
                     case 'cut':
                         // Ensure the amount is positive (cut -3 == cut 7)
                         if (amount < 0) {
-                            amount = (deckSize + amount) % deckSize;
+                            amount += deckSize;
                         }
 
                         cardIndex = (cardIndex < amount)
