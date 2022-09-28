@@ -31,6 +31,12 @@ export default class IntcodeComputer
     fallbackInput;
 
     /**
+     * Whether the program used the fallback input value
+     * @type {boolean}
+     */
+    fallbackInputUsed = false;
+
+    /**
      * Whether the program pauses when asking for input
      * @type {boolean}
      */
@@ -90,6 +96,14 @@ export default class IntcodeComputer
     setFallbackInput(input)
     {
         this.fallbackInput = input;
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    usedFallbackInput()
+    {
+        return this.fallbackInputUsed;
     }
 
     /**
@@ -213,6 +227,8 @@ export default class IntcodeComputer
             // Input
             case 3:
                 let nextInput = this.input.shift();
+                this.fallbackInputUsed = (nextInput === undefined);
+
                 if (nextInput === undefined) {
                     // Stop looping if the program needs to wait for input
                     if (this.waitForInput === true) {
