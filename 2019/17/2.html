@@ -25,7 +25,6 @@
             while (! intcodeComputer.isWaiting()) {
                 mapString += String.fromCharCode(intcodeComputer.getNextSignal());
             }
-            intcodeComputer.resetStatus();
 
             // Create a map of all the characters
             const map = new Array2d(
