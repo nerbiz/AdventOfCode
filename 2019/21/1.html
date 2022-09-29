@@ -11,17 +11,13 @@
         <script type="module">
             import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
-            import IntcodeComputer from '../IntcodeComputer.js';
+            import AsciiComputer from '../AsciiComputer.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const program = await fileReader.parse();
-            const intcodeComputer = new IntcodeComputer(program);
-            intcodeComputer.enableWaiting();
+            const asciiComputer = new AsciiComputer(program);
 
-            // Get all signals up to the input prompt
-            while (intcodeComputer.getNextSignal() !== undefined) {}
-
-            const inputs = [
+            for (const input of [
                 // Jump if C is a gap and D is ground
                 'NOT C J',
                 'AND D J',
@@ -29,24 +25,12 @@
                 'NOT A T',
                 'OR T J',
                 'WALK',
-            ];
-
-            let signal;
-            let lastSignal;
-            while (inputs.length > 0) {
-                const input = inputs.shift()
-                    .split('')
-                    .concat('\n')
-                    .map(character => character.charCodeAt(0));
-
-                intcodeComputer.setInput(...input);
-
-                while ((signal = intcodeComputer.getNextSignal()) !== undefined) {
-                    lastSignal = signal;
-                }
+            ]) {
+                asciiComputer.addInput(input);
             }
 
-            document.querySelector('.answer').innerText = lastSignal;
+            asciiComputer.getNextOutput();
+            document.querySelector('.answer').innerText = asciiComputer.getLastSignal();
         </script>
     </body>
 </html>

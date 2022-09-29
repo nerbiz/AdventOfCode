@@ -11,24 +11,19 @@
         <script type="module">
             import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
-            import IntcodeComputer from '../IntcodeComputer.js';
             import Array2d from '../../classes/Array2d.js';
+            import AsciiComputer from '../AsciiComputer.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const program = await fileReader.parse();
             program[0] = 2;
-            const intcodeComputer = new IntcodeComputer(program);
-            intcodeComputer.enableWaiting();
+            const asciiComputer = new AsciiComputer(program);
 
-            // Get all the signals up to the first prompt
-            let mapString = '';
-            while (! intcodeComputer.isWaiting()) {
-                mapString += String.fromCharCode(intcodeComputer.getNextSignal());
-            }
-
-            // Create a map of all the characters
+            // Create a map of all the characters from the program
             const map = new Array2d(
-                mapString.split('\n').map(row => row.split(''))
+                asciiComputer.getNextOutput()
+                    .split('\n')
+                    .map(row => row.split(''))
             );
 
             let currentLocation = map.find2d(location => location.value === '^');
@@ -94,46 +89,31 @@
                 }
 
                 // Store the pattern as a 'function', remove the pattern form the string
-                functions[i] = pattern;
+                functions[i] = pattern.match(/[LR]\d+/g)
+                    .map(direction => direction.replace(/([LR])/, '$1,'))
+                    .join(',');
                 pathString = pathString.replaceAll(pattern, '_');
                 // Replace the pattern with the 'function' name for the order
                 functionOrder = functionOrder.replaceAll(pattern, functionNames[i]);
             }
 
-            const inputs = [
-                // Main routine
-                functionOrder.split('').join(','),
-                // Function A
-                functions[0].match(/[LR]\d+/g)
-                    .map(direction => direction.replace(/([LR])/, '$1,'))
-                    .join(','),
-                // Function B
-                functions[1].match(/[LR]\d+/g)
-                    .map(direction => direction.replace(/([LR])/, '$1,'))
-                    .join(','),
-                // Function C
-                functions[2].match(/[LR]\d+/g)
-                    .map(direction => direction.replace(/([LR])/, '$1,'))
-                    .join(','),
-                // Continuous video feed
-                'N',
-            ];
+            // Main routine
+            asciiComputer.addInput(functionOrder.split('').join(','));
+            asciiComputer.getNextOutput();
+            // Function A
+            asciiComputer.addInput(functions[0]);
+            asciiComputer.getNextOutput();
+            // Function B
+            asciiComputer.addInput(functions[1]);
+            asciiComputer.getNextOutput();
+            // Function C
+            asciiComputer.addInput(functions[2]);
+            asciiComputer.getNextOutput();
+            // Continuous video feed
+            asciiComputer.addInput('N');
+            asciiComputer.getNextOutput();
 
-            let signal;
-            let lastSignal;
-            while (inputs.length > 0) {
-                const input = inputs.shift()
-                    .split('')
-                    .concat('\n')
-                    .map(character => character.charCodeAt(0));
-                intcodeComputer.setInput(...input);
-
-                while ((signal = intcodeComputer.getNextSignal()) !== undefined) {
-                    lastSignal = signal;
-                }
-            }
-
-            document.querySelector('.answer').innerText = lastSignal;
+            document.querySelector('.answer').innerText = asciiComputer.getLastSignal();
         </script>
     </body>
 </html>
