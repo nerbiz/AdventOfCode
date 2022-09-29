@@ -45,11 +45,15 @@ export default class AsciiComputer
     getNextOutput()
     {
         let output = '';
-        let signal;
 
-        while ((signal = this.intcodeComputer.getNextSignal()) !== undefined) {
-            this.lastSignal = signal;
+        while (true) {
+            const signal = this.intcodeComputer.getNextSignal();
+            if (signal === undefined) {
+                break;
+            }
+
             output += String.fromCharCode(signal);
+            this.lastSignal = signal;
         }
 
         return output.trim();
