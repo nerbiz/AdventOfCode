@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const {positions} = await fileReader.parse();
+            const axes = ['x', 'y', 'z'];
+
+            console.time('Time taken');
+
+            // Create moon objects
+            const moons = positions.map((position, index) => ({
+                index,
+                position,
+                velocity: {x: 0, y: 0, z: 0},
+                initialPosition: {
+                    x: position.x,
+                    y: position.y,
+                    z: position.z,
+                },
+                history: {
+                    x: [position.x],
+                    y: [position.y],
+                    z: [position.z],
+                },
+                patterns: {x: '', y: '', z: ''},
+                found: {x: false, y: false, z: false},
+                others: [],
+            }));
+
+            // Link moons to each other
+            for (let i = 0; i < moons.length; i++) {
+                for (const otherMoon of moons.slice(i + 1)) {
+                    moons[i].others.push(otherMoon);
+                    otherMoon.others.push(moons[i]);
+                }
+            }
+
+            /**
+             * Get the velocity for an axis of a moon
+             * @param {object} moon
+             * @param {string} axis
+             * @returns {number}
+             */
+            const getVelocity = (moon, axis) =>
+                moon.others
+                    // Get the difference as -1, 0 or 1 (per other moon)
+                    .map(other => {
+                        const difference = other.position[axis] - moon.position[axis];
+
+                        return (difference === 0)
+                            ? 0
+                            : difference / Math.abs(difference);
+                    })
+                    // Sum up the differences
+                    .reduce((sum, velocity) => (sum + velocity), 0);
+
+            /**
+             * Create a state-string of the current moons
+             * @returns {string}
+             */
+            const getStateString = () => moons
+                .flatMap(moon => Object.values(moon.position)
+                    .concat(Object.values(moon.velocity)))
+                .join(',');
+
+            const allFound = () => moons
+                .flatMap(moon => Object.values(moon.found))
+                .filter(status => status === false)
+                .length === 0;
+
+            const originalState = getStateString();
+
+            // console.log({steps: 0, x: moons[1].position.x});
+
+            let steps = 0;
+            while (++steps) {
+                if (steps === 1e4) {
+                    console.error('Too many loops');
+                    break;
+                }
+
+                // Calculate the velocities of each moon
+                for (const moon of moons) {
+                    for (const axis of axes) {
+                        moon.velocity[axis] += getVelocity(moon, axis);
+                    }
+                }
+
+                // Apply the velocities to each moon's position
+                for (const moon of moons) {
+                    for (const axis of axes) {
+                        moon.position[axis] += moon.velocity[axis];
+
+                        if (moon.found[axis] === false) {
+                            moon.history[axis].push(moon.position[axis]);
+
+                            if (moon.position[axis] === moon.initialPosition[axis]) {
+                                const currentPattern = moon.history[axis].join(',');
+                                if (currentPattern.length < moon.patterns[axis].length) {
+                                    continue;
+                                }
+
+                                if (currentPattern === moon.patterns[axis]) {
+                                    moon.found[axis] = true;
+                                    console.log({
+                                        steps,
+                                        moonIndex: moon.index,
+                                        axis,
+                                        pattern: moon.patterns[axis].split(',')
+                                    });
+                                } else {
+                                    moon.patterns[axis] = currentPattern;
+                                    moon.history[axis] = [];
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // console.log({steps, x: moons[1].position.x});
+
+                if (allFound()) {
+                    break;
+                }
+
+                // if (getStateString() === originalState) {
+                //     break;
+                // }
+            }
+
+            console.log(steps);
+            console.log('Moons', moons);
+            console.log('Patterns', moons.map(moon => moon.patterns));
+            // console.log(moons[1].patterns.x);
+
+            console.timeEnd('Time taken');
+
+            // document.querySelector('.answer').innerText =
+        </script>
+    </body>
+</html>

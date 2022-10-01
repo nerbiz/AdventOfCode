@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./datatest.txt', new Parser());
+            let digits = await fileReader.parse();
+            // digits = new Array(1e4).fill(digits).flat();
+            const pattern = [0, 1, 0, -1];
+            const phases = 100;
+            const offset = digits.slice(0, 7).join('') - 0;
+
+            console.time('Time taken');
+            let counter = 0;
+
+            for (let phase = 0; phase < phases; phase++) {
+                for (let position = 1; position <= digits.length; position++) {
+                    let patternIndex = 0;
+                    let repeater = 0;
+                    let sum = 0;
+
+                    for (const digit of digits) {
+                        // Repeat the current pattern value based on the position
+                        if (++repeater % position === 0) {
+                            patternIndex++;
+                        }
+
+                        // Multiply the digit with the pattern value
+                        sum += digit * pattern[patternIndex % pattern.length];
+                    }
+
+                    // Keep only the rightmost digit
+                    digits[position - 1] = Math.abs(sum % 10);
+                }
+
+                console.log((++counter).toString().padStart(4, '0'), digits);
+            }
+
+            document.querySelector('.answer').innerText = digits.slice(offset, offset + 8).join('');
+            console.timeEnd('Time taken');
+        </script>
+    </body>
+</html>

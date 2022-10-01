@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {deckSize, steps} = await fileReader.parse();
+            deckSize = 119315717514047;
+
+            console.time('Time elapsed');
+
+            const initialIndex = 2020;
+            console.log({initialIndex});
+            let cardIndex = initialIndex;
+            let previous = cardIndex;
+
+            for (let round = 1; round <= 1e6; round++) {
+                for (let [type, amount] of steps) {
+                    switch (type) {
+                        case 'new':
+                            cardIndex = deckSize - cardIndex - 1;
+                            break;
+                        case 'cut':
+                            // Ensure the amount is positive (cut -3 == cut 7)
+                            if (amount < 0) {
+                                amount += deckSize;
+                            }
+
+                            cardIndex = (cardIndex < amount)
+                                ? cardIndex += (deckSize - amount)
+                                : cardIndex -= amount;
+                            break;
+                        case 'increment':
+                            cardIndex = (cardIndex * amount) % deckSize;
+                            break;
+                    }
+                }
+
+                if (cardIndex === initialIndex) {
+                    console.log('Repeated', {round, cardIndex});
+                    break;
+                }
+
+                if (round % 1e5 === 0) {
+                    console.log({round, cardIndex, difference: cardIndex - previous});
+                    previous = cardIndex;
+                }
+            }
+
+            document.querySelector('.answer').innerText = cardIndex;
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
