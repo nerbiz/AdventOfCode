@@ -306,21 +306,16 @@ export default class ArrayPrototype
              * @returns {array}
              */
             value: function repeatValues(amount, maxLength = null) {
-                let newArray = this;
-
-                if (amount === null) {
-                    while (newArray.length < maxLength) {
-                        newArray = newArray.concat(this);
-                    }
-                } else {
-                    for (let i = 0; i < amount - 1; i++) {
-                        newArray = newArray.concat(this);
-
-                        if (maxLength !== null && newArray.length >= maxLength) {
-                            break;
-                        }
-                    }
+                if (
+                    // Calculate the amount, if not given
+                    amount === null
+                    // Or adjust the amount, if it will loop too often
+                    || (maxLength !== null && amount * this.length > maxLength)
+                ) {
+                    amount = Math.ceil(maxLength / this.length);
                 }
+
+                const newArray = new Array(amount).fill(this).flat();
 
                 return (maxLength !== null)
                     ? newArray.slice(0, maxLength)
