@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const numbers = await fileReader.parse();
+
+            let multiplied;
+            mainLoop: for (let i = 0; i < numbers.length; i++) {
+                for (let j = i + 1; j < numbers.length; j++) {
+                    if (numbers[i] + numbers[j] > 2020) {
+                        continue;
+                    }
+
+                    for (const other of numbers.slice(j)) {
+                        if (numbers[i] + numbers[j] + other === 2020) {
+                            multiplied = numbers[i] * numbers[j] * other;
+                            break mainLoop;
+                        }
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = multiplied;
+        </script>
+    </body>
+</html>
