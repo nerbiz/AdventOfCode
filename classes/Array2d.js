@@ -474,15 +474,9 @@ export default class Array2d extends Array
     getColumns()
     {
         const columns = [];
-
-        if (this.length === 0) {
-            return columns;
+        for (let x = 0; x < this[0].length; x++) {
+            columns.push(this.getColumn(x));
         }
-
-        // Loop over the length of the first row
-        this.at(0).forEach((item, x) => {
-            columns.push(this.reduce((column, row) => column.concat(row[x]), []));
-        });
 
         return columns;
     }
@@ -494,7 +488,7 @@ export default class Array2d extends Array
      */
     getColumn(x)
     {
-        return this.getColumns().at(x);
+        return this.map(row => row[x]);
     }
 
     /**
