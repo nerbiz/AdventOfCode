@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import AsciiComputer from '../AsciiComputer.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            const asciiComputer = new AsciiComputer(program);
+
+            for (const input of [
+                // Jump if D is ground
+                'NOT D T',
+                'NOT T J',
+
+                // Unless E and H are gaps
+                'NOT E T',
+                'NOT T T',
+                'OR H T',
+                'AND T J',
+
+                // Unless A, B and C are all ground
+                'NOT A T',
+                'NOT T T',
+                'AND B T',
+                'AND C T',
+                'NOT T T',
+                'AND T J',
+
+                'RUN',
+            ]) {
+                asciiComputer.addInput(input);
+            }
+
+            asciiComputer.getNextOutput();
+            document.querySelector('.answer').innerText = asciiComputer.getLastSignal();
+        </script>
+    </body>
+</html>
