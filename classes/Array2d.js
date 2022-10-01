@@ -468,6 +468,16 @@ export default class Array2d extends Array
     }
 
     /**
+     * Get a single row
+     * @param {number} y The row index
+     * @returns {array}
+     */
+    getRow(y)
+    {
+        return this.at(y);
+    }
+
+    /**
      * Get all columns
      * @returns {array}
      */
