@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const rules = await fileReader.parse();
+
+            // Simplify the contents array to only colour names
+            rules.forEach(rule => rule[1] = rule[1].map(content => content.colour));
+
+            const bagColours = new Set();
+            const findBagColours = colour => rules
+                .filter(rule => ! bagColours.has(rule[0]) && rule[1].includes(colour))
+                .forEach(rule => {
+                    bagColours.add(rule[0]);
+                    findBagColours(rule[0]);
+                });
+
+            findBagColours('shiny gold');
+
+            document.querySelector('.answer').innerText = bagColours.size;
+        </script>
+    </body>
+</html>
