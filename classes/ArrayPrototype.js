@@ -134,8 +134,15 @@ export default class ArrayPrototype
              * @returns {array}
              */
             value: function difference(...arrays) {
-                arrays = [].concat(...arrays);
-                return this.filter(item => ! arrays.includes(item));
+                return this.filter(item => {
+                    for (const other of arrays) {
+                        if (other.includes(item)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                });
             },
             enumerable: false,
             writable: false,
