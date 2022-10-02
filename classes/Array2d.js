@@ -609,7 +609,7 @@ export default class Array2d extends Array
      * @param {object} customData
      * @returns {Array2d}
      */
-    expandVertically(amount, value = undefined, customData)
+    expandVertically(amount, value = undefined, customData = {})
     {
         if (amount < 0) {
             const amountAbs = amount * -1;
@@ -644,7 +644,7 @@ export default class Array2d extends Array
      * @param {object} customData Extra data for the items
      * @returns {Array2d}
      */
-    expandAllSides(amount, value = undefined, customData)
+    expandAllSides(amount, value = undefined, customData = {})
     {
         return this.expandHorizontally(amount * -1, value, customData)
             .expandHorizontally(amount, value, customData)
