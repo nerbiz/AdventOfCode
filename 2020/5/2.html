@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const seats = await fileReader.parse();
+
+            const seatIds = seats
+                .join('\n')
+                // Replace characters with binary
+                .replaceAll('F', '0')
+                .replaceAll('B', '1')
+                .replaceAll('L', '0')
+                .replaceAll('R', '1')
+                .split('\n')
+                // Seat ID = first 7 bits * 8, add last 3 bits,
+                // which is the same as left-shifting 3 bits, then add the last 3 bits,
+                // which is simply the whole seat ID in binary
+                .map(seat => parseInt(seat, 2))
+                .sort((a, b) => a - b);
+
+            let ownSeatId;
+            for (let i = 0; i < seatIds.length; i++) {
+                // The ID minus the lowest ID in the list, should match the index
+                if (seatIds[i] - seatIds[0] !== i) {
+                    ownSeatId = seatIds[i] - 1;
+                    break;
+                }
+            }
+
+            document.querySelector('.answer').innerText = ownSeatId;
+        </script>
+    </body>
+</html>
