@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const passports = await fileReader.parse();
+            const requiredFields = {
+                byr: value => value.length === 4 && value >= 1920 && value <= 2002,
+                iyr: value => value.length === 4 && value >= 2010 && value <= 2020,
+                eyr: value => value.length === 4 && value >= 2020 && value <= 2030,
+                hgt: value => {
+                    const matches = value.match(/^(\d+)(cm|in)$/);
+                    if (matches === null) {
+                        return false;
+                    }
+
+                    return (
+                        (matches[2] === 'cm' && matches[1] >= 150 && matches[1] <= 193)
+                        || (matches[2] === 'in' && matches[1] >= 59 && matches[1] <= 76)
+                    );
+                },
+                hcl: value => value.match(/^#[0-9a-f]{6}$/) !== null,
+                ecl: value => ['amb', 'blu', 'brn', 'gry', 'grn', 'hzl', 'oth'].includes(value),
+                pid: value => value.match(/^\d{9}$/) !== null,
+            };
+
+            document.querySelector('.answer').innerText = passports
+                .filter(passport => {
+                    for (const field in requiredFields) {
+                        if (passport[field] === undefined || ! requiredFields[field](passport[field])) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                })
+                .length;
+        </script>
+    </body>
+</html>
