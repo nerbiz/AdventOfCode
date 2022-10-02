@@ -13,13 +13,20 @@
             import Parser from './Parser.js';
             import ArrayPrototype from '../../classes/ArrayPrototype.js';
 
-            ArrayPrototype.registerUnique();
+            ArrayPrototype.registerIntersection();
             ArrayPrototype.registerSum();
             const fileReader = new FileReader('./data.txt', new Parser());
             const groups = await fileReader.parse();
 
             document.querySelector('.answer').innerText = groups
-                .map(group => group.join('').split('').unique().length)
+                .map(group => {
+                    if (group.length === 1) {
+                        return group[0].length;
+                    }
+
+                    group = group.map(person => person.split(''));
+                    return group[0].intersection(...group.slice(1)).length;
+                })
                 .sum();
         </script>
     </body>
