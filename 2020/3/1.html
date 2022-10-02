@@ -15,18 +15,16 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const map = await fileReader.parse();
 
-            console.time('Time elapsed');
-
             let x = 0;
             let y = 0;
             let trees = 0;
+
             while ((x += 3) && (++y < map.length)) {
                 x %= map[0].length;
                 trees += Number(map[y][x] === '#');
             }
 
             document.querySelector('.answer').innerText = trees;
-            console.timeEnd('Time elapsed');
         </script>
     </body>
 </html>
