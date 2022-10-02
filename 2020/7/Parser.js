@@ -11,7 +11,7 @@ export default class Parser
             const [colour, contentsString] = rule.split(' bags contain ');
 
             const contents = [];
-            for (const matches of contentsString.matchAll(/(\d+) ([a-z]+ [a-z]+)/ig)) {
+            for (const matches of contentsString.matchAll(/(\d+) ([a-z]+ [a-z]+)/g)) {
                 contents.push({
                     colour: matches[2],
                     amount: matches[1] - 0,
