@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {preamble, numbers} = await fileReader.parse();
+
+            let wrongNumber;
+            mainLoop: for (let i = preamble; i < numbers.length; i++) {
+                const previous = numbers.slice(i - preamble, i);
+
+                for (let j = 0; j < previous.length; j++) {
+                    for (const other of previous.slice(j)) {
+                        if (previous[j] + other === numbers[i]) {
+                            continue mainLoop;
+                        }
+                    }
+                }
+
+                wrongNumber = numbers[i];
+            }
+
+            document.querySelector('.answer').innerText = wrongNumber;
+        </script>
+    </body>
+</html>
