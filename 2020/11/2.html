@@ -17,10 +17,40 @@
             ArrayPrototype.registerTap();
             const fileReader = new FileReader('./data.txt', new Parser());
             const grid = new Array2d(await fileReader.parse());
+
+            /**
+             * Find the nearest neighbour in a certain direction
+             * @param {Array2dItem} location
+             * @param {number} deltaX
+             * @param {number} deltaY
+             * @return {Array2dItem|undefined}
+             */
+            const findVisibleSeat = (location, deltaX, deltaY) => {
+                const neighbour = grid.getItem(location.x + deltaX, location.y + deltaY);
+                if (neighbour === undefined) {
+                    return;
+                }
+
+                if (neighbour.value === 'L' || neighbour.value === '#') {
+                    return neighbour;
+                }
+
+                return findVisibleSeat(neighbour, deltaX, deltaY);
+            };
+
             const seats = grid.filter2d(location => location.value === 'L' || location.value === '#')
                 .tap(seat => {
-                    seat.surrounding = seat.getSurroundingItems()
-                        .filter(neighbour => neighbour !== undefined);
+                    seat.surrounding = [
+                        // Up-left, up, up-right, left, right, down-left, down, down-right
+                        findVisibleSeat(seat, -1, -1),
+                        findVisibleSeat(seat, 0, -1),
+                        findVisibleSeat(seat, 1, -1),
+                        findVisibleSeat(seat, -1, 0),
+                        findVisibleSeat(seat, 1, 0),
+                        findVisibleSeat(seat, -1, 1),
+                        findVisibleSeat(seat, 0, 1),
+                        findVisibleSeat(seat, 1, 1),
+                    ].filter(neighbour => neighbour !== undefined);
                 });
 
             let previousState = '';
@@ -33,7 +63,7 @@
 
                         if (seat.value === 'L' && occupied === 0) {
                             seat.newValue = '#';
-                        } else if (seat.value === '#' && occupied >= 4) {
+                        } else if (seat.value === '#' && occupied >= 5) {
                             seat.newValue = 'L';
                         } else {
                             seat.newValue = seat.value;
