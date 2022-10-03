@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerTap();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const grid = new Array2d(await fileReader.parse());
+
+            let previousState = '';
+            while (true) {
+                const state = grid
+                    .filter2d(location => location.value === 'L' || location.value === '#')
+                    .tap(seat => {
+                        const occupied = seat.getSurroundingItems()
+                            .filter(neighbour => neighbour?.value === '#')
+                            .length;
+
+                        if (seat.value === 'L' && occupied === 0) {
+                            seat.newValue = '#';
+                        } else if (seat.value === '#' && occupied >= 4) {
+                            seat.newValue = 'L';
+                        } else {
+                            seat.newValue = seat.value;
+                        }
+                    })
+                    .map(seat => seat.value = seat.newValue)
+                    .join('');
+
+                if (state === previousState) {
+                    break;
+                }
+
+                previousState = state;
+            }
+
+            document.querySelector('.answer').innerText = grid
+                .filter2d(location => location.value === '#')
+                .length;
+        </script>
+    </body>
+</html>
