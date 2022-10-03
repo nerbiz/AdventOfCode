@@ -17,13 +17,14 @@
             ArrayPrototype.registerTap();
             const fileReader = new FileReader('./data.txt', new Parser());
             const grid = new Array2d(await fileReader.parse());
+            const seats = grid.filter2d(location => location.value === 'L' || location.value === '#')
+                .tap(seat => seat.surrounding = seat.getSurroundingItems());
 
             let previousState = '';
             while (true) {
-                const state = grid
-                    .filter2d(location => location.value === 'L' || location.value === '#')
+                const state = seats
                     .tap(seat => {
-                        const occupied = seat.getSurroundingItems()
+                        const occupied = seat.surrounding
                             .filter(neighbour => neighbour?.value === '#')
                             .length;
 
