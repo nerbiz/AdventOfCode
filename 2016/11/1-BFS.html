@@ -86,8 +86,9 @@
                 const steps = queue.shift();
                 const states = [];
                 let currentFloor = 0;
-                for (const [move, ...indexes] of steps) {
-                    for (const index of indexes) {
+                for (const step of steps) {
+                    const move = step[0];
+                    for (const index of step.slice(1)) {
                         items[index].floor += move;
                     }
                     currentFloor += move;
@@ -106,7 +107,10 @@
 
                 if (succeeded) {
                     // Set the minimum floor, for not going back down to empty floors
-                    const minimumFloor = Math.min(...items.map(item => item.floor));
+                    let minimumFloor = Infinity;
+                    for (const item of items) {
+                        minimumFloor = Math.min(minimumFloor, item.floor);
+                    }
 
                     // See if all items are on the top floor
                     if (minimumFloor === 3) {
@@ -128,20 +132,19 @@
 
                             // Try to move 2 items
                             for (let j = i + 1; j < floorItems.length; j++) {
-                                const item2 = floorItems[j];
-                                queue.push([...steps, [move, item1.index, item2.index]]);
+                                queue.push(steps.concat([[move, item1.index, floorItems[j].index]]));
                             }
 
                             // If moving 2 items failed, try to move 1 item
-                            queue.push([...steps, [move, item1.index]]);
+                            queue.push(steps.concat([[move, item1.index]]));
                         }
                     }
                 }
 
                 // Revert all the steps
                 for (let i = steps.length - 1; i > 0; i--) {
-                    const [move, ...indexes] = steps[i];
-                    for (const index of indexes) {
+                    const move = steps[i][0];
+                    for (const index of steps[i].slice(1)) {
                         items[index].floor += move * -1;
                     }
                 }
