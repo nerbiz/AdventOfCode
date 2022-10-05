@@ -11,61 +11,40 @@
         <script type="module">
             import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
-            import Array2d from '../../classes/Array2d.js';
 
             const fileReader = new FileReader('./datatest.txt', new Parser());
-            // Get a list of items with unique x values and y value stored in it
             const items = (await fileReader.parse())
-                .map((floor, index) => floor.map(item => [index, item]))
-                .flat();
+                .flatMap((contents, floor) => contents.map(item => {
+                    const [element, type] = item.split(' ');
+                    return {floor, element, type};
+                }));
 
             console.time('Time elapsed');
 
-            // Create the building object with locations linked to other floors
-            const building = new Array2d(4, items.length)
-                .tap2d((location, x, y, building) => location.floors = {
-                    '-1': building.getItem(x, y - 1),
-                    '1': building.getItem(x, y + 1),
-                });
-
-            // Set the item values in the building
-            items.forEach((item, x) => {
-                const location = building.getItem(x, item[0]);
-                const [element, type] = item[1].split(' ');
-                location.value = {element, type};
-            });
-
             /**
-             * Check if any microchips are fried
-             * @param {number} minimumFloor
+             * Check if any microchip is fried
              * @return {boolean}
              */
-            const microchipFried = minimumFloor => {
-                for (let i = minimumFloor; i < building.length; i++) {
-                    const floor = building[i];
-                    const generators = [];
-                    const microchips = [];
-                    for (const location of floor) {
-                        if (location.value === undefined) {
-                            continue;
-                        }
+            const microchipFried = () => {
+                // Sort items by type and element
+                const itemsSorted = items.slice(0).sort((a, b) => (a.type === b.type)
+                    ? (a.element < b.element ? -1 : 1)
+                    : (a.type < b.type ? -1 : 1)
+                );
 
-                        (location.value.type === 'generator')
-                            ? generators.push(location)
-                            : microchips.push(location);
-                    }
+                // First half is generators, second half is microchips
+                const generators = itemsSorted.slice(0, itemsSorted.length / 2);
+                const microchips = itemsSorted.slice(itemsSorted.length / 2);
 
-                    // The floor is safe if there are no generators
-                    if (generators.length === 0) {
+                for (let i = 0; i < microchips.length; i++) {
+                    // See if the chip is protected by its corresponding generator
+                    if (generators[i].floor === microchips[i].floor) {
                         continue;
                     }
 
-                    for (const microchip of microchips) {
-                        const generator = generators
-                            .find(generator => generator.value.element === microchip.value.element);
-
-                        // The chip is fried if there is no matching generator
-                        if (generator === undefined) {
+                    // If not, the chip is fried if there is a different generator
+                    for (const generator of generators) {
+                        if (generator.floor === microchips[i].floor) {
                             return true;
                         }
                     }
@@ -75,32 +54,16 @@
             };
 
             /**
-             * Get a string representing the current building state
+             * Get a string representing the current items state
              * @return {string}
              */
             const getStateString = () => {
                 let string = '';
-
-                for (const floor of building) {
-                    for (const location of floor) {
-                        if (location.value !== undefined) {
-                            string += location.x + ',' + location.y;
-                        }
-                    }
+                for (let x = 0; x < items.length; x++) {
+                    string += x + ',' + items[x].floor;
                 }
 
                 return string;
-            };
-
-            /**
-             * Move an item (value) to another location
-             * @param {Array2dItem} location1
-             * @param {Array2dItem} location2
-             * @returns {void}
-             */
-            const moveItem = (location1, location2) => {
-                location2.value = location1.value;
-                location1.value = undefined;
             };
 
             let fewestSteps = Infinity;
@@ -117,15 +80,7 @@
                 }
 
                 // Set the minimum floor, for not going back down to empty floors
-                let minimumFloor;
-                for (minimumFloor = 0; minimumFloor < building.length; minimumFloor++) {
-                    if (building[minimumFloor]
-                        .filter(location => location.value !== undefined)
-                        .length > 0
-                    ) {
-                        break;
-                    }
-                }
+                const minimumFloor = Math.min(...items.map(item => item.floor));
 
                 // See if all items are on the top floor
                 if (minimumFloor === 3) {
@@ -145,35 +100,34 @@
                 states.push(state);
 
                 // Check if any microchips are fried
-                if (microchipFried(minimumFloor) === true) {
+                if (microchipFried()) {
                     return;
                 }
 
-                const floorItems = building[floor].filter(location => location.value !== undefined);
+                const floorItems = items.filter(item => item.floor === floor);
 
                 for (const move of [-1, 1]) {
                     const nextFloor = floor + move;
-                    if (nextFloor < minimumFloor || building[nextFloor] === undefined) {
+                    if (nextFloor < minimumFloor || nextFloor < 0 || nextFloor > 3) {
                         continue;
                     }
 
                     for (let i = 0; i < floorItems.length; i++) {
                         const item1 = floorItems[i];
-                        const nextLocation1 = item1.floors[move];
-                        moveItem(item1, nextLocation1);
+                        item1.floor += move;
 
                         // Try to move 2 items
                         for (const item2 of floorItems.slice(i + 1)) {
-                            // Try the possibility, then revert the item location
-                            const nextLocation2 = item2.floors[move];
-                            moveItem(item2, nextLocation2);
+                            item2.floor += move;
                             findFewestSteps(nextFloor, steps, states.slice(0));
-                            moveItem(nextLocation2, item2);
+                            // Revert to previous floor after trying
+                            item2.floor += move * -1;
                         }
 
                         // If moving 2 items failed, try to move 1 item
                         findFewestSteps(nextFloor, steps, states.slice(0));
-                        moveItem(nextLocation1, item1);
+                        // Revert to previous floor after trying
+                        item1.floor += move * -1;
                     }
                 }
             };
