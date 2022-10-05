@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./datatest.txt', new Parser());
+            // Get a list of items with unique x values and y value stored in it
+            const items = (await fileReader.parse())
+                .map((floor, index) => floor.map(item => [index, item]))
+                .flat();
+
+            console.time('Time elapsed');
+
+            // Create the building object with locations linked to other floors
+            const building = new Array2d(4, items.length)
+                .tap2d((location, x, y, building) => location.floors = {
+                    '-1': building.getItem(x, y - 1),
+                    '1': building.getItem(x, y + 1),
+                });
+
+            // Set the item values in the building
+            items.forEach((item, x) => {
+                const location = building.getItem(x, item[0]);
+                const [element, type] = item[1].split(' ');
+                location.value = {element, type};
+            });
+
+            /**
+             * Check if any microchips are fried
+             * @param {number} minimumFloor
+             * @return {boolean}
+             */
+            const microchipFried = minimumFloor => {
+                for (let i = minimumFloor; i < building.length; i++) {
+                    const floor = building[i];
+                    const generators = [];
+                    const microchips = [];
+                    for (const location of floor) {
+                        if (location.value === undefined) {
+                            continue;
+                        }
+
+                        (location.value.type === 'generator')
+                            ? generators.push(location)
+                            : microchips.push(location);
+                    }
+
+                    // The floor is safe if there are no generators
+                    if (generators.length === 0) {
+                        continue;
+                    }
+
+                    for (const microchip of microchips) {
+                        const generator = generators
+                            .find(generator => generator.value.element === microchip.value.element);
+
+                        // The chip is fried if there is no matching generator
+                        if (generator === undefined) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            };
+
+            /**
+             * Get a string representing the current building state
+             * @return {string}
+             */
+            const getStateString = () => {
+                let string = '';
+
+                for (const floor of building) {
+                    for (const location of floor) {
+                        if (location.value !== undefined) {
+                            string += location.x + ',' + location.y;
+                        }
+                    }
+                }
+
+                return string;
+            };
+
+            /**
+             * Move an item (value) to another location
+             * @param {Array2dItem} location1
+             * @param {Array2dItem} location2
+             * @returns {void}
+             */
+            const moveItem = (location1, location2) => {
+                location2.value = location1.value;
+                location1.value = undefined;
+            };
+
+            let fewestSteps = Infinity;
+            let loopCount = 0;
+
+            const findFewestSteps = (floor = 0, steps = -1, states = []) => {
+                if (++loopCount === 1e6) {
+                    throw new Error('Too much recursion');
+                }
+
+                // Stop if the amount of steps is already larger than the fewest
+                if (++steps >= fewestSteps) {
+                    return;
+                }
+
+                // Set the minimum floor, for not going back down to empty floors
+                let minimumFloor;
+                for (minimumFloor = 0; minimumFloor < building.length; minimumFloor++) {
+                    if (building[minimumFloor]
+                        .filter(location => location.value !== undefined)
+                        .length > 0
+                    ) {
+                        break;
+                    }
+                }
+
+                // See if all items are on the top floor
+                if (minimumFloor === 3) {
+                    if (steps < fewestSteps) {
+                        fewestSteps = steps;
+                        console.log({fewestSteps});
+                    }
+
+                    return;
+                }
+
+                // Don't repeat a previous state
+                const state = getStateString();
+                if (states.includes(state)) {
+                    return;
+                }
+                states.push(state);
+
+                // Check if any microchips are fried
+                if (microchipFried(minimumFloor) === true) {
+                    return;
+                }
+
+                const floorItems = building[floor].filter(location => location.value !== undefined);
+
+                for (const move of [-1, 1]) {
+                    const nextFloor = floor + move;
+                    if (nextFloor < minimumFloor || building[nextFloor] === undefined) {
+                        continue;
+                    }
+
+                    for (let i = 0; i < floorItems.length; i++) {
+                        const item1 = floorItems[i];
+                        const nextLocation1 = item1.floors[move];
+                        moveItem(item1, nextLocation1);
+
+                        // Try to move 2 items
+                        for (const item2 of floorItems.slice(i + 1)) {
+                            // Try the possibility, then revert the item location
+                            const nextLocation2 = item2.floors[move];
+                            moveItem(item2, nextLocation2);
+                            findFewestSteps(nextFloor, steps, states.slice(0));
+                            moveItem(nextLocation2, item2);
+                        }
+
+                        // If moving 2 items failed, try to move 1 item
+                        findFewestSteps(nextFloor, steps, states.slice(0));
+                        moveItem(nextLocation1, item1);
+                    }
+                }
+            };
+
+            findFewestSteps();
+
+            console.log({loopCount});
+
+            document.querySelector('.answer').innerText = fewestSteps;
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>

@@ -10,7 +10,7 @@
 
         <script type="module">
             import FileReader from '../../classes/FileReader.js';
-            import Parser from './Parser.js';
+            import Parser from './Parser-old.js';
 
             const fileReader = new FileReader('./datatest.txt', new Parser());
             const floors = await fileReader.parse();
@@ -25,7 +25,7 @@
             console.log(items.map(item => item.element + '-' + item.type));
             throw new Error('Done'); */
 
-            const startTime = new Date().getTime();
+            console.time('Time elapsed');
 
             /* const visualizeFloors = floors => floors.map(floor =>
                 floor.map(item => item.element + '-' + item.type.at(0).toUpperCase())
@@ -126,7 +126,7 @@
 
             traverseFloors(floors);
 
-            console.log('Done in ms:', new Date().getTime() - startTime);
+            console.timeEnd('Time elapsed');
 
             document.querySelector('.answer').innerText = fewestSteps;
         </script>
