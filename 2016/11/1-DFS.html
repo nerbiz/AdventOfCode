@@ -68,6 +68,8 @@
 
             let fewestSteps = Infinity;
             let loopCount = 0;
+            const succeededStates = new Set();
+            const failedStates = new Set();
 
             const findFewestSteps = (floor = 0, steps = -1, states = []) => {
                 if (++loopCount === 1e6) {
@@ -78,6 +80,18 @@
                 if (++steps >= fewestSteps) {
                     return;
                 }
+
+                // Don't check an already known failed state
+                const state = getStateString();
+                if (failedStates.has(state)) {
+                    return;
+                }
+
+                // Don't repeat a previous state
+                if (states.includes(state)) {
+                    return;
+                }
+                states.push(state);
 
                 // Set the minimum floor, for not going back down to empty floors
                 const minimumFloor = Math.min(...items.map(item => item.floor));
@@ -92,18 +106,13 @@
                     return;
                 }
 
-                // Don't repeat a previous state
-                const state = getStateString();
-                if (states.includes(state)) {
-                    return;
-                }
-                states.push(state);
-
                 // Check if any microchips are fried
-                if (microchipFried()) {
+                if (! succeededStates.has(state) && microchipFried()) {
+                    failedStates.add(state);
                     return;
                 }
 
+                succeededStates.add(state);
                 const floorItems = items.filter(item => item.floor === floor);
 
                 for (const move of [-1, 1]) {
