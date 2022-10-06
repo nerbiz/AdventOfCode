@@ -17,7 +17,16 @@
                 .flatMap((contents, floor) => contents.map(item => {
                     const [element, type] = item.split(' ');
                     return {floor, element, type};
-                }));
+                }))
+                // Sort items by type and element
+                .sort((a, b) => (a.type === b.type)
+                    ? (a.element < b.element ? -1 : 1)
+                    : (a.type < b.type ? 1 : -1)
+                );
+
+            // First half is generators, second half is microchips
+            const microchips = items.slice(0, items.length / 2);
+            const generators = items.slice(items.length / 2);
 
             console.time('Time elapsed');
 
@@ -26,16 +35,6 @@
              * @return {boolean}
              */
             const microchipFried = () => {
-                // Sort items by type and element
-                const itemsSorted = items.slice(0).sort((a, b) => (a.type === b.type)
-                    ? (a.element < b.element ? -1 : 1)
-                    : (a.type < b.type ? -1 : 1)
-                );
-
-                // First half is generators, second half is microchips
-                const generators = itemsSorted.slice(0, itemsSorted.length / 2);
-                const microchips = itemsSorted.slice(itemsSorted.length / 2);
-
                 for (let i = 0; i < microchips.length; i++) {
                     // See if the chip is protected by its corresponding generator
                     if (generators[i].floor === microchips[i].floor) {
@@ -54,16 +53,19 @@
             };
 
             /**
-             * Get a string representing the current items state
-             * @return {string}
+             * Get a number representing the current items state
+             * Example: 1032, if 4 items are on floors 1, 0, 2 and 3
+             * Example: 2, if 4 items are on floors 0, 0, 0 and 2
+             * @return {number}
              */
-            const getStateString = () => {
-                let string = '';
-                for (let x = 0; x < items.length; x++) {
-                    string += x + ',' + items[x].floor;
+            const getCurrentState = () => {
+                let state = 0;
+                for (let i = 0; i < items.length; i++) {
+                    // Place digits in order by multiplying by powers of 10
+                    state += items[i].floor * (10 ** (items.length - i - 1));
                 }
 
-                return string;
+                return state;
             };
 
             let fewestSteps = Infinity;
@@ -82,7 +84,7 @@
                 }
 
                 // Don't check an already known failed state
-                const state = getStateString();
+                const state = getCurrentState();
                 if (failedStates.has(state)) {
                     return;
                 }
@@ -94,7 +96,15 @@
                 states.push(state);
 
                 // Set the minimum floor, for not going back down to empty floors
-                const minimumFloor = Math.min(...items.map(item => item.floor));
+                let minimumFloor = Infinity;
+                const floorItems = [];
+                for (const item of items) {
+                    minimumFloor = Math.min(minimumFloor, item.floor);
+
+                    if (item.floor === floor) {
+                        floorItems.push(item);
+                    }
+                }
 
                 // See if all items are on the top floor
                 if (minimumFloor === 3) {
@@ -113,7 +123,6 @@
                 }
 
                 succeededStates.add(state);
-                const floorItems = items.filter(item => item.floor === floor);
 
                 for (const move of [-1, 1]) {
                     const nextFloor = floor + move;
