@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const itemObjects = (await fileReader.parse())
+                .flatMap((contents, floor) => contents.map(item => {
+                    const [element, type] = item.split(' ');
+                    return {floor, element, type};
+                }))
+                // Sort items by type and element
+                .sort((a, b) => (a.type === b.type)
+                    ? (a.element < b.element ? -1 : 1)
+                    : (a.type < b.type ? 1 : -1)
+                );
+
+            console.time('Time elapsed');
+
+            const itemsAmount = itemObjects.length;
+
+            // Make multipliers for the item locations
+            // Example: increase first digit of 2222 with 1000
+            const multipliers = [];
+            for (let i = 0; i < itemsAmount; i++) {
+                multipliers[i] = 10 ** (itemObjects.length - i - 1);
+            }
+
+            // The goal is when all items are at the 4th floor
+            const goal = (3).toString(10).repeat(itemsAmount) - 0;
+
+            // Convert the building state to a number
+            // Example: 1032, if 4 items are on floors 1, 0, 2 and 3
+            // Example:    2, if 4 items are on floors 0, 0, 0 and 2
+            let items = 0;
+            for (let i = 0; i < itemObjects.length; i++) {
+                // Place digits in order by multiplying by powers of 10
+                items += itemObjects[i].floor * multipliers[i];
+            }
+
+            /**
+             * Check if any microchip is fried
+             * @param {string} itemsString
+             * @param {string} indexes
+             * @returns {boolean}
+             */
+            const microchipFried = (itemsString, indexes) => {
+                const half = itemsString.length / 2;
+
+                for (let i = 0; i < indexes.length; i++) {
+                    // Only check the microchips
+                    if (indexes[i] >= half) {
+                        continue;
+                    }
+
+                    // Chip and generator index difference is half the items amount
+                    // If that index exists, the chip is safe
+                    if (indexes.includes((indexes[i] - 0) + half)) {
+                        continue;
+                    }
+
+                    // If not, the chip is fried if there are generators
+                    for (let j = i + 1; j < indexes.length; j++) {
+                        if (indexes[j] >= half) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            };
+
+            const queue = [[[0, items]]];
+            let fewestSteps = Infinity;
+            let loopCount = 0;
+
+            mainLoop: do {
+                if (++loopCount === 1e4) {
+                    console.error('Too many loops');
+                    break;
+                }
+
+                const path = queue.shift();
+                const [currentFloor, items] = path.at(-1);
+
+                // See if all items are on the top floor
+                if (items === goal) {
+                    fewestSteps = path.length - 1;
+                    console.log({fewestSteps});
+                    break;
+                }
+
+                // Don't repeat a previous state
+                for (let i = 0; i < path.length - 1; i++) {
+                    if (path[i][1] === items) {
+                        continue mainLoop;
+                    }
+                }
+
+                const itemsString = items.toString(10).padStart(itemsAmount, '0');
+
+                // Set the minimum floor, for not going back down to empty floors
+                // And get the items that are on the current floor
+                let minimumFloor = Infinity;
+                let floorItemIndexes = '';
+                for (let i = 0; i < itemsString.length; i++) {
+                    minimumFloor = Math.min(minimumFloor, (itemsString[i] - 0));
+
+                    if (itemsString[i] - 0 === currentFloor) {
+                        floorItemIndexes += i;
+                    }
+                }
+
+                // Check if any microchip is fried
+                if (microchipFried(itemsString, floorItemIndexes)) {
+                    continue;
+                }
+
+                for (const move of [-1, 1]) {
+                    const nextFloor = currentFloor + move;
+                    if (nextFloor < minimumFloor || nextFloor > 3) {
+                        continue;
+                    }
+
+                    for (let i = 0; i < floorItemIndexes.length; i++) {
+                        const oneItem = items + (multipliers[floorItemIndexes[i]] * move);
+
+                        // Try to move 2 items
+                        for (let j = i + 1; j < floorItemIndexes.length; j++) {
+                            const twoItems = oneItem + (multipliers[floorItemIndexes[j]] * move);
+                            queue.push(path.concat([[nextFloor, twoItems]]));
+                        }
+
+                        // If moving 2 items failed, try to move 1 item
+                        queue.push(path.concat([[nextFloor, oneItem]]));
+                    }
+                }
+            } while (queue.length > 0);
+
+            console.log({loopCount});
+
+            document.querySelector('.answer').innerText = fewestSteps;
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
