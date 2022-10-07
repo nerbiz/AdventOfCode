@@ -85,13 +85,23 @@
             const succeededStates = new Set();
             const failedStates = new Set();
 
-            const findFewestSteps = (items, floor = 0, steps = -1, path = []) => {
+            const findFewestSteps = (items, floor = 0, path = []) => {
                 if (++loopCount === 1e6) {
                     throw new Error('Too much recursion');
                 }
 
+                // See if all items are on the top floor
+                if (items === goal) {
+                    if (path.length < fewestSteps) {
+                        fewestSteps = path.length;
+                        console.log({fewestSteps});
+                    }
+
+                    return;
+                }
+
                 // Stop if the amount of steps is already larger than the fewest
-                if (++steps >= fewestSteps) {
+                if (path.length >= fewestSteps) {
                     skipped++;
                     return;
                 }
@@ -103,6 +113,7 @@
                 }
 
                 // Don't repeat a previous state
+                // (Copy the path to avoid same-reference)
                 path = path.slice(0);
                 if (path.includes(items)) {
                     skipped++;
@@ -122,16 +133,6 @@
                     if (itemsString[i] - 0 === floor) {
                         floorItemIndexes += i;
                     }
-                }
-
-                // See if all items are on the top floor
-                if (items === goal) {
-                    if (steps < fewestSteps) {
-                        fewestSteps = steps;
-                        console.log({fewestSteps});
-                    }
-
-                    return;
                 }
 
                 // Check if any microchips are fried
@@ -158,11 +159,11 @@
                         // Try to move 2 items
                         for (let j = i + 1; j < floorItemIndexes.length; j++) {
                             const twoItems = oneItem + (multipliers[floorItemIndexes[j]] * move);
-                            findFewestSteps(twoItems, nextFloor, steps, path);
+                            findFewestSteps(twoItems, nextFloor, path);
                         }
 
                         // If moving 2 items failed, try to move 1 item
-                        findFewestSteps(oneItem, nextFloor, steps, path);
+                        findFewestSteps(oneItem, nextFloor, path);
                     }
                 }
             };

@@ -74,14 +74,29 @@
             const succeededStates = new Set();
             const failedStates = new Set();
 
-            const findFewestSteps = (floor = 0, steps = -1, states = []) => {
+            const findFewestSteps = (floor = 0, states = []) => {
                 if (++loopCount === 1e6) {
                     throw new Error('Too much recursion');
                 }
 
-                // Stop if the amount of steps is already larger than the fewest
-                if (++steps >= fewestSteps) {
-                    skipped++;
+                // Set the minimum floor, for not going back down to empty floors
+                let minimumFloor = Infinity;
+                const floorItems = [];
+                for (const item of items) {
+                    minimumFloor = Math.min(minimumFloor, item.floor);
+
+                    if (item.floor === floor) {
+                        floorItems.push(item);
+                    }
+                }
+
+                // See if all items are on the top floor
+                if (minimumFloor === 3) {
+                    if (states.length < fewestSteps) {
+                        fewestSteps = states.length;
+                        console.log({fewestSteps});
+                    }
+
                     return;
                 }
 
@@ -99,24 +114,9 @@
                 }
                 states.push(state);
 
-                // Set the minimum floor, for not going back down to empty floors
-                let minimumFloor = Infinity;
-                const floorItems = [];
-                for (const item of items) {
-                    minimumFloor = Math.min(minimumFloor, item.floor);
-
-                    if (item.floor === floor) {
-                        floorItems.push(item);
-                    }
-                }
-
-                // See if all items are on the top floor
-                if (minimumFloor === 3) {
-                    if (steps < fewestSteps) {
-                        fewestSteps = steps;
-                        console.log({fewestSteps});
-                    }
-
+                // Stop if the amount of steps is already larger than the fewest
+                if (states.length >= fewestSteps) {
+                    skipped++;
                     return;
                 }
 
@@ -142,13 +142,13 @@
                         // Try to move 2 items
                         for (const item2 of floorItems.slice(i + 1)) {
                             item2.floor += move;
-                            findFewestSteps(nextFloor, steps, states.slice(0));
+                            findFewestSteps(nextFloor, states.slice(0));
                             // Revert to previous floor after trying
                             item2.floor += move * -1;
                         }
 
                         // If moving 2 items failed, try to move 1 item
-                        findFewestSteps(nextFloor, steps, states.slice(0));
+                        findFewestSteps(nextFloor, states.slice(0));
                         // Revert to previous floor after trying
                         item1.floor += move * -1;
                     }
