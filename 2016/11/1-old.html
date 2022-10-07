@@ -52,7 +52,12 @@
             const initialFloorStates = floors.filter(floor => floor.length > 0)
                 .map((floor, index) => floorStateString(index, floor));
 
+            let loopCount = 0;
             const traverseFloors = (floors, floorIndex = 0, steps = 0, floorStates = initialFloorStates) => {
+                if (++loopCount === 1e6) {
+                    throw new Error('Too much recursion');
+                }
+
                 // Stop if the amount of steps is already higher than the current lowest
                 if (steps >= fewestSteps) {
                     // console.log('Too many steps, stop here');
@@ -125,6 +130,8 @@
             };
 
             traverseFloors(floors);
+
+            console.log({loopCount});
 
             console.timeEnd('Time elapsed');
 
