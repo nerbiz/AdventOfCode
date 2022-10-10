@@ -13,15 +13,14 @@
             import Parser from './Parser.js';
 
             const fileReader = new FileReader('./data.txt', new Parser());
-            let {timestamp, busIds} = await fileReader.parse();
+            const {timestamp, busIds} = await fileReader.parse();
 
-            const earliest = busIds
+            document.querySelector('.answer').innerText = busIds
                 .filter(id => id !== 'x')
                 .map(id => [id, id - (timestamp % id)])
                 .sort((a, b) => a[1] - b[1])
-                .at(0);
-
-            document.querySelector('.answer').innerText = earliest[0] * earliest[1];
+                .at(0)
+                .reduce((total, number) => total * number, 1);
         </script>
     </body>
 </html>
