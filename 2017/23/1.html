@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const instructions = await fileReader.parse();
+            const registers = {a: 0, b: 0, c: 0, d: 0, e: 0, f: 0, g: 0, h: 0};
+            let mulInvoked = 0;
+
+            const getValue = value => (value in registers) ? registers[value] : value;
+
+            const functions = {
+                set: (register, value) => { registers[register] = getValue(value); },
+                sub: (register, value) => { registers[register] -= getValue(value); },
+                mul: (register, value) => { registers[register] *= getValue(value); mulInvoked++; },
+                jnz: (value, amount) => { if (getValue(value) !== 0) return getValue(amount); },
+            };
+
+            let index = 0;
+            while (index < instructions.length) {
+                const instruction = instructions[index];
+                const result = functions[instruction[0]](...instruction.slice(1));
+
+                index += (result !== undefined) ? result : 1;
+            }
+
+            document.querySelector('.answer').innerText = mulInvoked;
+        </script>
+    </body>
+</html>

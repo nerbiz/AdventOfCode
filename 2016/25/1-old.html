@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const instructions = await fileReader.parse();
+            const registers = {a: 0, b: 0, c: 0, d: 0};
+            let initialNumber = -1;
+
+            const getValue = value => Number.isInteger(value)
+                ? value
+                : registers[value];
+
+            const operations = {
+                cpy: (from, to) => { registers[to] = getValue(from); },
+                inc: register => { registers[register]++; },
+                dec: register => { registers[register]--; },
+                jnz: (value, amount) => { if (getValue(value) !== 0) return amount; },
+                out: () => { return 1 },
+            };
+
+            increaseNumber: while (true) {
+                initialNumber++;
+                registers['a'] = initialNumber;
+                let index = 0;
+                let sequence = [];
+
+                // Skip the last instruction, causing an infinite loop
+                while (index < instructions.length - 1) {
+                    const instruction = instructions[index];
+                    const result = operations[instruction[0]](...instruction.slice(1));
+
+                    if (instruction[0] === 'out') {
+                        sequence.push(registers['b']);
+
+                        // Check the next initial number, if the sequence isn't alternating
+                        if (sequence.at(-1) === sequence.at(-2)) {
+                            continue increaseNumber;
+                        }
+                    }
+
+                    index += Number.isInteger(result) ? result : 1;
+                }
+
+                break;
+            }
+
+            document.querySelector('.answer').innerText = initialNumber;
+        </script>
+    </body>
+</html>

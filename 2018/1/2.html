@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const changes = await fileReader.parse();
+            const frequencies = {};
+            let frequency = 0;
+            let duplicateFrequency;
+
+            let index = -1;
+            while (++index >= 0) {
+                frequency += changes[index % changes.length];
+
+                if (frequencies[frequency] === true) {
+                    duplicateFrequency = frequency;
+                    break;
+                }
+
+                frequencies[frequency] = true;
+            }
+
+            document.querySelector('.answer').innerText = duplicateFrequency;
+        </script>
+    </body>
+</html>

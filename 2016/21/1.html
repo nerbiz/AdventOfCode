@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {password, operations} = await fileReader.parse();
+            password = password.split('');
+
+            const functions = {
+                swap: (variant, arg1, arg2) => {
+                    if (variant === 'position') {
+                        const letterOne = password[arg1];
+                        password[arg1] = password[arg2];
+                        password[arg2] = letterOne;
+                    } else {
+                        password = password.join('')
+                            // Use uppercase, to limit the next replacement
+                            .replaceAll(arg1, arg2.toUpperCase())
+                            .replaceAll(arg2, arg1)
+                            .toLowerCase()
+                            .split('');
+                    }
+                },
+                rotate: (variant, arg1) => {
+                    // Wrap around, if the amount is larger than the password
+                    if (Number.isInteger(arg1)) {
+                        arg1 = arg1 % password.length;
+                    }
+
+                    if (variant === 'left') {
+                        password = password.slice(arg1)
+                            .concat(password.slice(0, arg1));
+                    } else if (variant === 'right') {
+                        password = password.slice(password.length - arg1)
+                            .concat(password.slice(0, (password.length - arg1)));
+                    } else if (variant === 'based') {
+                        let amount = password.indexOf(arg1);
+                        amount += 1 + ((amount >= 4) ? 1 : 0);
+                        functions.rotate('right', amount);
+                    }
+                },
+                reverse: (startIndex, endIndex) => {
+                    password = password.slice(0, startIndex)
+                        .concat(password.slice(startIndex, endIndex + 1).reverse())
+                        .concat(password.slice(endIndex + 1));
+                },
+                move: (fromIndex, toIndex) => {
+                    password.splice(toIndex, 0, password.splice(fromIndex, 1)[0]);
+                },
+            };
+
+            // Perform operations on the password
+            operations.forEach(operation => {
+                functions[operation[0]](...operation.slice(1));
+            });
+
+            document.querySelector('.answer').innerText = password.join('');
+        </script>
+    </body>
+</html>

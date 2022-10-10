@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const binaryStrings = await fileReader.parse();
+
+            const binaryStringLength = binaryStrings[0].length;
+            let zeroes, ones;
+            // Clone the data array (keep the original)
+            let remainingArray = binaryStrings.map(item => item);
+            let stringIndex = -1;
+
+            while (++stringIndex < binaryStringLength && remainingArray.length > 1) {
+                zeroes = remainingArray.filter(binaryString => binaryString.charAt(stringIndex) === '0');
+                ones = remainingArray.filter(binaryString => binaryString.charAt(stringIndex) === '1');
+
+                // Decide which part of the array to keep
+                if (ones.length > zeroes.length || ones.length === zeroes.length) {
+                    remainingArray = ones;
+                } else {
+                    remainingArray = zeroes;
+                }
+            }
+
+            const oxygenGeneratorRating = remainingArray[0];
+
+
+
+            remainingArray = binaryStrings.map(item => item);
+            stringIndex = -1;
+
+            while (++stringIndex < binaryStringLength && remainingArray.length > 1) {
+                zeroes = remainingArray.filter(binaryString => binaryString.charAt(stringIndex) === '0');
+                ones = remainingArray.filter(binaryString => binaryString.charAt(stringIndex) === '1');
+
+                // Decide which part of the array to keep
+                if (zeroes.length < ones.length || zeroes.length === ones.length) {
+                    remainingArray = zeroes;
+                } else {
+                    remainingArray = ones;
+                }
+            }
+
+            const co2ScrubberRating = remainingArray[0];
+
+            document.querySelector('.answer').innerText = parseInt(oxygenGeneratorRating, 2) * parseInt(co2ScrubberRating, 2);
+        </script>
+    </body>
+</html>

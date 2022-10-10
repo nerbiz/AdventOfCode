@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+            import Array2d from '../../classes/Array2d.js';
+            import Pathfinding from '../../classes/Pathfinding.js';
+
+            ArrayPrototype.registerTake();
+            ArrayPrototype.registerTap();
+            const fileReader = new FileReader('./data.txt', new Parser(), false);
+            const maze = new Array2d(await fileReader.parse());
+            const letterRegExp = /[A-Z]/;
+            const unreachableNode = maze.getItem(0, 0);
+            const isObstacle = node => node.value === '#' || letterRegExp.test(node.value);
+
+            const portalNodes = maze
+                // Find nodes with a letter in them
+                .filter2d(node => letterRegExp.test(node.value))
+                // Make [X, X, .] triplets of the portals
+                .map(node => {
+                    const {up, right, down, left} = node.getAdjacentItems(true);
+                    const adjacent = [up, right, down, left];
+
+                    for (let i = 0; i < adjacent.length; i++) {
+                        // See if the node is in the middle of an [X, X, .] triple
+                        if (adjacent[i] !== undefined && adjacent[i].value === '.') {
+                            const oppositeIndex = (4 + i + 2) % 4;
+                            return [adjacent[oppositeIndex], node, adjacent[i]]
+                                // Sort the nodes by X or Y (reading order)
+                                .sort((a, b) => (a.x === b.x)
+                                    ? a.y - b.y
+                                    : a.x - b.x);
+                        }
+                    }
+                })
+                .filter(nodes => nodes !== undefined)
+                // Give the portal name to each portal node
+                .map(nodes => {
+                    const portalNode = nodes.take(node => node.value === '.')[0];
+                    portalNode.portalName = nodes.map(node => node.value).join('');
+                    return portalNode;
+                })
+                // Link portal nodes to each other
+                .tap((node, index, nodes) => {
+                    const otherNode = nodes.find(otherNode =>
+                        otherNode !== node
+                        && otherNode.portalName === node.portalName
+                    );
+
+                    if (otherNode !== undefined) {
+                        node.portalTo = otherNode;
+                        otherNode.portalTo = node;
+                    }
+                })
+                // Set all reachable portals in each portal node
+                .tap(node => {
+                    // Force complete traversing, by setting an unreachable node
+                    Pathfinding.aStar(maze, node, unreachableNode, isObstacle);
+
+                    node.reachablePortals = maze
+                        .filter2d(node =>
+                            node.portalName !== undefined
+                            && node.G > 0
+                        )
+                        .map(node => ({node, steps: node.G}));
+
+                    if (node.portalTo !== undefined) {
+                        node.reachablePortals.push({
+                            node: node.portalTo,
+                            steps: 1,
+                        });
+                    }
+                });
+
+            const startNode = portalNodes.find(node => node.portalName === 'AA');
+            const targetNode = portalNodes.find(node => node.portalName === 'ZZ');
+            let fewestSteps = Infinity;
+
+            (function findTarget(fromNode, steps = 0, visited = []) {
+                // Stop if the amount of steps is already larger than the fewest
+                if (steps >= fewestSteps) {
+                    return;
+                }
+
+                // Stop if the target node is found
+                if (fromNode === targetNode) {
+                    fewestSteps = steps;
+                    return;
+                }
+
+                // Mark the node as visited, to prevent infinite loops
+                visited = visited.slice(0).concat(fromNode);
+
+                // Move to other reachable portals
+                for (const next of fromNode.reachablePortals) {
+                    if (visited.includes(next.node)) {
+                        continue;
+                    }
+
+                    findTarget(next.node, steps + next.steps, visited);
+                }
+            })(startNode);
+
+            document.querySelector('.answer').innerText = fewestSteps;
+        </script>
+    </body>
+</html>

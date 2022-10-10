@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerUnique();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {number, target} = await fileReader.parse();
+            const valueFormula = (x, y) => {
+                const decimal = (x * x) + (3 * x) + (2 * x * y) + y + (y * y) + number;
+                const binary = decimal.toString(2);
+                // True = open space, false = wall
+                return (binary.split('').filter(bit => bit === '1').length % 2 === 0);
+            };
+            const maze = Array2d.withData({
+                value: (x, y) => valueFormula(x, y),
+                G: undefined,
+                F: undefined,
+                previous: undefined,
+            }, target[1] * 2, target[0] * 2);
+
+            const getHeuristic = (startNode, endNode) => {
+                return Math.abs(endNode.x - startNode.x) + Math.abs(endNode.y - startNode.y);
+            };
+
+            // Use the A* algorithm
+            const startNode = maze.getItem(1, 1);
+            const endNode = maze.getItem(target[0], target[1]);
+            startNode.G = 0;
+            startNode.F = startNode.G + getHeuristic(startNode, endNode);
+            startNode.inPath = true;
+
+            const queue = [startNode];
+            const visited = [];
+
+            while (queue.length > 0) {
+                const currentNode = queue.sort((a, b) => a.F - b.F).shift();
+                visited.push(currentNode);
+
+                // Don't look further with the current node,
+                // if the maximum distance to the start node has been reached
+                if (currentNode.G === 50) {
+                    continue;
+                }
+
+                for (const neighbour of currentNode.getAdjacentItems()) {
+                    if (neighbour === undefined
+                        // The node must not be an obstacle
+                        || neighbour.value === false
+                        // The node must not be visited yet
+                        || visited.includes(neighbour)
+                    ) {
+                        continue;
+                    }
+
+                    // Calculate the F value of the neighbour
+                    const G = (currentNode.G + 1);
+                    const F = G + Math.abs(endNode.x - neighbour.x)
+                        + Math.abs(endNode.y - neighbour.y);
+
+                    // Update the neighbour's values if it's not in the queue,
+                    // or if it is in the queue, but the F is lower
+                    const inQueue = queue.includes(neighbour);
+                    if (! inQueue || (inQueue && F < neighbour.F)) {
+                        neighbour.G = G;
+                        neighbour.F = F;
+                        neighbour.previous = currentNode;
+                    }
+
+                    // Add the neighbour to the queue
+                    if (! inQueue) {
+                        queue.push(neighbour);
+                    }
+                }
+            }
+
+            // Visualize the maze
+            console.log(maze.toString(node => {
+                if (visited.includes(node)) {
+                    return '█';
+                }
+
+                return node.value ? '.' : '#';
+            }));
+
+            document.querySelector('.answer').innerText = visited.unique().length;
+        </script>
+    </body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import IntcodeComputer from '../IntcodeComputer.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+
+            const intcodeComputers = new Array(50)
+                .fill(null)
+                .map((number, index) => {
+                    const computer = new IntcodeComputer(program.slice(0), index);
+                    computer.setFallbackInput(-1);
+                    return computer;
+                });
+
+            let yValue;
+            mainLoop: while (true) {
+                for (const intcodeComputer of intcodeComputers) {
+                    // Synchronise all computers, all taking 1 step at a time
+                    intcodeComputer.nextStep();
+
+                    // Send outputs to another computer, if there are 3 values
+                    if (intcodeComputer.getOutputAmount() === 3) {
+                        const [address, X, Y] = intcodeComputer.takeOutput();
+
+                        // Stop when a value is sent to address 255
+                        if (address === 255) {
+                            yValue = Y;
+                            break mainLoop;
+                        }
+
+                        // Add the input values to the other computer
+                        intcodeComputers[address].addInput(X, Y);
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = yValue;
+        </script>
+    </body>
+</html>

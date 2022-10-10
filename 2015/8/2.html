@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const strings = await fileReader.parse();
+
+            document.querySelector('.answer').innerText = strings.map(string => {
+                const originalLength = string.length;
+
+                string = '"'
+                    + string.replaceAll('\\', '\\\\')
+                        .replaceAll('"', '\\"')
+                    + '"';
+
+                return string.length - originalLength;
+            }).reduce((sum, difference) => (sum + difference), 0);
+        </script>
+    </body>
+</html>

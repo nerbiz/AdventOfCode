@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import LinkedList from '../../classes/LinkedList.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const recipesPattern = (await fileReader.parse())
+                .toString()
+                .split('')
+                .map(number => number - 0)
+                .reverse();
+            const scoreBoard = new LinkedList();
+
+            // Set the first 2 recipes
+            scoreBoard.add(3);
+            scoreBoard.add(7);
+            const currentRecipes = [scoreBoard.getFirst(), scoreBoard.getLast()];
+            let recipesAmount;
+
+            makeRecipes: while (true) {
+                const sum = currentRecipes[0].value + currentRecipes[1].value;
+
+                // Get the first digit of a two-digit number (it's 0 if there is only 1 digit)
+                const first = Math.floor((sum % 100) / 10);
+                if (first > 0) {
+                    scoreBoard.add(first);
+                }
+
+                scoreBoard.add(sum % 10);
+
+                // Set the new current recipes
+                currentRecipes[0] = scoreBoard.getNext(currentRecipes[0], 1 + currentRecipes[0].value);
+                currentRecipes[1] = scoreBoard.getNext(currentRecipes[1], 1 + currentRecipes[1].value);
+
+                // See if the recipes pattern exists at the end
+                let firstRecipe = scoreBoard.getFirst();
+                let lastRecipe = firstRecipe.previous;
+                let checkRecipe = (lastRecipe === recipesPattern[0]) ? firstRecipe : lastRecipe;
+                for (let i = 0; i < recipesPattern.length; i++) {
+                    checkRecipe = checkRecipe.previous;
+                    if (checkRecipe.value !== recipesPattern[i]) {
+                        continue makeRecipes;
+                    }
+                }
+
+                recipesAmount = scoreBoard.getSize() - recipesPattern.length - Number(sum > 9);
+                break;
+            }
+
+            document.querySelector('.answer').innerText = recipesAmount;
+        </script>
+    </body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../../classes/Utilities.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerUnique();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const target = await fileReader.parse();
+
+            const possibilities = [];
+
+            // Add the possibilities for reaching the target in 1 step
+            // They are all the possible coordinates of the target
+            for (let x = target.xMin; x <= target.xMax; x++) {
+                for (let y = target.yMin; y <= target.yMax; y++) {
+                    possibilities.push([x, y]);
+                }
+            }
+
+            // Calculate the first X velocity that makes X >= xMin of the target,
+            // in at least 2 steps, using triangular number formula
+            let xMinVelocity = 0, endX;
+            do {
+                endX = ++xMinVelocity * (xMinVelocity + 1) / 2;
+            } while (endX < target.xMin);
+
+            // Calculate the other min/max velocities for at least 2 steps
+            const xMaxVelocity = Math.ceil(target.xMax / 2);
+            const yMinVelocity = Math.floor(target.yMin / 2) + 1;
+            const yMaxVelocity = Math.abs(target.yMin + 1);
+
+            const xRange = Utilities.range(xMinVelocity, xMaxVelocity);
+            const yRange = Utilities.range(yMinVelocity, yMaxVelocity);
+
+            const xValidSteps = xRange.map(x => {
+                let sum = 0, steps = 0, decreaser = x + 1;
+                const validSteps = [];
+
+                while (sum <= target.xMax && --decreaser >= 0) {
+                    sum += decreaser;
+                    steps++;
+
+                    // Target is reached, add the valid step amount
+                    if (sum >= target.xMin && sum <= target.xMax) {
+                        validSteps.push(decreaser === 0 ? Infinity : steps);
+                    }
+                }
+
+                return {x, validSteps};
+            });
+
+            const yValidSteps = yRange.map(y => {
+                let sum = 0, steps, decreaser;
+                // let xVelocities = [];
+                const validSteps = [];
+
+                // A positive Y goes back to zero after (y * 2) + 1 steps,
+                // Y goes negative after that, so no need to check steps before that
+                if (y > 0) {
+                    steps = (y * 2) + 1;
+                    decreaser = y * -1;
+                } else {
+                    steps = 0;
+                    decreaser = y + 1;
+                }
+
+                while ((sum += --decreaser) >= target.yMin) {
+                    steps++;
+
+                    // Target is reached, couple with X velocities that match the step amount
+                    if (sum >= target.yMin && sum <= target.yMax) {
+                        validSteps.push(steps);
+                    }
+                }
+
+                return {y, validSteps};
+            });
+
+            // Make X,Y pairs
+            xValidSteps.forEach(xSteps => {
+                const yCollection = [];
+
+                // Check for Y velocities that reach the target in an equal amount of steps
+                xSteps.validSteps.forEach(stepAmount => {
+                    yValidSteps.filter(ySteps => ySteps.validSteps.includes(stepAmount))
+                        .forEach(ySteps => yCollection.push(ySteps.y));
+                });
+
+                // Some X velocities result in the proper X position infinitely
+                // Check for Y velocities that take at least that amount of steps
+                if (xSteps.validSteps.includes(Infinity)) {
+                    const validSteps = xSteps.validSteps.filter(stepAmount => stepAmount !== Infinity);
+                    const minimumSteps = Math.max(...validSteps);
+
+                    yValidSteps
+                        .filter(ySteps => ySteps.validSteps
+                            .filter(stepAmount => stepAmount >= minimumSteps)
+                            .length > 0)
+                        .forEach(ySteps => yCollection.push(ySteps.y));
+                }
+
+                yCollection.unique().forEach(y => possibilities.push([xSteps.x, y]));
+            });
+
+            document.querySelector('.answer').innerText = possibilities.length;
+        </script>
+    </body>
+</html>

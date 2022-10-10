@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const seafloor = new Array2d(await fileReader.parse());
+
+            const getNextPosition = seaCucumber => {
+                if (seaCucumber.value === '>') {
+                    const {right} = seaCucumber.getAdjacentItems(true);
+                    return right || seafloor.getItem(0, seaCucumber.y);
+                } else {
+                    const {down} = seaCucumber.getAdjacentItems(true);
+                    return down || seafloor.getItem(seaCucumber.x, 0);
+                }
+            };
+
+            const prepareMove = seaCucumber => {
+                // See if the sea cucumber can move during this step
+                const nextPosition = getNextPosition(seaCucumber);
+                seaCucumber.moveTo = (nextPosition.value === '.')
+                    ? nextPosition
+                    : undefined;
+
+                return seaCucumber;
+            };
+
+            const move = seaCucumber => {
+                seaCucumber.moveTo.value = seaCucumber.value;
+                seaCucumber.value = '.';
+            };
+
+            let steps = 0;
+            while (true) {
+                steps++;
+                let moveAmount = 0;
+
+                // Get all east- and south-facing sea cucumbers
+                let eastMoving = seafloor.filter2d(position => position.value === '>');
+                let southMoving = seafloor.filter2d(position => position.value === 'v');
+
+                eastMoving = eastMoving.map(prepareMove).filter(seaCucumber => seaCucumber.moveTo !== undefined);
+                moveAmount += eastMoving.length;
+                if (eastMoving.length > 0) {
+                    eastMoving.forEach(move);
+                }
+
+                southMoving = southMoving.map(prepareMove).filter(seaCucumber => seaCucumber.moveTo !== undefined);
+                moveAmount += southMoving.length;
+                if (moveAmount === 0) {
+                    break;
+                }
+                southMoving.forEach(move);
+
+                seafloor.forEach2d(position => position.moveTo = undefined);
+            }
+
+            document.querySelector('.answer').innerText = steps;
+        </script>
+    </body>
+</html>

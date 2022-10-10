@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            // Convert the polymer to a character code array
+            let polymer = (await fileReader.parse())
+                .split('')
+                .map(unit => unit.charCodeAt(0));
+
+            // Remove matching unit pairs
+            while (true) {
+                const originalLength = polymer.length;
+                const replacedPolymer = [];
+
+                while (polymer.length > 0) {
+                    const unit = polymer.shift();
+
+                    // The difference between uppercase and lowercase
+                    // in character codes is 32
+                    if (Math.abs(unit - polymer[0]) === 32) {
+                        polymer.shift();
+                        continue;
+                    }
+
+                    // No match, keep the unit
+                    replacedPolymer.push(unit);
+
+                    // If there's only 1 unit left, keep it
+                    if (polymer.length === 1) {
+                        replacedPolymer.push(polymer.shift());
+                    }
+                }
+
+                // Update the polymer for the next loop
+                polymer = replacedPolymer;
+
+                // No replacements done, stop looping
+                if (replacedPolymer.length === originalLength) {
+                    break;
+                }
+            }
+
+            document.querySelector('.answer').innerText = polymer.length;
+        </script>
+    </body>
+</html>

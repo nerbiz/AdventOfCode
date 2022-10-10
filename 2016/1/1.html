@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const instructions = await fileReader.parse();
+            const directions = ['up', 'right', 'down', 'left'];
+            let directionIndex = 0;
+            const coordinates = [0, 0];
+
+            for (const instruction of instructions) {
+                // Determine the direction
+                directionIndex = (instruction[0] === 'L')
+                    ? (directionIndex - 1 < 0) ? directions.length - 1 : directionIndex - 1
+                    : (directionIndex + 1) % directions.length;
+
+                switch (directions[directionIndex]) {
+                    case 'up':
+                        coordinates[1] += instruction[1];
+                        break;
+                    case 'right':
+                        coordinates[0] += instruction[1];
+                        break;
+                    case 'down':
+                        coordinates[1] -= instruction[1];
+                        break;
+                    case 'left':
+                        coordinates[0] -= instruction[1];
+                        break;
+                }
+            }
+
+            document.querySelector('.answer').innerText = Math.abs(coordinates[0] + coordinates[1]);
+        </script>
+    </body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const jumps = await fileReader.parse();
+            let steps = 0;
+            let index = 0;
+
+            while (++steps) {
+                const jump = jumps[index];
+                jumps[index]++;
+
+                if ((index += jump) >= jumps.length) {
+                    break;
+                }
+            }
+
+            document.querySelector('.answer').innerText = steps;
+        </script>
+    </body>
+</html>

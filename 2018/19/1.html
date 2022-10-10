@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {pointer, instructions} = await fileReader.parse();
+            const registers = Array(6).fill(0);
+
+            const operations = {
+                addr: (registers, a, b) => registers[a] + registers[b],
+                addi: (registers, a, b) => registers[a] + b,
+                mulr: (registers, a, b) => registers[a] * registers[b],
+                muli: (registers, a, b) => registers[a] * b,
+                banr: (registers, a, b) => registers[a] & registers[b],
+                bani: (registers, a, b) => registers[a] & b,
+                borr: (registers, a, b) => registers[a] | registers[b],
+                bori: (registers, a, b) => registers[a] | b,
+                setr: (registers, a) => registers[a],
+                seti: (registers, a) => a,
+                gtir: (registers, a, b) => Number(a > registers[b]),
+                gtri: (registers, a, b) => Number(registers[a] > b),
+                gtrr: (registers, a, b) => Number(registers[a] > registers[b]),
+                eqir: (registers, a, b) => Number(a === registers[b]),
+                eqri: (registers, a, b) => Number(registers[a] === b),
+                eqrr: (registers, a, b) => Number(registers[a] === registers[b]),
+            };
+
+            while (registers[pointer] < instructions.length) {
+                const instruction = instructions[registers[pointer]];
+                const [operation, arg1, arg2, register] = instruction;
+                registers[register] = operations[operation](registers, arg1, arg2);
+
+                registers[pointer]++;
+            }
+
+            document.querySelector('.answer').innerText = registers[0];
+        </script>
+    </body>
+</html>

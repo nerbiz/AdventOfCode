@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let value = await fileReader.parse();
+            const steps = 50;
+
+            for (let step = 0; step < steps; step++) {
+                let newString = '';
+                let currentDigit = value.at(0);
+                let amount = 0;
+
+                for (let digit of value) {
+                    if (digit !== currentDigit) {
+                        // Add amount+digit to the string
+                        newString += amount + currentDigit;
+
+                        // Start counting for the next digit
+                        currentDigit = digit;
+                        amount = 1;
+                    } else {
+                        amount++;
+                    }
+                }
+
+                // Add the last digit(s) amount to the string
+                newString += amount + currentDigit;
+
+                // Update the value for the next step
+                value = newString;
+            }
+
+            document.querySelector('.answer').innerText = value.length;
+        </script>
+    </body>
+</html>

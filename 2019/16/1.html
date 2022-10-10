@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const digits = await fileReader.parse();
+            const pattern = [0, 1, 0, -1];
+            const phases = 100;
+
+            for (let phase = 0; phase < phases; phase++) {
+                for (let position = 1; position <= digits.length; position++) {
+                    let sum = 0;
+
+                    // Skip the first digits, because they will be multiplied by 0, not changing the sum
+                    for (let index = position - 1; index < digits.length; index++) {
+                        // The multiplier changes at every step that is a multiple of the position
+                        const patternIndex = Math.floor((index + 1) / position) % pattern.length;
+
+                        sum += digits[index] * pattern[patternIndex];
+                    }
+
+                    // Keep only the rightmost digit
+                    digits[position - 1] = Math.abs(sum % 10);
+                }
+            }
+
+            document.querySelector('.answer').innerText = digits.slice(0, 8).join('');
+        </script>
+    </body>
+</html>

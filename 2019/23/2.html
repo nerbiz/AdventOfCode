@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import IntcodeComputer from '../IntcodeComputer.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerSum();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+
+            const intcodeComputers = new Array(50)
+                .fill(null)
+                .map((number, index) => {
+                    const computer = new IntcodeComputer(program.slice(0), index);
+                    computer.setFallbackInput(-1);
+                    return computer;
+                });
+
+            let natPacket = {X: null, Y: null};
+            let previousY = natPacket.Y;
+            mainLoop: while (true) {
+                for (const intcodeComputer of intcodeComputers) {
+                    // Synchronise all computers, all taking 1 step at a time
+                    intcodeComputer.nextStep();
+
+                    // Send outputs to another computer, if there are 3 values
+                    if (intcodeComputer.getOutputAmount() === 3) {
+                        const [address, X, Y] = intcodeComputer.takeOutput();
+
+                        (address === 255)
+                            // Store values in the NAT if the address is 255
+                            ? natPacket = {X, Y}
+                            // Or add the input values to another computer
+                            : intcodeComputers[address].addInput(X, Y);
+                    }
+                }
+
+                // The NAT packet needs to have a value
+                if (natPacket.Y === null) {
+                    continue;
+                }
+
+                // Continue if any computer is not idle
+                for (const intcodeComputer of intcodeComputers) {
+                    if (! intcodeComputer.usedFallbackInput()) {
+                        continue mainLoop;
+                    }
+                }
+
+                // The Y value of the packet is repeated
+                if (natPacket.Y === previousY) {
+                    break;
+                }
+                previousY = natPacket.Y;
+
+                // Send the packet to the computer at address 0
+                intcodeComputers[0].addInput(natPacket.X, natPacket.Y);
+                natPacket = {X: null, Y: null};
+            }
+
+            document.querySelector('.answer').innerText = previousY;
+        </script>
+    </body>
+</html>

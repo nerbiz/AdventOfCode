@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+            import Pathfinding from '../../classes/Pathfinding.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const map = new Array2d(await fileReader.parse());
+            const numberNodes = map.filter2d(item => Number.isInteger(item.value));
+            let shortestDistance = Infinity;
+
+            // Find all possible combinations for visiting every target node
+            const startNode = numberNodes.find(node => node.value === 0);
+            const allCombinations = [];
+            (function findCombinations(path, remaining) {
+                if (remaining.length === 0) {
+                    // Add the start node to the start and end of the path
+                    path.unshift(startNode);
+                    path.push(startNode);
+                    allCombinations.push(path);
+                    return;
+                }
+
+                for (const node of remaining) {
+                    // Clone the arrays
+                    const pathCopy = path.map(node => node);
+                    const remainingCopy = remaining.map(node => node);
+
+                    // Add the node to the path
+                    pathCopy.push(node);
+
+                    // Repeat with the remaining nodes
+                    findCombinations(pathCopy, remainingCopy.filter(otherNode => otherNode !== node));
+                }
+            })([], numberNodes.filter(node => node.value !== 0));
+
+            // Find all paths between all targets
+            for (const node of numberNodes) {
+                node.paths = {};
+
+                const targetNodes = numberNodes.filter(targetNode => targetNode !== node);
+                for (const targetNode of targetNodes) {
+                    node.paths[targetNode.value] = Pathfinding.aStar(map, node, targetNode, node => node.value === false);
+                }
+            }
+
+            // Find the shortest distance
+            combinationsLoop: for (const combination of allCombinations) {
+                let distance = 0;
+
+                // Skip the last node, because of start-end pairs
+                for (let i = 0; i < combination.length - 1; i++) {
+                    const startNode = combination[i];
+                    const endNode = combination[i + 1];
+                    distance += startNode.paths[endNode.value].length;
+
+                    // Stop looking, if the path is already longer than the shortest
+                    if (distance > shortestDistance) {
+                        continue combinationsLoop;
+                    }
+                }
+
+                // Update the shortest distance
+                shortestDistance = distance;
+            }
+
+            document.querySelector('.answer').innerText = shortestDistance;
+        </script>
+    </body>
+</html>

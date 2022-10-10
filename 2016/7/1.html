@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const ipAddresses = await fileReader.parse();
+
+            // Any first a-z character,
+            // followed by a different second character,
+            // followed by the second and first character
+            const abbaRegExp = /([a-z])(?!\1)([a-z])\2\1/g;
+
+            document.querySelector('.answer').innerText = ipAddresses
+                // Keep IP address parts that match the pattern
+                .map(parts => parts.filter(part => part.match(abbaRegExp)))
+                // At least 1 part needed, except when it's a hypernet sequence
+                .filter(parts => parts.length > 0
+                    && parts.every(part => ! part.startsWith('[')))
+                .length;
+        </script>
+    </body>
+</html>

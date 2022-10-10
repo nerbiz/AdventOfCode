@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const reindeer = await fileReader.parse();
+            const seconds = 2503;
+
+            document.querySelector('.answer').innerText = reindeer
+                .map(reindeer =>
+                    // Seconds moved = number of move+rest intervals * duration
+                    (Math.floor(seconds / (reindeer.duration + reindeer.rest))
+                    * reindeer.duration
+                    // Add the remaining seconds after interval dividing (at most the duration)
+                    + (seconds % (reindeer.duration + reindeer.rest) > reindeer.duration
+                        ? reindeer.duration
+                        : seconds % (reindeer.duration + reindeer.rest)))
+                    // Amount of seconds moved * the speed per second
+                    * reindeer.speed
+                )
+                .sort((a, b) => b - a)
+                .at(0);
+        </script>
+    </body>
+</html>

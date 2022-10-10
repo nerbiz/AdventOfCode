@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            // Sort the positions ascending
+            const positions = (await fileReader.parse()).sort((a, b) => a - b);
+            const lowestPos = positions[0];
+            const highestPos = positions[positions.length - 1];
+
+            // For the first check, the total has to be lower
+            let lowestFuelCost = Number.MAX_SAFE_INTEGER;
+
+            // Check all available positions, to find the least expensive one
+            checkPosition: for (let targetPos = lowestPos; targetPos <= highestPos; targetPos++) {
+                let totalFuelCost = 0;
+
+                for (let i = 0; i < positions.length; i++) {
+                    const steps = Math.abs(positions[i] - targetPos);
+                    // Use triangular number formula, instead of a loop
+                    totalFuelCost += (steps * (steps + 1) / 2);
+
+                    // Skip to next target position, if at some point before the end the total is already too high
+                    if (totalFuelCost > lowestFuelCost) {
+                        continue checkPosition;
+                    }
+                }
+
+                lowestFuelCost = totalFuelCost;
+            }
+
+            document.querySelector('.answer').innerText = lowestFuelCost;
+        </script>
+    </body>
+</html>

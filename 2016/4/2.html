@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerCountValues();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const rooms = await fileReader.parse();
+            const spaceCharCode = ' '.charCodeAt(0);
+            const aCharCode = 'a'.charCodeAt(0);
+
+            document.querySelector('.answer').innerText = rooms
+                // Compare the checksum with the most occurring characters
+                .filter(room => (room.checksum === room.name
+                    .replaceAll('-', '')
+                    .split('')
+                    // Sort alphabetically
+                    .sort((a, b) => (a === b)
+                        ? 0
+                        : (a < b) ? -1 : 1)
+                    // Get the amount of character occurrences
+                    .countValues()
+                    // Sort by most occurrences first
+                    .sort((a, b) => b[1] - a[1])
+                    // Keep the first 5
+                    .slice(0, 5)
+                    .map(occurence => occurence[0])
+                    .join('')))
+                .map(room => {
+                    room.name = room.name
+                        .replaceAll('-', ' ')
+                        .split('')
+                        .map(character => character.charCodeAt(0))
+                        .map(charCode => String.fromCharCode(
+                            (charCode === spaceCharCode)
+                                ? charCode
+                                // Make charcode 0-based, then wrap from z to a if needed
+                                : (((charCode - aCharCode) + room.sectorId) % 26) + aCharCode
+                        ))
+                        .join('');
+
+                    return room;
+                })
+                .find(room => room.name.match('north'))
+                .sectorId;
+        </script>
+    </body>
+</html>

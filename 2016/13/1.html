@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+            import Pathfinding from '../../classes/Pathfinding.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {number, target} = await fileReader.parse();
+            const valueFormula = (x, y) => {
+                const decimal = (x * x) + (3 * x) + (2 * x * y) + y + (y * y) + number;
+                const binary = decimal.toString(2);
+                // True = open space, false = wall
+                return (binary.split('').filter(bit => bit === '1').length % 2 === 0);
+            };
+            const maze = Array2d.withData({
+                value: (x, y) => valueFormula(x, y),
+            }, target[1] * 2, target[0] * 2);
+
+            // Find the shortest path
+            const startNode = maze.getItem(1, 1);
+            const endNode = maze.getItem(target[0], target[1]);
+            const path = Pathfinding.aStar(maze, startNode, endNode, node => node.value === false);
+
+            // Visualize the path
+            console.log(maze.toString(node => {
+                if (node === startNode || path.includes(node)) {
+                    return '█';
+                }
+
+                return node.value ? '.' : '#';
+            }));
+
+            document.querySelector('.answer').innerText = path.length;
+        </script>
+    </body>
+</html>

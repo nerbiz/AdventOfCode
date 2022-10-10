@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let particles = await fileReader.parse();
+
+            // Should be enough steps
+            for (let i = 0; i < 300; i++) {
+                // Will contain coordinates:[particles] entries
+                const coordinates = {};
+
+                for (const particle of particles) {
+                    // Update the particle values
+                    particle.position[0] += (particle.velocity[0] += particle.acceleration[0]);
+                    particle.position[1] += (particle.velocity[1] += particle.acceleration[1]);
+                    particle.position[2] += (particle.velocity[2] += particle.acceleration[2]);
+
+                    // Add the particle to the coordinates collection
+                    const positionString = particle.position.join(',');
+                    if (! (positionString in coordinates)) {
+                        coordinates[positionString] = [];
+                    }
+                    coordinates[positionString].push(particle);
+                }
+
+                // Remove particles that are at the same coordinate
+                for (const coordinate in coordinates) {
+                    if (coordinates[coordinate].length > 1) {
+                        particles = particles.filter(particle => ! coordinates[coordinate].includes(particle));
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = particles.length;
+        </script>
+    </body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const instructions = await fileReader.parse();
+            let index = 0;
+            let accumulator = 0;
+
+            while (index < instructions.length) {
+                const instruction = instructions[index];
+
+                // Stop when trying to execute a previous instruction again
+                if (instruction[2] === true) {
+                    break;
+                }
+
+                switch (instruction[0]) {
+                    case 'acc':
+                        accumulator += instruction[1];
+                        index++;
+                        break;
+                    case 'jmp':
+                        index += instruction[1];
+                        break;
+                    case 'nop':
+                        index++;
+                        break;
+                }
+
+                // Add a value indicating the instruction has been executed
+                instruction[2] = true;
+            }
+
+            document.querySelector('.answer').innerText = accumulator;
+        </script>
+    </body>
+</html>

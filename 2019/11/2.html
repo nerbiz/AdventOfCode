@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer monospace"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import IntcodeComputer from '../IntcodeComputer.js';
+            import Array2d from '../../classes/Array2d.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerTap();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            const intcodeComputer = new IntcodeComputer(program);
+
+            const directionsMap = ['up', 'right', 'down', 'left'];
+            let directionIndex = 0;
+
+            const gridSize = 150;
+            let grid = Array2d.withData({value: 0}, gridSize, gridSize);
+            let position = grid.getItem(gridSize / 2, gridSize / 2);
+            position.value = 1;
+
+            while (true) {
+                intcodeComputer.setInput(position.value);
+                const colorValue = intcodeComputer.getNextSignal();
+
+                // Stop if there are no signals anymore
+                if (colorValue === undefined) {
+                    break;
+                }
+
+                // Update the value of the position
+                position.value = colorValue;
+
+                // Change the direction, value 0 becomes -1 (left)
+                directionIndex += intcodeComputer.getNextSignal() || -1;
+                // Keep the index within bounds (0 through 3)
+                directionIndex = (4 + directionIndex) % 4;
+
+                // Define the next position
+                const adjacent = position.getAdjacentItems(true);
+                position = adjacent[directionsMap[directionIndex]];
+            }
+
+            // Used for getting the contents portion of the grid
+            let startX = Infinity;
+            let endX = 0;
+
+            document.querySelector('.answer').innerText = grid
+                // Get the rows that have contents (items with value 1)
+                .filter(row => row.reduce((sum, item) => sum + item.value, 0))
+                // Get the start and end X coordinate, of where the content starts/ends
+                .tap(row => {
+                    row.filter(item => item.value === 1)
+                        .forEach(item => {
+                            startX = Math.min(startX, item.x);
+                            endX = Math.max(endX, item.x);
+                        });
+                })
+                // Cut off the empty beginning/end of each row
+                .map(row => row.slice(startX, endX + 1))
+                // Convert 0/1 values to visible blocks
+                .map(row => row.map(item => (item.value === 0) ? ' ' : '█').join(''))
+                .join('\n');
+        </script>
+    </body>
+</html>

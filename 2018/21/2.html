@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            let input = 0;
+            let value1 = 0;
+            let value2 = 0;
+            const occurrences = [];
+            let previousValue = 0;
+
+            while (true) {
+                value1 = value2 | 65536;
+                value2 = 9010242;
+
+                while (true) {
+                    value2 = (value2 + (value1 & 255)) & 16777215;
+                    value2 = (value2 * 65899) & 16777215;
+
+                    if (256 > value1) {
+                        // Stop the program when a duplicate value is encountered,
+                        // because the values will then repeat
+                        if (occurrences[value2] === true) {
+                            input = previousValue;
+                            break;
+                        }
+
+                        occurrences[value2] = true;
+                        previousValue = value2;
+                        break;
+                    }
+
+                    value1 = Math.floor(value1 / 256);
+                }
+
+                // Stop the program if the input matches the current value
+                if (value2 === input) {
+                    break;
+                }
+            }
+
+            document.querySelector('.answer').innerText = input;
+        </script>
+    </body>
+</html>

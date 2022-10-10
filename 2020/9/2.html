@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {preamble, numbers} = await fileReader.parse();
+
+            let wrongNumber;
+            findWrongNumber: for (let i = preamble; i < numbers.length; i++) {
+                const previous = numbers.slice(i - preamble, i);
+
+                for (let j = 0; j < previous.length; j++) {
+                    for (const other of previous.slice(j + 1)) {
+                        if (previous[j] + other === numbers[i]) {
+                            continue findWrongNumber;
+                        }
+                    }
+                }
+
+                wrongNumber = numbers[i];
+            }
+
+            let correctSet;
+            findSet: for (let i = 0; i < numbers.length; i++) {
+                const set = [numbers[i]];
+                let sum = numbers[i];
+
+                for (const other of numbers.slice(i + 1)) {
+                    set.push(other);
+                    sum += other;
+
+                    if (sum === wrongNumber) {
+                        correctSet = set.sort((a, b) => a - b);
+                        break findSet;
+                    }
+
+                    if (sum > wrongNumber) {
+                        continue findSet;
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = correctSet.at(0) + correctSet.at(-1);
+        </script>
+    </body>
+</html>

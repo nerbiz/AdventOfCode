@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {bots, outputs, inputs, giving} = await fileReader.parse();
+
+            // Create bot objects
+            bots = bots.map(bot => ({
+                type: 'bot',
+                number: bot.match(/\d+/) - 0,
+                low: undefined,
+                high: undefined,
+                holds: [],
+            }));
+
+            // Create output objects
+            outputs = outputs.map(output => ({
+                type: 'output',
+                number: output.match(/\d+/) - 0,
+                holds: [],
+            }));
+
+            // Convert 'giving' information to object references
+            // and store initial values in the bots
+            bots.forEach(bot => {
+                let {low, high} = giving.find(giveInfo => giveInfo.bot === bot.number);
+
+                low = low.split(' ');
+                bot.low = (low[0] === 'bot')
+                    ? bots.find(bot => bot.number === low[1] - 0)
+                    : outputs.find(output => output.number === low[1] - 0);
+
+                high = high.split(' ');
+                bot.high = (high[0] === 'bot')
+                    ? bots.find(bot => bot.number === high[1] - 0)
+                    : outputs.find(output => output.number === high[1] - 0);
+
+                bot.holds = inputs.filter(input => input.bot === bot.number)
+                    .map(input => input.value);
+            });
+
+            let nextBots;
+            let targetBot;
+            givingLoop: while ((nextBots = bots.filter(bot => bot.holds.length === 2)).length > 0) {
+                for (const nextBot of nextBots) {
+                    // See if the bot holds value 17 and 61
+                    nextBot.holds.sort((a, b) => a - b);
+                    if (nextBot.holds[0] === 17 && nextBot.holds[1] === 61) {
+                        targetBot = nextBot;
+                        break givingLoop;
+                    }
+
+                    // Give low and high value chips to other bots/outputs
+                    nextBot.low.holds.push(nextBot.holds.shift());
+                    nextBot.high.holds.push(nextBot.holds.shift());
+                }
+            }
+
+            document.querySelector('.answer').innerText = targetBot.number;
+        </script>
+    </body>
+</html>

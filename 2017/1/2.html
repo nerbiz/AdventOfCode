@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const numbers = await fileReader.parse();
+
+            document.querySelector('.answer').innerText = numbers
+                .filter((number, index) => {
+                    const otherIndex = (index + (numbers.length / 2)) % numbers.length;
+                    return (number === numbers[otherIndex]);
+                })
+                .map(number => number - 0)
+                .reduce((sum, number) => (sum + number), 0);
+        </script>
+    </body>
+</html>

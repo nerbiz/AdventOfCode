@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const chunkLines = await fileReader.parse();
+
+            // The scores for the invalid closing characters
+            const delimiterScores = {
+                ')': 3,
+                ']': 57,
+                '}': 1197,
+                '>': 25137,
+            };
+
+            let score = 0;
+            // Checks for any existing closing delimiter
+            const closingRegex = /[\)\]\}\>]/;
+            // Checks for any adjacent delimiter pairs
+            const adjacentRegex = /\(\)|\[\]|\{\}|\<\>/;
+
+            chunkLines.forEach(line => {
+                // Remove adjacent delimiters while there are any
+                while (adjacentRegex.exec(line) !== null) {
+                    line = line.replaceAll('()', '')
+                        .replaceAll('[]', '')
+                        .replaceAll('{}', '')
+                        .replaceAll('<>', '');
+                }
+
+                // A line is invalid, if a closing delimiter remains
+                const result = closingRegex.exec(line);
+                if (result !== null) {
+                    score += delimiterScores[line[result.index]];
+                }
+            });
+
+            document.querySelector('.answer').innerText = score;
+        </script>
+    </body>
+</html>

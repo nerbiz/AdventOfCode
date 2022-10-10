@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const steps = await fileReader.parse();
+            const buffer = [0];
+
+            let index = 0;
+            let value = 0;
+            let insertions = 0;
+            while (++insertions < 2018) {
+                index = ((index + steps) % buffer.length) + 1;
+                buffer.splice(index, 0, ++value);
+            }
+
+            document.querySelector('.answer').innerText = buffer[index + 1];
+        </script>
+    </body>
+</html>

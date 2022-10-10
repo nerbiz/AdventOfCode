@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const seats = await fileReader.parse();
+
+            document.querySelector('.answer').innerText = seats
+                .join('\n')
+                // Replace characters with binary
+                .replaceAll('F', '0')
+                .replaceAll('B', '1')
+                .replaceAll('L', '0')
+                .replaceAll('R', '1')
+                .split('\n')
+                // Calculate the seat IDs
+                .map(seat => (
+                    (parseInt(seat.slice(0, 7), 2) * 8)
+                    + parseInt(seat.slice(7), 2)
+                ))
+                .sort((a, b) => b - a)
+                .at(0);
+        </script>
+    </body>
+</html>

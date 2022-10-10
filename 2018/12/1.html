@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            ArrayPrototype.registerIndexesOf();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {pots, notes} = await fileReader.parse();
+            const generations = 20;
+            let newPots = '';
+
+            for (let generation = 1; generation <= generations; generation++) {
+                // Expand the pots amount to the left and right
+                pots = '.'.repeat(5) + pots + '.'.repeat(5);
+
+                for (let i = 0; i < pots.length; i++) {
+                    // Create the left-left-current-right-right pots pattern
+                    const pattern = pots.substring(i - 2, i).padStart(2, '.')
+                        + pots.substring(i, i + 3).padEnd(3, '.');
+
+                    newPots += (pattern in notes) ? notes[pattern] : '.';
+                }
+
+                pots = newPots;
+                newPots = '';
+            }
+
+            // Determine the lowest index to start counting from
+            const firstPlantIndex = pots.indexOf('#');
+            const addedToLeft = generations * 5;
+            const lowestIndex = firstPlantIndex - addedToLeft;
+
+            document.querySelector('.answer').innerText = pots
+                .slice(firstPlantIndex)
+                .split('')
+                .indexesOf('#')
+                .map(index => index + lowestIndex)
+                .reduce((sum, index) => (sum + index), 0);
+        </script>
+    </body>
+</html>

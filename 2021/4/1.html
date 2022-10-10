@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Board from './Board.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser(), false);
+            const { drawnNumbers, boardsNumbers } = await fileReader.parse();
+
+            const boards = boardsNumbers.map((boardNumbers, index) => new Board(index, boardNumbers));
+            let win = false;
+
+            for (let i = 0; i < drawnNumbers.length; i++) {
+                if (win === true) {
+                    break;
+                }
+
+                const number = drawnNumbers[i];
+
+                for (let j = 0; j < boards.length; j++) {
+                    const board = boards[j];
+
+                    if (board.checkWin(number) === true) {
+                        document.querySelector('.answer').innerText = board.calculateScore(number);
+                        win = true;
+                        break;
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>

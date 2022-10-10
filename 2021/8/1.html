@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const notes = await fileReader.parse();
+            // Digits 1, 4, 7 and 8 have unique segment sizes
+            const uniqueSegmentSizes = [2, 3, 4, 7];
+
+            let occurrences = 0;
+            notes.forEach(note => {
+                let [signalPatterns, outputValues] = note.split(' | ');
+                outputValues = outputValues.split(' ');
+
+                // See how many output values have a unique size
+                outputValues.forEach(outputValue => {
+                    if (uniqueSegmentSizes.indexOf(outputValue.length) !== -1) {
+                        occurrences++;
+                    }
+                });
+            });
+
+            document.querySelector('.answer').innerText = occurrences;
+        </script>
+    </body>
+</html>

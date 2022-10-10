@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            let notPrimeAmount = 0;
+
+            nextNumber: for (let i = 106500; i <= 123500; i += 17) {
+                // Can't divide by more than half of itself
+                for (let j = 2; j < Math.ceil(i / 2) + 1; j++) {
+                    if (i % j === 0) {
+                        notPrimeAmount++;
+                        continue nextNumber;
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = notPrimeAmount;
+        </script>
+    </body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const directions = await fileReader.parse();
+            let x = 0;
+            let y = 0;
+            let z = 0;
+            const distances = [];
+
+            for (const direction of directions) {
+                switch (direction) {
+                    case 'nw':
+                        x--;
+                        y++;
+                        break;
+                    case 'n':
+                        y++;
+                        z--;
+                        break;
+                    case 'ne':
+                        x++;
+                        z--;
+                        break;
+                    case 'sw':
+                        x--;
+                        z++;
+                        break;
+                    case 's':
+                        y--;
+                        z++;
+                        break;
+                    case 'se':
+                        x++;
+                        y--;
+                        break;
+                }
+
+                distances.push((Math.abs(x) + Math.abs(y) + Math.abs(z)) / 2);
+            }
+
+            document.querySelector('.answer').innerText = Math.max(...distances);
+        </script>
+    </body>
+</html>

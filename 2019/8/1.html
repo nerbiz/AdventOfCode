@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerCountValues();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {width, height, digits} = await fileReader.parse();
+
+            // Create layers
+            const layers = [];
+            while (digits.length > 0) {
+                layers.push(digits.splice(0, width * height));
+            }
+
+            // Find the layer with the least amount of zeroes
+            const fewestZeroes = layers.map(layer => layer.countValues(true))
+                .sort((a, b) => a[0] - b[0])
+                .at(0);
+
+            document.querySelector('.answer').innerText = fewestZeroes[1] * fewestZeroes[2];
+        </script>
+    </body>
+</html>

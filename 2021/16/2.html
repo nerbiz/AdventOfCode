@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../../classes/Utilities.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const binaryMessage = await fileReader.parse();
+
+            const getNextPacket = (startIndex = 0) => {
+                let nextIndex = startIndex;
+
+                // Get the packet header
+                const versionBinary = binaryMessage.slice(nextIndex, nextIndex += 3);
+                const typeIdBinary = binaryMessage.slice(nextIndex, nextIndex += 3);
+                const packet = {
+                    version: parseInt(versionBinary, 2),
+                    typeId: parseInt(typeIdBinary, 2),
+                    subPackets: [],
+                };
+
+                // The packet contains a literal value
+                if (packet.typeId === 4) {
+                    const groups = [];
+                    let group;
+
+                    // Get all the groups
+                    do {
+                        group = binaryMessage.slice(nextIndex, nextIndex += 5);
+                        groups.push(group);
+                    } while (group[0] !== '0');
+
+                    // Get the literal value
+                    const binaryValue = groups.reduce((binary, group) => binary += group.slice(1), '');
+                    packet.literalValue = parseInt(binaryValue, 2);
+                }
+
+                // The packet is an operator packet
+                else {
+                    packet.lengthTypeId = binaryMessage.slice(nextIndex, nextIndex += 1);
+
+                    // The type is 'total bit length'
+                    if (packet.lengthTypeId === '0') {
+                        const lengthBinary = binaryMessage.slice(nextIndex, nextIndex += 15);
+                        packet.subBitLength = parseInt(lengthBinary, 2);
+
+                        // Get the subpackets, using the bit length limit
+                        const subPacketStart = nextIndex;
+                        while (nextIndex < (subPacketStart + packet.subBitLength)) {
+                            const {packet: subPacket, bitsUsed} = getNextPacket(nextIndex);
+                            nextIndex += bitsUsed;
+                            packet.subPackets.push(subPacket);
+                        }
+                    }
+
+                    // The type is 'sub-packets amount'
+                    else {
+                        const amountBinary = binaryMessage.slice(nextIndex, nextIndex += 11);
+                        packet.subPacketsAmount = parseInt(amountBinary, 2);
+
+                        while (packet.subPackets.length < packet.subPacketsAmount) {
+                            const {packet: subPacket, bitsUsed} = getNextPacket(nextIndex);
+                            nextIndex += bitsUsed;
+                            packet.subPackets.push(subPacket);
+                        }
+                    }
+                }
+
+                return {
+                    packet,
+                    bitsUsed: nextIndex - startIndex,
+                };
+            };
+
+            // Start the packet tree parsing
+            const {packet: rootPacket} = getNextPacket();
+
+            const calculate = packet => {
+                const subValues = packet.subPackets.map(packet => {
+                    return (packet.typeId === 4)
+                        ? packet.literalValue
+                        : calculate(packet);
+                });
+
+                switch (packet.typeId) {
+                    // Sum
+                    case 0:
+                        return subValues.reduce((total, value) => (total + value), 0);
+                    // Multiply
+                    case 1:
+                        return subValues.reduce((total, value) => (total * value), 1);
+                    // Minimum
+                    case 2:
+                        return Math.min(...subValues);
+                    // Maximum
+                    case 3:
+                        return Math.max(...subValues);
+                    // Greater than
+                    case 5:
+                        return Number(subValues[0] > subValues[1]);
+                    // Less than
+                    case 6:
+                        return Number(subValues[0] < subValues[1]);
+                    // Equal to
+                    case 7:
+                        return Number(subValues[0] === subValues[1]);
+                    default:
+                        break;
+                }
+            };
+
+            document.querySelector('.answer').innerText = calculate(rootPacket);
+        </script>
+    </body>
+</html>

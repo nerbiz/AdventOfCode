@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+            import PriorityQueue from '../../classes/PriorityQueue.js';
+
+            ArrayPrototype.registerUnique();
+            ArrayPrototype.registerTake();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const instructions = await fileReader.parse();
+            const availableSteps = new PriorityQueue();
+            const workers = [];
+            const maxWorkers = 4;
+            let order = '';
+
+            // Create a list of all steps, as objects with remaining seconds
+            const allSteps = instructions
+                .flatMap(instruction => [instruction.step, instruction.required])
+                .unique()
+                .map(step => ({
+                    name: step[0],
+                    // Seconds = 60 + 1, 2, 3, etc. for A, B, C, etc.
+                    secondsRemaining: step[0].charCodeAt(0) - 4,
+                }));
+
+            // Create a list of steps that have required steps before it
+            const stepsWithRequirements = [];
+            for (const step of allSteps) {
+                stepsWithRequirements.push([
+                    step,
+                    instructions.filter(instruction => instruction.step === step.name)
+                        .map(instruction => allSteps.find(step => step.name === instruction.required)),
+                ]);
+            }
+
+            let seconds = -1;
+            while (++seconds >= 0) {
+                // Add available steps to the queue (the character code is the priority)
+                stepsWithRequirements.take(step => step[1].length === 0)
+                    .forEach(step => availableSteps.enqueue(step[0].name.charCodeAt(0), step));
+
+                // Stop when all steps are done
+                if (workers.length === 0 && availableSteps.isEmpty()) {
+                    break;
+                }
+
+                // Give available step(s) to available workers
+                while (workers.length < maxWorkers && ! availableSteps.isEmpty()) {
+                    workers.push(availableSteps.dequeue()[0]);
+                }
+
+                for (let i = workers.length - 1; i >= 0; i--) {
+                    const workerStep = workers[i];
+
+                    // Check if the step is done
+                    if (--workerStep.secondsRemaining === 0) {
+                        // Add the step to the order
+                        order += workerStep.name;
+
+                        // Remove the step from requirements
+                        for (const step of stepsWithRequirements) {
+                            step[1] = step[1].filter(required => required.name !== workerStep.name);
+                        }
+
+                        // Remove the step from the worker
+                        workers.splice(i, 1);
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = seconds;
+        </script>
+    </body>
+</html>

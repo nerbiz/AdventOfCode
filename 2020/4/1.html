@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const passports = await fileReader.parse();
+            const requiredFields = [
+                'byr',
+                'iyr',
+                'eyr',
+                'hgt',
+                'hcl',
+                'ecl',
+                'pid',
+            ];
+
+            document.querySelector('.answer').innerText = passports
+                .filter(passport => {
+                    for (const field of requiredFields) {
+                        if (passport[field] === undefined) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                })
+                .length;
+        </script>
+    </body>
+</html>

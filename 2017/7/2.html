@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerUnique();
+            ArrayPrototype.registerDifference();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let programs = await fileReader.parse();
+
+            // Replace names with objects
+            for (const program of programs) {
+                program.subTowers = program.subTowers
+                    .map(name => programs.find(program => program.name === name));
+            }
+
+            // Merge sub-tower weights into program weights,
+            // if the sub-tower weights are all equal
+            let mergePrograms;
+            do {
+                // Find programs that have sub-towers, of which the weights are all equal
+                mergePrograms = programs.filter(program =>
+                    program.subTowers.map(subTower => subTower.weight).unique().length === 1
+                );
+
+                for (const program of mergePrograms) {
+                    // Merge the program weight with its sub-tower weights
+                    program.initialWeight = program.weight;
+                    program.weight += program.subTowers[0].weight * program.subTowers.length;
+
+                    // Remove the merged sub-towers
+                    programs = programs.difference(program.subTowers);
+                    program.subTowers = [];
+                }
+            } while (mergePrograms.length > 0);
+
+            // The anomaly is in the outermost/deepest program,
+            // which is the only program that has sub-towers, which don't have sub-towers
+            const anomalyProgram = programs.find(program =>
+                program.subTowers.length > 0
+                && program.subTowers.reduce((sum, subTower) => {
+                    return sum + subTower.subTowers.length;
+                }, 0) === 0
+            );
+
+            // Get the unique sub-tower weights
+            const weights = anomalyProgram.subTowers
+                .map(subTower => subTower.weight)
+                .unique();
+
+            // Subtract the weight difference from the heaviest sub-tower weight
+            document.querySelector('.answer').innerText = anomalyProgram.subTowers
+                .find(subTower => subTower.weight === Math.max(...weights))
+                .initialWeight
+                - Math.abs(weights[0] - weights[1]);
+        </script>
+    </body>
+</html>

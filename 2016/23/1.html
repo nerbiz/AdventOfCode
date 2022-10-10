@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const instructions = await fileReader.parse();
+            const registers = {a: 7, b: 0, c: 0, d: 0};
+
+            const getValue = value => Number.isInteger(value)
+                ? value
+                : registers[value];
+
+            const operations = {
+                tgl: (instructionIndex, amount) => {
+                    amount = getValue(amount);
+                    const instruction = instructions[instructionIndex + amount];
+                    if (instruction === undefined) {
+                        return;
+                    }
+
+                    if (instruction.length === 2) {
+                        instruction[0] = (instruction[0] === 'inc') ? 'dec' : 'inc';
+                    } else if (instruction.length === 3) {
+                        instruction[0] = (instruction[0] === 'jnz') ? 'cpy' : 'jnz';
+                    }
+                },
+                inc: register => {
+                    if (! String(register).match(/[a-d]/)) {
+                        return;
+                    }
+
+                    registers[register]++;
+                },
+                dec: register => {
+                    if (! String(register).match(/[a-d]/)) {
+                        return;
+                    }
+
+                    registers[register]--;
+                },
+                cpy: (from, to) => {
+                    if (! String(to).match(/[a-d]/)) {
+                        return;
+                    }
+
+                    registers[to] = getValue(from);
+                },
+                jnz: (value, amount) => {
+                    if (getValue(value) !== 0) {
+                        return getValue(amount);
+                    }
+                },
+            };
+
+            let index = 0;
+            while (index < instructions.length) {
+                const instruction = instructions[index];
+                const result = (instruction[0] === 'tgl')
+                    ? operations['tgl'](index, instruction[1])
+                    : operations[instruction[0]](...instruction.slice(1));
+
+                index += Number.isInteger(result) ? result : 1;
+            }
+
+            document.querySelector('.answer').innerText = registers['a'];
+        </script>
+    </body>
+</html>

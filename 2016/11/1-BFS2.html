@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const items = (await fileReader.parse())
+                .flatMap((contents, floor) => contents.map(item => {
+                    const [element, type] = item.split(' ');
+                    return {floor, element, type};
+                }))
+                // Sort items by type and element
+                .sort((a, b) => (a.type === b.type)
+                    ? (a.element < b.element ? -1 : 1)
+                    : (a.type < b.type ? 1 : -1)
+                );
+
+            console.time('Time elapsed');
+
+            const itemsAmount = items.length;
+            const microchipsAmount = itemsAmount / 2;
+            const firstGeneratorIndex = microchipsAmount + 1;
+
+            // The goal is when all items are at the 4th floor
+            const goal = (3).toString(10).repeat(itemsAmount + 1) - 0;
+
+            // Make multipliers for all digits in the state number
+            // Example: increase first digit of 22222 with 10000
+            const multipliers = [];
+            for (let i = 0; i <= itemsAmount; i++) {
+                multipliers[i] = 10 ** (items.length - i);
+            }
+
+            // Convert the building state to a number
+            // Example: 21032, if elevator is on floor 2 and 4 items are on floors 1, 0, 3 and 2
+            // Example:     2, if elevator is on floor 0 and 4 items are on floors 0, 0, 0 and 2
+            let state = 0;
+            for (let i = 0; i < itemsAmount; i++) {
+                // Place digits in order by multiplying by powers of 10
+                state += items[i].floor * multipliers[i + 1];
+            }
+
+            /**
+             * Get a single digit from a state number
+             * @param {number} state
+             * @param {number} index
+             * @returns {number}
+             */
+            const getDigit = (state, index) => Math.floor(
+                (state % (multipliers[index] * 10)) / multipliers[index]
+            );
+
+            /**
+             * Check if any microchip is fried
+             * @param {number} state
+             * @returns {boolean}
+             */
+            const microchipFried = state => {
+                const generatorFloors = [];
+                for (let i = firstGeneratorIndex; i <= itemsAmount; i++) {
+                    generatorFloors.push(getDigit(state, i));
+                }
+
+                for (let i = 1; i < firstGeneratorIndex; i++) {
+                    const microchipFloor = getDigit(state, i);
+                    if (generatorFloors[i - 1] === microchipFloor) {
+                        continue;
+                    }
+
+                    for (const floor of generatorFloors) {
+                        if (floor === microchipFloor) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            };
+
+            let skipped = 0;
+            let reused = 0;
+            const possibleMoves = [];
+
+            /**
+             * Get the possible next moves for a certain state
+             * @param {number} state
+             * @returns {array}
+             */
+            const getPossibleMoves = state => {
+                if (possibleMoves[state] !== undefined) {
+                    reused++;
+                    return possibleMoves[state];
+                }
+
+                possibleMoves[state] = [];
+
+                // Set the minimum floor, for not going back down to empty floors
+                // And gte the indexes of items that are on the current floor
+                const floor = getDigit(state, 0);
+                let minimumFloor = Infinity;
+                let itemIndexes = [];
+                for (let i = 1; i <= itemsAmount; i++) {
+                    const itemFloor = getDigit(state, i);
+                    minimumFloor = Math.min(minimumFloor, itemFloor);
+
+                    if (itemFloor === floor) {
+                        itemIndexes.push(i);
+                    }
+                }
+
+                for (const move of [-1, 1]) {
+                    const nextFloor = floor + move;
+                    if (nextFloor < minimumFloor || nextFloor > 3) {
+                        continue;
+                    }
+
+                    // Change the floor in the state number
+                    const nextFloorState = state + multipliers[0] * move;
+
+                    for (let i = 0; i < itemIndexes.length; i++) {
+                        const oneItem = nextFloorState + (multipliers[itemIndexes[i]] * move);
+
+                        // Add the options of moving 2 items
+                        for (let j = i + 1; j < itemIndexes.length; j++) {
+                            const twoItems = oneItem + (multipliers[itemIndexes[j]] * move);
+                            possibleMoves[state].push(twoItems);
+                        }
+
+                        // Add the option of moving 1 item
+                        possibleMoves[state].push(oneItem);
+                    }
+                }
+
+                return possibleMoves[state];
+            };
+
+            const queue = [[state]];
+            let fewestSteps = Infinity;
+            let loopCount = 0;
+            const succeededStates = new Set();
+            const failedStates = new Set();
+
+            while (queue.length > 0) {
+                if (++loopCount === 4e4) {
+                    console.error('Too many loops');
+                    break;
+                }
+
+                const path = queue.shift();
+                const state = path.at(-1);
+
+                // See if all items are on the top floor
+                if (state === goal) {
+                    fewestSteps = path.length - 1;
+                    console.log({fewestSteps});
+                    break;
+                }
+
+                // Don't check an already known failed state
+                if (failedStates.has(state)) {
+                    skipped++;
+                    continue;
+                }
+
+                // Don't repeat a previous state
+                if (path.slice(0, -1).includes(state)) {
+                    skipped++;
+                    continue;
+                }
+
+                // Check if any microchip is fried
+                if (! succeededStates.has(state)) {
+                    if (microchipFried(state)) {
+                        skipped++;
+                        failedStates.add(state);
+                        continue;
+                    }
+
+                    succeededStates.add(state);
+                }
+
+                const moves = getPossibleMoves(state);
+                for (const move of moves) {
+                    queue.push(path.concat(move));
+                }
+            }
+
+            console.log({loopCount});
+            console.log({skipped});
+            console.log({reused});
+            console.log({succeededStates});
+            console.log({failedStates});
+
+            document.querySelector('.answer').innerText = fewestSteps;
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>

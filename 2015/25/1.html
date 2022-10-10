@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {row, column} = await fileReader.parse();
+            // Make the row and column 0-based
+            row--;
+            column--;
+
+            // Determine the amount of rows needed,
+            // to find the value at point (row,column)
+            const maxRows = row + column + 1;
+            const sheet = new Array2d(maxRows, maxRows);
+
+            let currentValue = 20151125;
+            sheet.setItem(0, 0, currentValue);
+            for (let i = 1; i < maxRows; i++) {
+                for (let column = 0, row = i; row >= 0; column++, row--) {
+                    currentValue = (currentValue * 252533) % 33554393;
+                    sheet.setItem(column, row, currentValue);
+                }
+            }
+
+            document.querySelector('.answer').innerText = sheet.getItem(column, row).value;
+        </script>
+    </body>
+</html>

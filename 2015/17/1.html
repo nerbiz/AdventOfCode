@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {liters, containers} = await fileReader.parse();
+            containers.sort((a, b) => b - a);
+
+            const findCombinations = (liters, containers) => {
+                // Remove containers that are larger than the liters
+                containers = containers.filter(container => container <= liters);
+
+                // Check if the containers combined are large enough
+                const available = containers.reduce((sum, container) => (sum + container), 0);
+                if (available < liters) {
+                    return;
+                }
+
+                while (containers.length > 0) {
+                    // Create a copy to calculate with
+                    let litersCopy = liters;
+
+                    // Subtract the container size from the liters
+                    // and check if it matches exactly
+                    if ((litersCopy -= containers.shift()) === 0) {
+                        combinations++;
+                        continue;
+                    }
+
+                    if (containers.length > 0) {
+                        findCombinations(litersCopy, containers);
+                    }
+                }
+            };
+
+            let combinations = 0;
+            findCombinations(liters, containers);
+
+            document.querySelector('.answer').innerText = combinations;
+        </script>
+    </body>
+</html>

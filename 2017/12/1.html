@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerDifference();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const pipes = await fileReader.parse();
+            const queue = [0];
+            const group = [];
+
+            while (queue.length > 0) {
+                // Take the first item from the queue, add it to the group
+                const current = queue.shift();
+                group.push(current);
+
+                // Add unchecked items to the queue
+                queue.push(...pipes[current].difference(group, queue));
+            }
+
+            document.querySelector('.answer').innerText = group.length;
+        </script>
+    </body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const grid = new Array2d(await fileReader.parse());
+            const directions = ['up', 'right', 'down', 'left'];
+            let currentDirection = 0;
+            const bursts = 1e7;
+            let infections = 0;
+            let currentNode = grid.getItem(
+                Math.floor(grid[0].length / 2),
+                Math.floor(grid.length / 2)
+            );
+
+            // Convert node values to numbers
+            grid.tap2d(node => node.value = (node.value === '#') ? 2 : 0);
+
+            // Expand the grid to create room for traversing
+            grid.expandAllSides(250, 0);
+
+            for (let burst = 0; burst < bursts; burst++) {
+                /*
+                Define the next direction, which is status - 1
+                status 0 -> left (-1)
+                status 1 -> same (0)
+                status 2 -> right (1)
+                status 3 -> opposite (2)
+                */
+                currentDirection = (4 + currentDirection + (currentNode.value - 1)) % 4;
+
+                // Update the status of the current node
+                currentNode.value = (currentNode.value + 1) % 4;
+
+                // Update the infections amount if needed
+                infections += (currentNode.value === 2);
+
+                // Go to the next node
+                const adjacent = currentNode.getAdjacentItems(true);
+                currentNode = adjacent[directions[currentDirection]];
+            }
+
+            document.querySelector('.answer').innerText = infections;
+        </script>
+    </body>
+</html>

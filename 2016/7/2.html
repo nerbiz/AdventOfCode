@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const ipAddresses = await fileReader.parse();
+
+            // Any first a-z character,
+            // which is not preceded by an opening square bracket,
+            // followed by a different second character,
+            // followed by the first character,
+            // followed by the inverse (second-first-second) between square brackets
+            const abaBabRegExp = /(?<!\[.*)([a-z])(?!\1)([a-z])\1.*\[.*(\2\1\2)/;
+
+            // 405 is too high
+            document.querySelector('.answer').innerText = ipAddresses
+                // Place hypernet sequences at the end
+                .map(parts => {
+                    parts.sort((a, b) => a.startsWith('[') ? 1 : -1);
+                    return parts;
+                })
+                // Convert the parts to 1 string
+                .map(parts => parts.join(''))
+                .filter(ipAddress => ipAddress.match(abaBabRegExp))
+                .length;
+        </script>
+    </body>
+</html>

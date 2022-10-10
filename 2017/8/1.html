@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const instructions = await fileReader.parse();
+            const registers = {};
+
+            // Initialize all registers to 0
+            for (const instruction of instructions) {
+                registers[instruction.register] = 0;
+            }
+
+            // Evaluate a condition
+            const evaluate = (register, operator, value) => {
+                switch (operator) {
+                    case '==':
+                        return registers[register] === value;
+                    case '!=':
+                        return registers[register] !== value;
+                    case '>':
+                        return registers[register] > value;
+                    case '<':
+                        return registers[register] < value;
+                    case '>=':
+                        return registers[register] >= value;
+                    case '<=':
+                        return registers[register] <= value;
+                }
+            }
+
+            // Complete all instructions
+            for (const instruction of instructions) {
+                if (evaluate(...instruction.condition) === true) {
+                    registers[instruction.register] += instruction.modify;
+                }
+            }
+
+            document.querySelector('.answer').innerText = Math.max(...Object.values(registers));
+        </script>
+    </body>
+</html>

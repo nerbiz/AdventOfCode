@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {replacements, molecule} = await fileReader.parse();
+
+            // Sort by largest replacement first
+            // Because if it matches, it takes less steps than replacing parts of it
+            replacements.sort((a, b) => b[1].length - a[1].length);
+            let steps = 0;
+
+            while (molecule !== 'e' && ++steps) {
+                // Replace with the first (largest) matching replacement
+                const replacement = replacements.find(replacement => molecule.match(replacement[1]) !== null);
+                molecule = molecule.replace(replacement[1], replacement[0]);
+            }
+
+            document.querySelector('.answer').innerText = steps;
+        </script>
+    </body>
+</html>

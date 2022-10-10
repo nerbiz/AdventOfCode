@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const reindeer = await fileReader.parse();
+            const maxSeconds = 2503;
+
+            reindeer.forEach(reindeer => {
+                reindeer.distance = 0;
+                reindeer.points = 0;
+            });
+
+            for (let seconds = 1; seconds <= maxSeconds; seconds++) {
+                reindeer.map(reindeer => {
+                    // Seconds moved = number of move+rest intervals * duration
+                    reindeer.distance = (Math.floor(seconds / (reindeer.duration + reindeer.rest))
+                        * reindeer.duration
+                        // Add the remaining seconds after interval dividing (at most the duration)
+                        + (seconds % (reindeer.duration + reindeer.rest) > reindeer.duration
+                            ? reindeer.duration
+                            : seconds % (reindeer.duration + reindeer.rest)))
+                        // Amount of seconds moved * the speed per second
+                        * reindeer.speed;
+
+                    return reindeer;
+                })
+                .sort((a, b) => b.distance - a.distance)
+                .at(0)
+                .points++;
+            }
+
+            document.querySelector('.answer').innerText = reindeer
+                .sort((a, b) => b.points - a.points)
+                .at(0)
+                .points;
+        </script>
+    </body>
+</html>

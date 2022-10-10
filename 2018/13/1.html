@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerSortGrouped();
+            const fileReader = new FileReader('./data.txt', new Parser(), false);
+            const map = new Array2d(await fileReader.parse());
+            let carts = [];
+            const directions = ['up', 'right', 'down', 'left'];
+            let crashLocation;
+
+            map.forEach2d((track, x, y) => {
+                const directions = ['^', '>', 'v', '<'];
+                if (! directions.includes(track.value)) {
+                    return;
+                }
+
+                // Add a cart object
+                const direction = directions.indexOf(track.value);
+                carts.push({x, y, direction, nextTurn: 1});
+
+                // Replace the cart with a track in the map
+                track.value = (['<', '>'].includes(track.value)) ? '-' : '|';
+            });
+
+            moveLoop: while (true) {
+                // Sort by position, top-left to bottom-right
+                carts = carts.sortGrouped('y', (a, b) => a.y - b.y,
+                    (a, b) => a.x - b.x);
+
+                // Move the carts 1 step
+                for (const cart of carts) {
+                    const currentLocation = map.getItem(cart.x, cart.y);
+
+                    // Change direction at corners and intersections
+                    if (currentLocation.value === '/') {
+                        cart.direction += (cart.direction & 1) ? -1 : 1;
+                    } else if (currentLocation.value === '\\') {
+                        cart.direction += (cart.direction & 1) ? 1 : -1;
+                    } else if (currentLocation.value === '+') {
+                        // Left, straight, right
+                        // in direction change: -1, 0, 1
+                        cart.nextTurn++;
+                        if (cart.nextTurn === 2) {
+                            cart.nextTurn = -1;
+                        }
+
+                        cart.direction += cart.nextTurn;
+                    }
+
+                    // Keep the direction within bounds
+                    cart.direction = (4 + cart.direction) % 4;
+
+                    // Move the cart to the new location
+                    const adjacent = currentLocation.getAdjacentItems(true);
+                    const nextLocation = adjacent[directions[cart.direction]];
+                    cart.x = nextLocation.x;
+                    cart.y = nextLocation.y;
+
+                    // See if there is a collision
+                    const otherCarts = carts.filter(otherCart => otherCart !== cart);
+                    for (const otherCart of otherCarts) {
+                        if (otherCart.x === cart.x && otherCart.y === cart.y) {
+                            crashLocation = `${cart.x},${cart.y}`;
+                            break moveLoop;
+                        }
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = crashLocation;
+        </script>
+    </body>
+</html>

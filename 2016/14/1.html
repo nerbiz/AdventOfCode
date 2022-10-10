@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script src="./blueimp-JavaScript-MD5/md5.min.js"></script>
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const salt = await fileReader.parse();
+            const threeRegExp = /(.)\1\1/;
+            const hashes = [];
+
+            let index = 0;
+            let keysFound = 0;
+            findKeys: while (true) {
+                // Reuse existing hash or create a new one
+                hashes[index] = hashes[index] || md5(salt + index);
+                const match = hashes[index].match(threeRegExp);
+
+                // The hash has three consecutive same characters
+                if (match !== null) {
+                    for (let i = index + 1; i <= index + 1000; i++) {
+                        hashes[i] = hashes[i] || md5(salt + i);
+
+                        // See if the hash contains five of the same characters, consecutively
+                        const fiveRegExp = new RegExp('(' + match[1] + ')\\1\\1\\1\\1');
+                        if (hashes[i].match(fiveRegExp)) {
+                            // Enough keys found
+                            if (++keysFound === 64) {
+                                break findKeys;
+                            }
+                        }
+                    }
+                }
+
+                index++;
+            }
+
+            document.querySelector('.answer').innerText = index;
+        </script>
+    </body>
+</html>

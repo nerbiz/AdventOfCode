@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const elvesAmount = await fileReader.parse();
+            let elves = new Array(elvesAmount)
+                .fill(undefined)
+                .map((elf, index) => index + 1);
+
+            while (elves.length > 1) {
+                let elfIndex = -1;
+
+                while (++elfIndex >= 0) {
+                    // Find the target index to be removed
+                    // The index is the amount of elves to be removed, and the start index
+                    const targetIndex = (elfIndex * 2)
+                        + Math.floor((elves.length - elfIndex) / 2);
+
+                    // Continue while target elves exist
+                    if (elves[targetIndex] === undefined) {
+                        break;
+                    }
+
+                    // Flag the elf for removal
+                    elves[targetIndex] = undefined;
+                }
+
+                // Remove the flagged elves
+                elves = elves.filter(elf => elf !== undefined);
+
+                // Place the 'used' elves at the end of the list
+                const usedElves = elves.slice(0, elfIndex);
+                elves = elves.slice(elfIndex).concat(usedElves);
+            }
+
+            document.querySelector('.answer').innerText = elves.at(0);
+        </script>
+    </body>
+</html>

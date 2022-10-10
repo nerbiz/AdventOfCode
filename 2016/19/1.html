@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const elvesAmount = await fileReader.parse();
+            let elves = new Array(elvesAmount)
+                .fill(undefined)
+                .map((elf, index) => index + 1);
+
+            while (elves.length > 1) {
+                // Whether there is an odd number of elves left
+                const isOdd = (elves.length % 2 !== 0);
+
+                // Every second elf has its presents taken
+                elves = elves.filter((elf, index) => index % 2 === 0);
+
+                // If there was an odd number of elves, the last takes from the first
+                if (isOdd) {
+                    elves.shift();
+                }
+            }
+
+            document.querySelector('.answer').innerText = elves.at(0);
+        </script>
+    </body>
+</html>

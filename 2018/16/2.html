@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {samples, testProgram} = await fileReader.parse();
+
+            const operations = [
+                /* addr */ (registers, a, b) => (registers[a] - 0) + (registers[b] - 0),
+                /* addi */ (registers, a, b) => (registers[a] - 0) + b,
+                /* mulr */ (registers, a, b) => registers[a] * registers[b],
+                /* muli */ (registers, a, b) => registers[a] * b,
+                /* banr */ (registers, a, b) => registers[a] & registers[b],
+                /* bani */ (registers, a, b) => registers[a] & b,
+                /* borr */ (registers, a, b) => registers[a] | registers[b],
+                /* bori */ (registers, a, b) => registers[a] | b,
+                /* setr */ (registers, a) => (registers[a] - 0),
+                /* seti */ (registers, a) => a,
+                /* gtir */ (registers, a, b) => Number(a > registers[b]),
+                /* gtri */ (registers, a, b) => Number(registers[a] > b),
+                /* gtrr */ (registers, a, b) => Number(registers[a] > registers[b]),
+                /* eqir */ (registers, a, b) => Number(a === (registers[b] - 0)),
+                /* eqri */ (registers, a, b) => Number((registers[a] - 0) === b),
+                /* eqrr */ (registers, a, b) => Number(registers[a] === registers[b]),
+            ];
+
+            // The list of matched opcode:operation entries
+            const matchedOperations = [];
+
+            // Determine which opcode belongs to which operation
+            findMatches: while (samples.length > 0) {
+                checkSample: for (const sample of samples) {
+                    let matches = [];
+                    for (const operation of operations) {
+                        // Perform the operation on the registers
+                        const result = operation(sample.before, ...sample.instruction.slice(1, 3));
+
+                        // See if the result matches
+                        if (result === sample.after[sample.instruction[3]] - 0) {
+                            matches.push([sample.instruction[0], operation]);
+                        }
+
+                        if (matches.length > 1) {
+                            continue checkSample;
+                        }
+                    }
+
+                    // Only 1 match, set the operation in the matches array
+                    const [opcode, operation] = matches[0];
+                    matchedOperations[opcode] = operation;
+
+                    // Remove matched samples and operation
+                    samples = samples.filter(sample => sample.instruction[0] !== opcode);
+                    operations.splice(operations.indexOf(operation), 1);
+
+                    continue findMatches;
+                }
+            }
+
+            // Execute the test program on the registers
+            const registers = Array(4).fill(0);
+            for (const instruction of testProgram) {
+                const [opcode, arg1, arg2, register] = instruction;
+                registers[register] = matchedOperations[opcode](registers, arg1, arg2);
+            }
+
+            document.querySelector('.answer').innerText = registers[0];
+        </script>
+    </body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const instructions = await fileReader.parse();
+
+            const lights = Array2d.withData({value: 0}, 1000, 1000);
+
+            instructions.forEach(instruction => {
+                const slice = lights.slice2d(instruction.startX, instruction.startY,
+                    instruction.endX + 1, instruction.endY + 1);
+
+                slice.forEach2d(light => {
+                    switch (instruction.action) {
+                        case 'on':
+                            light.value++;
+                            break;
+                        case 'off':
+                            light.value = Math.max(0, light.value - 1);
+                            break;
+                        case 'toggle':
+                            light.value += 2;
+                            break;
+                    }
+                });
+            });
+
+            document.querySelector('.answer').innerText = lights
+                .reduce2d((sum, light) => (sum + light.value), 0);
+        </script>
+    </body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const adapters = await fileReader.parse();
+
+            // Add the charging outlet
+            adapters.unshift(0);
+
+            // Add the device
+            adapters.sort((a, b) => a - b);
+            adapters.push(adapters.at(-1) + 3);
+
+            // Difference amounts are the keys
+            const differences = [0, 0, 0, 0];
+
+            // Get all the differences between adapters
+            adapters.slice(0, -1).forEach((adapter, index) => {
+                const difference = adapters[index + 1] - adapter;
+                differences[difference]++;
+            });
+
+            document.querySelector('.answer').innerText = differences[1] * differences[3];
+        </script>
+    </body>
+</html>

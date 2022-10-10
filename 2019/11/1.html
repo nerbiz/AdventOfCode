@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import IntcodeComputer from '../IntcodeComputer.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            const intcodeComputer = new IntcodeComputer(program);
+
+            const directionsMap = ['up', 'right', 'down', 'left'];
+            let directionIndex = 0;
+
+            const gridSize = 150;
+            const grid = Array2d.withData({value: 0}, gridSize, gridSize);
+            let position = grid.getItem(gridSize / 2, gridSize / 2);
+
+            while (true) {
+                position.visited = true;
+                intcodeComputer.setInput(position.value);
+                const colorValue = intcodeComputer.getNextSignal();
+
+                // Stop if there are no signals anymore
+                if (colorValue === undefined) {
+                    break;
+                }
+
+                // Update the value of the position
+                position.value = colorValue;
+
+                // Change the direction, value 0 becomes -1 (left)
+                directionIndex += intcodeComputer.getNextSignal() || -1;
+                // Keep the index within bounds (0 through 3)
+                directionIndex = (4 + directionIndex) % 4;
+
+                // Define the next position
+                const adjacent = position.getAdjacentItems(true);
+                position = adjacent[directionsMap[directionIndex]];
+            }
+
+            document.querySelector('.answer').innerText = grid
+                .filter2d(item => item.visited === true)
+                .length;
+        </script>
+    </body>
+</html>

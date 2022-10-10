@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import IntcodeComputer from '../IntcodeComputer.js';
+            import Array2d from '../../classes/Array2d.js';
+            import Pathfinding from '../../classes/Pathfinding.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            const intcodeComputer = new IntcodeComputer(program);
+            const gridSize = 50;
+            const grid = new Array2d(gridSize, gridSize);
+
+            // Directions are 1-based
+            const oppositeDirections = [null, 2, 1, 4, 3];
+
+            // Set the node to start from
+            const startNode = grid.getItem(gridSize / 2, gridSize / 2);
+            startNode.value = 1;
+
+            (function traverse(node) {
+                const {up, down, left, right} = node.getAdjacentItems(true);
+                const adjacent = [up, down, left, right];
+
+                for (let i = 0; i < adjacent.length; i++) {
+                    // Skip visited nodes
+                    if (adjacent[i].value !== undefined) {
+                        continue;
+                    }
+
+                    // Set the node type of the neighbour
+                    intcodeComputer.setInput(i + 1);
+                    adjacent[i].value = intcodeComputer.getNextSignal();
+
+                    // The node is a wall, continue to next neighbour
+                    if (adjacent[i].value === 0) {
+                        continue;
+                    }
+
+                    // The node is traversable (could be the target)
+                    traverse(adjacent[i]);
+
+                    // Return from the neighbour to the current node
+                    intcodeComputer.setInput(oppositeDirections[i + 1]);
+                    intcodeComputer.getNextSignal();
+                }
+            })(startNode);
+
+            const targetNode = grid.find2d(item => item.value === 2);
+            targetNode.value = 'O';
+
+            let oxygenNodes = [targetNode];
+            let minutes = 0;
+
+            while (oxygenNodes.length > 0) {
+                for (const node of oxygenNodes) {
+                    // Spread oxygen to adjacent nodes
+                    node.getAdjacentItems()
+                        .filter(node => node.value === 1)
+                        .forEach(node => node.value = 'O');
+
+                    // Exclude the node from following loops
+                    node.value = 'X';
+                }
+
+                minutes++;
+
+                oxygenNodes = grid.filter2d(node => node.value === 'O');
+            }
+
+            // -1, because of the last loop
+            document.querySelector('.answer').innerText = minutes - 1;
+        </script>
+    </body>
+</html>

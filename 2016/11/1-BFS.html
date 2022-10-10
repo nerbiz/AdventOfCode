@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./datatest.txt', new Parser());
+            let itemIndex = -1;
+            const items = (await fileReader.parse())
+                .flatMap((contents, floor) => contents.map(item => {
+                    const [element, type] = item.split(' ');
+                    return {floor, index: ++itemIndex, element, type};
+                }));
+
+            console.time('Time elapsed');
+
+            /**
+             * Check if any microchip is fried
+             * @return {boolean}
+             */
+            const microchipFried = () => {
+                // Sort items by type and element
+                const itemsSorted = items.slice(0).sort((a, b) => (a.type === b.type)
+                    ? (a.element < b.element ? -1 : 1)
+                    : (a.type < b.type ? -1 : 1)
+                );
+
+                // First half is generators, second half is microchips
+                const generators = itemsSorted.slice(0, itemsSorted.length / 2);
+                const microchips = itemsSorted.slice(itemsSorted.length / 2);
+
+                for (let i = 0; i < microchips.length; i++) {
+                    // See if the chip is protected by its corresponding generator
+                    if (generators[i].floor === microchips[i].floor) {
+                        continue;
+                    }
+
+                    // If not, the chip is fried if there is a different generator
+                    for (const generator of generators) {
+                        if (generator.floor === microchips[i].floor) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            };
+
+            /**
+             * Get a string representing the current items state
+             * @return {string}
+             */
+            const getStateString = () => {
+                let string = '';
+                for (let x = 0; x < items.length; x++) {
+                    string += x + ',' + items[x].floor;
+                }
+
+                return string;
+            };
+
+            // Format: [move, index1, index2, ...]
+            // Example: [-1, 0, 2] means moving items 0 and 2 to a floor below
+            // [0] is just a dummy instruction, to get the queue started
+            const queue = [[[0]]];
+            let fewestSteps;
+            let loopCount = 0;
+
+            do {
+                if (++loopCount === 10000) {
+                    console.error('Too many loops');
+                    break;
+                }
+
+                let succeeded = true;
+
+                // Do all the steps
+                const steps = queue.shift();
+                const states = [];
+                let currentFloor = 0;
+                for (const step of steps) {
+                    const move = step[0];
+                    for (const index of step.slice(1)) {
+                        items[index].floor += move;
+                    }
+                    currentFloor += move;
+                    states.push(getStateString());
+                }
+
+                // Don't repeat a previous state
+                if (states.slice(0, -1).includes(states.at(-1))) {
+                    succeeded = false;
+                }
+
+                // Check if any microchips are fried
+                if (microchipFried()) {
+                    succeeded = false;
+                }
+
+                if (succeeded) {
+                    // Set the minimum floor, for not going back down to empty floors
+                    let minimumFloor = Infinity;
+                    for (const item of items) {
+                        minimumFloor = Math.min(minimumFloor, item.floor);
+                    }
+
+                    // See if all items are on the top floor
+                    if (minimumFloor === 3) {
+                        fewestSteps = steps.length - 1;
+                        console.log({fewestSteps});
+                        break;
+                    }
+
+                    const floorItems = items.filter(item => item.floor === currentFloor);
+
+                    for (const move of [-1, 1]) {
+                        const nextFloor = currentFloor + move;
+                        if (nextFloor < minimumFloor || nextFloor > 3) {
+                            continue;
+                        }
+
+                        for (let i = 0; i < floorItems.length; i++) {
+                            const item1 = floorItems[i];
+
+                            // Try to move 2 items
+                            for (let j = i + 1; j < floorItems.length; j++) {
+                                queue.push(steps.concat([[move, item1.index, floorItems[j].index]]));
+                            }
+
+                            // If moving 2 items failed, try to move 1 item
+                            queue.push(steps.concat([[move, item1.index]]));
+                        }
+                    }
+                }
+
+                // Revert all the steps
+                for (let i = steps.length - 1; i > 0; i--) {
+                    const move = steps[i][0];
+                    for (const index of steps[i].slice(1)) {
+                        items[index].floor += move * -1;
+                    }
+                }
+            } while (queue.length > 0);
+
+            console.log({loopCount});
+
+            document.querySelector('.answer').innerText = fewestSteps;
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>

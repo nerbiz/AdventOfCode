@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            program[1] = 12;
+            program[2] = 2;
+
+            let index = 0;
+            while (index < program.length) {
+                const opcode = program[index];
+                if (opcode === 99) {
+                    break;
+                }
+
+                const arg1 = program[program[++index]];
+                const arg2 = program[program[++index]];
+
+                program[program[++index]] = (opcode === 1)
+                    ? arg1 + arg2
+                    : arg1 * arg2;
+
+                index++;
+            }
+
+            document.querySelector('.answer').innerText = program[0];
+        </script>
+    </body>
+</html>

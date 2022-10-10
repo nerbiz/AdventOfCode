@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer">Score: <span class="score"></span></p>
+        <p class="answer monospace game-area"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import IntcodeComputer from '../IntcodeComputer.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            program[0] = 2;
+            const intcodeComputer = new IntcodeComputer(program);
+            const grid = Array2d.withData({value: 0}, 20, 44);
+
+            const scoreElement = document.querySelector('.score');
+            const gameArea = document.querySelector('.game-area');
+
+            const gameElements = [
+                // Empty
+                ' ',
+                // Wall
+                '█',
+                // Block
+                '░',
+                // Paddle
+                '━',
+                // Ball
+                '◍',
+            ];
+
+            let gameLoop = null;
+            let ballX;
+            let paddleX;
+
+            (function drawGameArea() {
+                const signal = {
+                    x: intcodeComputer.getNextSignal(),
+                    y: intcodeComputer.getNextSignal(),
+                    value: intcodeComputer.getNextSignal(),
+                };
+
+                // Stop if the program ended
+                if (signal.x === undefined) {
+                    clearInterval(gameLoop);
+                    return;
+                }
+
+                // Display the score
+                if (signal.x === -1 && signal.y === 0) {
+                    scoreElement.innerText = signal.value;
+                    return;
+                }
+
+                const tile = grid.getItem(signal.x, signal.y);
+                tile.value = signal.value;
+
+                // Get the current paddle and ball X positions
+                if (signal.value === 3) {
+                    paddleX = signal.x;
+                } else if (signal.value === 4) {
+                    ballX = signal.x;
+                }
+
+                // Decide if the paddle goes left, right or stands still (-1, 1 or 0)
+                if (ballX !== undefined && paddleX !== undefined) {
+                    const difference = ballX - paddleX;
+                    intcodeComputer.setInput(
+                        (difference === 0) ? 0 : difference / Math.abs(difference)
+                    );
+                }
+
+                // Draw the elements on screen
+                gameArea.innerText = grid
+                    .map(row => row.map(item => gameElements[item.value]).join(''))
+                    .join('\n');
+
+                if (gameLoop === null) {
+                    // Start the slower loop when the game area is drawn
+                    if (tile.y === grid.length - 1 && tile.x === grid[0].length - 1) {
+                        gameLoop = setInterval(drawGameArea, 1);
+                    } else {
+                        drawGameArea();
+                    }
+                }
+            })();
+        </script>
+    </body>
+</html>

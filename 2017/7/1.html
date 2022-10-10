@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerCountValues();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const programs = await fileReader.parse();
+
+            // The bottom program is the name that appears only once
+            document.querySelector('.answer').innerText = programs
+                .map(program => [program.name].concat(program.subTowers))
+                .flat()
+                .countValues()
+                .find(occurrences => occurrences[1] === 1)
+                .at(0);
+        </script>
+    </body>
+</html>

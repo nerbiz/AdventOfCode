@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import LinkedList from '../../classes/LinkedList.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {players, lastMarble} = await fileReader.parse();
+            lastMarble *= 100;
+            const circle = new LinkedList();
+            const playerScores = Array(players).fill(0);
+            let currentPlayer = 0;
+
+            circle.add(0);
+            let currentMarble = circle.getFirst();
+
+            for (let marbleValue = 1; marbleValue <= lastMarble; marbleValue++) {
+                currentPlayer = (currentPlayer + 1) % players;
+
+                if (marbleValue % 23 === 0) {
+                    // Get the marble to remove, 7 places to the left of the current
+                    const removeMarble = circle.getPrevious(currentMarble, 7);
+                    currentMarble = removeMarble.next;
+
+                    // Add the marble value + the removed marble value to the score
+                    playerScores[currentPlayer] += marbleValue + removeMarble.value;
+
+                    circle.remove(removeMarble);
+                } else {
+                    // Add a marble between 1 and 2 marbles to the right of the current
+                    const nextMarble = currentMarble.next;
+                    circle.addAfter(nextMarble, marbleValue);
+                    currentMarble = nextMarble.next;
+                }
+            }
+
+            document.querySelector('.answer').innerText = playerScores
+                .sort((a, b) => b - a)
+                .at(0);
+        </script>
+    </body>
+</html>

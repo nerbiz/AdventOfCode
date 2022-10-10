@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerCountValues();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const boxIds = await fileReader.parse();
+            let twoSame = 0;
+            let threeSame = 0;
+
+            for (const boxId of boxIds) {
+                // Get a list of character occurrences
+                const occurrences = boxId.countValues().map(occurrences => occurrences[1]);
+
+                // Increase the amounts if there are 2 or 3 duplicate letters
+                twoSame += occurrences.includes(2);
+                threeSame += occurrences.includes(3);
+            }
+
+            document.querySelector('.answer').innerText = twoSame * threeSame;
+        </script>
+    </body>
+</html>

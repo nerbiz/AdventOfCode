@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../../classes/Utilities.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let octopusMap = await fileReader.parse();
+            const steps = 100;
+            let flashCount = 0;
+
+            // Convert numbers into octopus objects
+            octopusMap = Utilities.map2D(octopusMap, (value, x, y) => ({x, y, value, hasFlashed: false}));
+
+            const getAdjacentOctopuses = octopus => {
+                const adjacent = [];
+
+                // Y: up, same, down
+                for (let y = octopus.y - 1; y <= octopus.y + 1; y++) {
+                    // X: left, same, right
+                    for (let x = octopus.x - 1; x <= octopus.x + 1; x++) {
+                        // Don't include self
+                        if (x === octopus.x && y === octopus.y) {
+                            continue;
+                        }
+
+                        // Add the value if the octopus exists
+                        if (octopusMap[y] !== undefined && octopusMap[y][x] !== undefined) {
+                            adjacent.push(octopusMap[y][x]);
+                        }
+                    }
+                }
+
+                return adjacent;
+            };
+
+            for (let step = 0; step < steps; step++) {
+                // Add 1 to every octopus value
+                Utilities.forEach2D(octopusMap, (octopus, x, y) => octopus.value++);
+
+                // Determine which octopuses will flash in this round
+                let willFlash = octopusMap.flat().filter(octopus => (octopus.value > 9 && octopus.hasFlashed === false));
+
+                // Continue as long as there are octopuses that will flash
+                while (willFlash.length > 0) {
+                    willFlash.forEach(octopus => {
+                        // Increase the value of adjacent octopuses
+                        getAdjacentOctopuses(octopus).forEach(octopus => {
+                            if (! octopus.hasFlashed) {
+                                octopus.value++;
+                            }
+                        });
+
+                        octopus.value = 0;
+                        octopus.hasFlashed = true;
+                        flashCount++;
+                    });
+
+                    // Determine which octopuses will flash in the next loop
+                    willFlash = octopusMap.flat().filter(octopus => octopus.value > 9);
+                }
+
+                // Reset the flash status for the next round
+                Utilities.map2D(octopusMap, (octopus, x, y) => {
+                    octopus.hasFlashed = false;
+                });
+            }
+
+            document.querySelector('.answer').innerText = flashCount;
+        </script>
+    </body>
+</html>

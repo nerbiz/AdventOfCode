@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const planet = new Array2d(await fileReader.parse());
+            const states = [];
+
+            while (true) {
+                let state = '';
+
+                planet
+                    .tap2d(location => {
+                        const bugsAmount = location.getAdjacentItems()
+                            .filter(location => location?.value === '#')
+                            .length;
+
+                        if (location.value === '#' && bugsAmount !== 1) {
+                            location.newValue = '.';
+                        } else if (location.value === '.' && (bugsAmount === 1 || bugsAmount === 2)) {
+                            location.newValue = '#';
+                        } else {
+                            location.newValue = location.value;
+                        }
+                    })
+                    .forEach2d(location => {
+                        location.value = location.newValue;
+                        state += location.value;
+                    });
+
+                if (states.includes(state)) {
+                    break;
+                }
+
+                states.push(state);
+            }
+
+            document.querySelector('.answer').innerText = planet
+                .flat()
+                .reduce((sum, location, index) => {
+                    return sum + (location.value === '#' ? 2 ** index : 0)
+                }, 0);
+        </script>
+    </body>
+</html>

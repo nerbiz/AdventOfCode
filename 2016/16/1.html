@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {diskLength, initialState} = await fileReader.parse();
+            let string = initialState;
+
+            // Generate a string long enough to fill the disk
+            while (string.length < diskLength) {
+                // Append the string with '0' and its reverse, with 0/1 characters swapped
+                string = string + '0' + string
+                    .split('')
+                    .reverse()
+                    .map(character => Number(! Number(character)))
+                    .join('');
+            }
+
+            // Cut off at the length of the disk
+            string = string.substring(0, diskLength);
+
+            // Create the checksum for the generated string, with an odd length
+            do {
+                string = string
+                    // Get all character pairs
+                    .match(/../g)
+                    // Equal characters become 1, otherwise 0
+                    .map(pair => Number(pair[0] === pair[1]))
+                    .join('');
+            } while (string.length % 2 === 0);
+
+            document.querySelector('.answer').innerText = string;
+        </script>
+    </body>
+</html>

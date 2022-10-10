@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Board from './Board.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser(), false);
+            const { drawnNumbers, boardsNumbers } = await fileReader.parse();
+
+            const boards = boardsNumbers.map((boardNumbers, index) => new Board(index, boardNumbers));
+            const winningBoards = [];
+
+            for (let i = 0; i < drawnNumbers.length; i++) {
+                const number = drawnNumbers[i];
+
+                // Loop backwards, because of splicing
+                for (let j = boards.length - 1; j > 0; j--) {
+                    const board = boards[j];
+
+                    if (board.checkWin(number) === true) {
+                        winningBoards.push(boards.splice(j, 1)[0]);
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = winningBoards[winningBoards.length - 1].calculateScore();
+        </script>
+    </body>
+</html>

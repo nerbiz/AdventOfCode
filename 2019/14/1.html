@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const formulas = await fileReader.parse();
+            let oreNeeded = 0;
+
+            // The available/surplus resources
+            const stock = {};
+
+            const getChemical = (name, amountNeeded) => {
+                // There is no formula for ORE, just add the required amount
+                if (name === 'ORE') {
+                    oreNeeded += amountNeeded;
+                    return;
+                }
+
+                const formula = formulas[name];
+
+                // Use existing resources from the stock, if there are any
+                if (name in stock && stock[name] > 0) {
+                    stock[name] -= amountNeeded;
+                    amountNeeded = (stock[name] < 0) ? stock[name] * -1 : 0;
+                    stock[name] = Math.max(0, stock[name]);
+                }
+
+                if (amountNeeded > 0) {
+                    // Calculate how many reactions are needed
+                    const reactionsNeeded = Math.ceil(amountNeeded / formula.amount);
+
+                    // Get the required other chemicals for the formula
+                    for (const chemical in formula.requirements) {
+                        const amount = formula.requirements[chemical];
+                        getChemical(chemical, amount * reactionsNeeded);
+                    }
+
+                    // Add the surplus to the stock
+                    const amountCreated = reactionsNeeded * formula.amount;
+                    stock[name] = (stock[name] || 0) + (amountCreated - amountNeeded);
+                }
+            };
+
+            getChemical('FUEL', 1);
+
+            document.querySelector('.answer').innerText = oreNeeded;
+        </script>
+    </body>
+</html>

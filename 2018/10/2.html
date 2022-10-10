@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const lightPoints = await fileReader.parse();
+            let minX, maxX, minY, maxY;
+            let smallestArea = Infinity;
+            let seconds = 0;
+
+            while (++seconds) {
+                minX = maxX = minY = maxY = 0;
+                const xPositions = [];
+                const yPositions = [];
+
+                // Change the lights' positions and store the x/y values
+                for (const point of lightPoints) {
+                    point.position[0] += point.velocity[0];
+                    point.position[1] += point.velocity[1];
+                    xPositions.push(point.position[0]);
+                    yPositions.push(point.position[1]);
+                }
+
+                // Calculate the area of the current lights' state
+                minX = Math.min(...xPositions);
+                maxX = Math.max(...xPositions);
+                minY = Math.min(...yPositions);
+                maxY = Math.max(...yPositions);
+                const area = Math.abs(maxX - minX) * Math.abs(maxY - minY);
+
+                // If the area expands, revert to the previous state and stop the loop
+                if (area > smallestArea) {
+                    seconds--;
+
+                    for (const point of lightPoints) {
+                        point.position[0] -= point.velocity[0];
+                        point.position[1] -= point.velocity[1];
+                    }
+
+                    break;
+                }
+
+                // Update the smallest area value
+                smallestArea = area;
+            }
+
+            // Create the 'sky' to place the lights in
+            const sky = Array(maxY + 1)
+                .fill(0)
+                .map(() => Array(maxX + 1).fill(null));
+
+            // Set the lights in the 'sky'
+            lightPoints.map(point => point.position).forEach(coordinates => {
+                const [x, y] = coordinates;
+                sky[y][x] = true;
+            });
+
+            document.querySelector('.answer').innerText = seconds;
+        </script>
+    </body>
+</html>

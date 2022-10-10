@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let password = await fileReader.parse();
+
+            const incrementPassword = (string, index) => {
+                // Define the new incremented character, wrap around from 'z' to 'a'
+                const newCharacter = (string.at(index) === 'z')
+                    ? 'a'
+                    : String.fromCharCode(string.charCodeAt(index) + 1);
+
+                string = string.slice(0, index)
+                    // Replace the character at the specified index
+                    + newCharacter
+                    // Replace characters after the index with 'a'
+                    + string.slice(index + 1)
+                        .split('')
+                        .map(character => 'a')
+                        .join('');
+
+                // If the character was wrapped around to 'a', increment the next character
+                if (string.at(index) === 'a') {
+                    return incrementPassword(string, index - 1);
+                }
+
+                return string;
+            };
+
+            const skipIllegalCharacters = string => {
+                const illegalIndex = string.search(/i|o|l/g);
+
+                return (illegalIndex > -1)
+                    ? incrementPassword(string, illegalIndex)
+                    : string;
+            };
+
+            const includesStraight = string => {
+                return string.split('')
+                    .map(letter => letter.charCodeAt(0))
+                    .some((charCode, index, charCodes) => charCode === charCodes[index + 1] - 1
+                        && charCode === charCodes[index + 2] - 2);
+            };
+
+            const hasTwoPairs = string => {
+                return /([a-z])\1.*([a-z])\2/g.test(string);
+            };
+
+            const findNextPassword = password => {
+                while (true) {
+                    password = incrementPassword(password, password.length - 1);
+                    password = skipIllegalCharacters(password);
+
+                    if (includesStraight(password) && hasTwoPairs(password)) {
+                        return password;
+                    }
+                }
+            }
+
+            password = findNextPassword(password);
+            password = findNextPassword(password);
+
+            document.querySelector('.answer').innerText = password;
+        </script>
+    </body>
+</html>

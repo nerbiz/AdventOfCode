@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerCountValues();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const messages = await fileReader.parse();
+
+            const characters = [];
+            for (let i = 0; i < messages[0].length; i++) {
+                const character = messages
+                    // Take the nth index of each row
+                    .map(message => message[i])
+                    .countValues()
+                    .sort((a, b) => b[1] - a[1])
+                    // Take the most occurring character
+                    .at(0)
+                    // The first index is the character
+                    .at(0);
+
+                characters.push(character);
+            }
+
+            document.querySelector('.answer').innerText = characters.join('');
+        </script>
+    </body>
+</html>

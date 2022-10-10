@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const items = (await fileReader.parse())
+                .flatMap((contents, floor) => contents.map(item => {
+                    const [element, type] = item.split(' ');
+                    return {floor, element, type};
+                }))
+                // Sort items by type and element
+                .sort((a, b) => (a.type === b.type)
+                    ? (a.element < b.element ? -1 : 1)
+                    : (a.type < b.type ? 1 : -1)
+                );
+
+            // First half is generators, second half is microchips
+            const microchips = items.slice(0, items.length / 2);
+            const generators = items.slice(items.length / 2);
+
+            console.time('Time elapsed');
+
+            /**
+             * Check if any microchip is fried
+             * @return {boolean}
+             */
+            const microchipFried = () => {
+                for (let i = 0; i < microchips.length; i++) {
+                    // See if the chip is protected by its corresponding generator
+                    if (generators[i].floor === microchips[i].floor) {
+                        continue;
+                    }
+
+                    // If not, the chip is fried if there is a different generator
+                    for (const generator of generators) {
+                        if (generator.floor === microchips[i].floor) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            };
+
+            /**
+             * Get a number representing the current items state
+             * Example: 1032, if 4 items are on floors 1, 0, 2 and 3
+             * Example: 2, if 4 items are on floors 0, 0, 0 and 2
+             * @return {number}
+             */
+            const getCurrentState = () => {
+                let state = 0;
+                for (let i = 0; i < items.length; i++) {
+                    // Place digits in order by multiplying by powers of 10
+                    state += items[i].floor * (10 ** (items.length - i - 1));
+                }
+
+                return state;
+            };
+
+            let fewestSteps = Infinity;
+            let loopCount = 0;
+            let skipped = 0;
+            const succeededStates = new Set();
+            const failedStates = new Set();
+
+            const findFewestSteps = (floor = 0, states = []) => {
+                if (++loopCount === 1e6) {
+                    throw new Error('Too much recursion');
+                }
+
+                // Set the minimum floor, for not going back down to empty floors
+                let minimumFloor = Infinity;
+                const floorItems = [];
+                for (const item of items) {
+                    minimumFloor = Math.min(minimumFloor, item.floor);
+
+                    if (item.floor === floor) {
+                        floorItems.push(item);
+                    }
+                }
+
+                // See if all items are on the top floor
+                if (minimumFloor === 3) {
+                    if (states.length < fewestSteps) {
+                        fewestSteps = states.length;
+                        console.log({fewestSteps});
+                    }
+
+                    return;
+                }
+
+                // Don't check an already known failed state
+                const state = getCurrentState();
+                if (failedStates.has(state)) {
+                    skipped++;
+                    return;
+                }
+
+                // Don't repeat a previous state
+                if (states.includes(state)) {
+                    skipped++;
+                    return;
+                }
+                states.push(state);
+
+                // Stop if the amount of steps is already larger than the fewest
+                if (states.length >= fewestSteps) {
+                    skipped++;
+                    return;
+                }
+
+                // Check if any microchips are fried
+                if (! succeededStates.has(state) && microchipFried()) {
+                    skipped++;
+                    failedStates.add(state);
+                    return;
+                }
+
+                succeededStates.add(state);
+
+                for (const move of [-1, 1]) {
+                    const nextFloor = floor + move;
+                    if (nextFloor < minimumFloor || nextFloor > 3) {
+                        continue;
+                    }
+
+                    for (let i = 0; i < floorItems.length; i++) {
+                        const item1 = floorItems[i];
+                        item1.floor += move;
+
+                        // Try to move 2 items
+                        for (const item2 of floorItems.slice(i + 1)) {
+                            item2.floor += move;
+                            findFewestSteps(nextFloor, states.slice(0));
+                            // Revert to previous floor after trying
+                            item2.floor += move * -1;
+                        }
+
+                        // If moving 2 items failed, try to move 1 item
+                        findFewestSteps(nextFloor, states.slice(0));
+                        // Revert to previous floor after trying
+                        item1.floor += move * -1;
+                    }
+                }
+            };
+
+            findFewestSteps();
+
+            console.log({loopCount});
+            console.log({skipped});
+
+            document.querySelector('.answer').innerText = fewestSteps;
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>

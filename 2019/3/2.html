@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const paths = await fileReader.parse();
+            const visited = {};
+            const intersections = {};
+
+            for (let pathNumber = 0; pathNumber < paths.length; pathNumber++) {
+                let x = 0;
+                let y = 0;
+                let steps = 0;
+
+                for (const [direction, amount] of paths[pathNumber]) {
+                    for (let i = 0; i < amount; i++) {
+                        steps++;
+                        switch (direction) {
+                            case 'U':
+                                y--;
+                                break;
+                            case 'R':
+                                x++;
+                                break;
+                            case 'D':
+                                y++;
+                                break;
+                            case 'L':
+                                x--;
+                                break;
+                        }
+
+                        const coordinates = x + ',' + y;
+                        if (pathNumber === 0) {
+                            if (! (coordinates in visited)) {
+                                // Set the amount of steps to the current point
+                                visited[coordinates] = steps;
+                            }
+                        } else {
+                            // If points intersect, add the steps sum
+                            if (coordinates in visited) {
+                                intersections[coordinates] = visited[coordinates] + steps;
+                            }
+                        }
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = Object.entries(intersections)
+                .sort((a, b) => a[1] - b[1])
+                .at(0)
+                .at(1);
+        </script>
+    </body>
+</html>

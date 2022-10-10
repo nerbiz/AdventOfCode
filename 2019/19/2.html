@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import IntcodeComputer from '../IntcodeComputer.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+
+            let x = 0;
+            let y = 100;
+            let xDeviation;
+
+            // Get the leftmost X coordinate of the beam for row 100, to get the deviation of X
+            while (++x) {
+                const signal = new IntcodeComputer(program.slice(0), x, y).getNextSignal();
+
+                if (signal === 1) {
+                    xDeviation = x / 100;
+                    break;
+                }
+            }
+
+            // Check each row to see if a 100x100 square fits in the preceding rows
+            while (++y) {
+                // Get the leftmost X of the beam in this row
+                x = Math.round(y * xDeviation);
+                while (--x) {
+                    const signal = new IntcodeComputer(program.slice(0), x, y).getNextSignal();
+                    if (signal === 0) {
+                        x++;
+                        break;
+                    }
+                }
+
+                // If the signal at the opposite corner of the 100x100 square is 1, the square fits
+                const topRightSignal = new IntcodeComputer(program.slice(0), x + 99, y - 99).getNextSignal();
+                if (topRightSignal === 1) {
+                    break;
+                }
+            }
+
+            document.querySelector('.answer').innerText = (x * 1e4) + (y - 99);
+        </script>
+    </body>
+</html>

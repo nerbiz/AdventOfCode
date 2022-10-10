@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const instructions = await fileReader.parse();
+            const registers = {a: 12, b: 0, c: 0, d: 0};
+            let toggleIndex;
+
+            /* The code below is the instructions translated to JavaScript */
+
+            // cpy a b
+            registers['b'] = registers['a'];
+
+            // dec b
+            registers['b']--;
+
+            four: while (true) {
+                // cpy a d
+                registers['d'] = registers['a'];
+
+                // cpy 0 a
+                registers['a'] = 0;
+
+                two: while (true) {
+                    // cpy b c
+                    registers['c'] = registers['b'];
+
+                    one: while (true) {
+                        // inc a
+                        registers['a']++;
+
+                        // dec c
+                        registers['c']--;
+
+                        // jnz c -2
+                        if (registers['c'] === 0) {
+                            break one;
+                        }
+                    }
+
+                    // dec d
+                    registers['d']--;
+
+                    // jnz d -5
+                    if (registers['d'] === 0) {
+                        break two;
+                    }
+                }
+
+                // dec b
+                registers['b']--;
+
+                // cpy b c
+                registers['c'] = registers['b'];
+
+                // cpy c d
+                registers['d'] = registers['c'];
+
+                three: while (true) {
+                    // dec d
+                    registers['d']--;
+
+                    // inc c
+                    registers['c']++;
+
+                    // jnz d -2
+                    if (registers['d'] === 0) {
+                        break three;
+                    }
+                }
+
+                // tgl c
+                // From tests: 'c' is always even (decreasing),
+                // so it toggles 8, 6, 4, then 2 instructions from here
+                // There are only 9 instructions after this, so 'c' >= 10 doesn't do anything
+                toggleIndex = registers['c'];
+
+                // cpy -16 c
+                registers['c'] = -16;
+
+                // jnz 1 c
+                // jnz 1 c becomes cpy 1 c
+                if (toggleIndex === 2) {
+                    registers['c'] = 1;
+                    break four;
+                }
+            }
+
+            // Because toggle index 2 breaks the above loop,
+            // The original lines below are toggled before they are reached
+
+            // cpy 96 c
+            registers['c'] = 96;
+
+            six: while (true) {
+                // jnz 91 d becomes cpy 91 d
+                registers['d'] = 91;
+
+                five: while (true) {
+                    // inc a
+                    registers['a']++;
+
+                    // inc d
+                    // inc d becomes dec d
+                    registers['d']--;
+
+                    // jnz d -2
+                    if (registers['d'] === 0) {
+                        break five;
+                    }
+                }
+
+                // inc c
+                // inc c becomes dec c
+                registers['c']--;
+
+                // jnz c -5
+                if (registers['c'] === 0) {
+                    break six;
+                }
+            }
+
+            document.querySelector('.answer').innerText = registers['a'];
+        </script>
+    </body>
+</html>

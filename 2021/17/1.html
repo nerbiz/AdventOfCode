@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const target = await fileReader.parse();
+
+            /*
+            The Y velocity always returns to the same value, after some amount of steps.
+            The next step is (velocity = velocity * -1), which is 0.
+            Then the next step is ((velocity + 1) * -1), which needs to be within the target.
+            So the maximum velocity is the target yMin + 1, as absolute number.
+            */
+            const yVelocity = Math.abs(target.yMin + 1);
+
+            // The highest Y value is the triangular number of the velocity
+            const highestY = yVelocity * (yVelocity + 1) / 2;
+
+            document.querySelector('.answer').innerText = highestY;
+        </script>
+    </body>
+</html>

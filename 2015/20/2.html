@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let targetAmount = await fileReader.parse();
+            let lowestHouseNumber = Infinity;
+            let elf = 0;
+            const houses = [];
+
+            // Every elf brings a multiple of 11 presents,
+            // so first divide by 11 to reduce amount of loops
+            targetAmount = Math.floor(targetAmount / 11);
+
+            // Calculate the amount of presents each house gets
+            elfLoop: while (++elf < targetAmount) {
+                for (let i = 1; i <= 50; i++) {
+                    const houseNumber = i * elf;
+                    if (houseNumber > targetAmount) {
+                        continue elfLoop;
+                    }
+
+                    houses[houseNumber] = (houses[houseNumber] || 0) + elf;
+
+                    if (houses[houseNumber] >= targetAmount) {
+                        lowestHouseNumber = Math.min(lowestHouseNumber, houseNumber);
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = lowestHouseNumber;
+        </script>
+    </body>
+</html>

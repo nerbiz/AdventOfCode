@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+            import Pathfinding from '../../classes/Pathfinding.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const riskMap = new Array2d(await fileReader.parse());
+
+            const startPoint = riskMap.getItem(0, 0);
+            const endPoint = riskMap.getItem(riskMap.length - 1, riskMap[0].length - 1);
+            const path = Pathfinding.dijkstra(riskMap, startPoint, endPoint);
+
+            // Show the path in the console
+            console.log(riskMap.toString(point =>
+                (point === startPoint || path.includes(point))
+                    ? '\x1b[35m' + point.value + '\x1b[0m'
+                    : '\x1b[37m' + point.value + '\x1b[0m'
+            ));
+
+            document.querySelector('.answer').innerText = endPoint.distance;
+        </script>
+    </body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const numbers = await fileReader.parse();
+
+            let increasedCount = 0;
+            numbers.forEach((number, index) => {
+                // Skip the first number
+                if (index === 0) {
+                    return;
+                }
+
+                if (number > numbers[index - 1]) {
+                    increasedCount++;
+                }
+            });
+
+            document.querySelector('.answer').innerText = increasedCount;
+        </script>
+    </body>
+</html>

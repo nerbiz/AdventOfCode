@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerTap();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const grid = new Array2d(await fileReader.parse());
+
+            /**
+             * Find the nearest neighbour in a certain direction
+             * @param {Array2dItem} location
+             * @param {number} deltaX
+             * @param {number} deltaY
+             * @return {Array2dItem|undefined}
+             */
+            const findVisibleSeat = (location, deltaX, deltaY) => {
+                const neighbour = grid.getItem(location.x + deltaX, location.y + deltaY);
+                if (neighbour === undefined) {
+                    return;
+                }
+
+                if (neighbour.value === 'L' || neighbour.value === '#') {
+                    return neighbour;
+                }
+
+                return findVisibleSeat(neighbour, deltaX, deltaY);
+            };
+
+            const seats = grid.filter2d(location => location.value === 'L' || location.value === '#')
+                .tap(seat => {
+                    seat.surrounding = [
+                        // Up-left, up, up-right, left, right, down-left, down, down-right
+                        findVisibleSeat(seat, -1, -1),
+                        findVisibleSeat(seat, 0, -1),
+                        findVisibleSeat(seat, 1, -1),
+                        findVisibleSeat(seat, -1, 0),
+                        findVisibleSeat(seat, 1, 0),
+                        findVisibleSeat(seat, -1, 1),
+                        findVisibleSeat(seat, 0, 1),
+                        findVisibleSeat(seat, 1, 1),
+                    ].filter(neighbour => neighbour !== undefined);
+                });
+
+            let previousState = '';
+            while (true) {
+                const state = seats
+                    .tap(seat => {
+                        const occupied = seat.surrounding
+                            .filter(neighbour => neighbour.value === '#')
+                            .length;
+
+                        if (seat.value === 'L' && occupied === 0) {
+                            seat.newValue = '#';
+                        } else if (seat.value === '#' && occupied >= 5) {
+                            seat.newValue = 'L';
+                        } else {
+                            seat.newValue = seat.value;
+                        }
+                    })
+                    .map(seat => seat.value = seat.newValue)
+                    .join('');
+
+                if (state === previousState) {
+                    break;
+                }
+
+                previousState = state;
+            }
+
+            document.querySelector('.answer').innerText = grid
+                .filter2d(location => location.value === '#')
+                .length;
+        </script>
+    </body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const claims = await fileReader.parse();
+
+            const isOverlapping = (claim1, claim2) =>
+                claim1.x < claim2.x + claim2.width
+                && claim1.x + claim1.width > claim2.x
+                && claim1.y < claim2.y + claim2.height
+                && claim1.y + claim1.height > claim2.y;
+
+            let claim;
+            checkClaims: for (claim of claims) {
+                for (const otherClaim of claims) {
+                    if (otherClaim === claim) {
+                        continue;
+                    }
+
+                    if (isOverlapping(claim, otherClaim)) {
+                        continue checkClaims;
+                    }
+                }
+
+                break;
+            }
+
+            document.querySelector('.answer').innerText = claim.id;
+        </script>
+    </body>
+</html>

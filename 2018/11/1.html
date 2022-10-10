@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const serialNumber = await fileReader.parse();
+            const gridSize = 300;
+            const grid = Array2d.withData({
+                totalPower: 0,
+                value: (x, y) => {
+                    const rackId = (x + 11);
+                    let powerLevel = rackId * (y + 1);
+                    powerLevel += serialNumber;
+                    powerLevel *= rackId;
+                    powerLevel = Math.floor((powerLevel % 1000) / 100);
+                    powerLevel -= 5;
+
+                    return powerLevel;
+                },
+            }, gridSize, gridSize);
+
+            grid.slice2d(1, 1, gridSize - 1, gridSize - 1).forEach2d(cell =>
+                cell.totalPower = cell.value
+                    + cell.getSurroundingItems().reduce((sum, cell) => (sum + cell.value), 0)
+            );
+
+            const cellWithMostPower = grid
+                .flat()
+                .sort((a, b) => b.totalPower - a.totalPower)
+                .at(0);
+
+            // Because the grid indexes should be 1-based, but they are 0-based
+            // The top-left fuel cell coordinates are those of the cell with the most power
+            document.querySelector('.answer').innerText = cellWithMostPower.x + ',' + cellWithMostPower.y;
+        </script>
+    </body>
+</html>

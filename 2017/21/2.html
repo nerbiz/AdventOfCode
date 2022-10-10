@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const rules = await fileReader.parse();
+            let grid = [
+                ['.', '#', '.'],
+                ['.', '.', '#'],
+                ['#', '#', '#'],
+            ];
+
+            const flip = array => array.map(row => row.map(pixel => pixel).reverse());
+
+            const rotate = array => {
+                const size = array[0].length;
+                const rotated = new Array(size).fill(undefined).map(row => []);
+
+                array.forEach((row, y) =>
+                    row.forEach((pixel, x) => rotated[x][size - 1 - y] = pixel)
+                );
+
+                return rotated;
+            };
+
+            const toPattern = array => array
+                .map(row => row.join(''))
+                .join('/');
+
+            const divide = array => {
+                const size = array[0].length;
+                const sliceSize = (size % 2 === 0) ? 2 : 3;
+                const divided = [];
+
+                for (let rowIndex = 0; rowIndex < size; rowIndex += sliceSize) {
+                    const slices = [];
+                    for (let columnIndex = 0; columnIndex < size; columnIndex += sliceSize) {
+                        // Get the slice from the grid
+                        const slice = array.slice(rowIndex, rowIndex + sliceSize)
+                            .map(row => row.slice(columnIndex, columnIndex + sliceSize));
+
+                        slices.push(slice);
+                    }
+
+                    divided.push(slices);
+                }
+
+                return divided;
+            };
+
+            const joinChunks = array => {
+                const joinedChunks = [];
+
+                for (const chunksRow of array) {
+                    const chunk = chunksRow[0];
+
+                    // Merge the chunks into the first
+                    for (const otherChunk of chunksRow.slice(1)) {
+                        for (let i = 0; i < chunk.length; i++) {
+                            chunk[i] = chunk[i].concat(otherChunk[i]);
+                        }
+                    }
+
+                    joinedChunks.push(chunk);
+                }
+
+                // Join the joined chunks
+                return joinedChunks[0].concat(...joinedChunks.slice(1));
+            };
+
+            for (let step = 0; step < 18; step++) {
+                grid = divide(grid)
+                    .map(chunks => chunks.map(chunk => {
+                        while (true) {
+                            // Try all rotations
+                            for (let i = 0; i < 4; i++) {
+                                const pattern = toPattern(chunk);
+
+                                if (pattern in rules) {
+                                    // Clone the replacement, to break reference
+                                    return rules[pattern].map(row => row.map(pixel => pixel));
+                                }
+
+                                chunk = rotate(chunk);
+                            }
+
+                            // Not found, flip before trying rotations again
+                            chunk = flip(chunk);
+                        }
+                    }));
+
+                grid = joinChunks(grid);
+            }
+
+            document.querySelector('.answer').innerText = grid
+                .flat()
+                .filter(pixel => pixel === '#')
+                .length;
+        </script>
+    </body>
+</html>

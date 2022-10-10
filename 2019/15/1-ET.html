@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import IntcodeComputer from '../IntcodeComputer.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            const intcodeComputer = new IntcodeComputer(program);
+            const gridSize = 50;
+            const grid = new Array2d(gridSize, gridSize);
+
+            // Directions are 1-based
+            const oppositeDirections = [null, 2, 1, 4, 3];
+
+            const startNode = grid.getItem(gridSize / 2, gridSize / 2);
+            startNode.value = 1;
+
+            /**
+             * @param {Array2dItem} node
+             * @returns {number} The type of the traversed node
+             */
+            const traverse = node => {
+                const {up, down, left, right} = node.getAdjacentItems(true);
+                const adjacent = [up, down, left, right];
+
+                for (let i = 0; i < adjacent.length; i++) {
+                    // Skip visited nodes
+                    if (adjacent[i].value !== undefined) {
+                        continue;
+                    }
+
+                    // Set the node type of the neighbour
+                    intcodeComputer.setInput(i + 1);
+                    adjacent[i].value = intcodeComputer.getNextSignal();
+
+                    // The node is a wall, continue to next neighbour
+                    if (adjacent[i].value === 0) {
+                        continue;
+                    }
+
+                    // The target is found
+                    if (adjacent[i].value === 2) {
+                        console.log('Found!', adjacent[i]);
+                    }
+
+                    // The node is traversable
+                    traverse(adjacent[i]);
+                    intcodeComputer.setInput(oppositeDirections[i + 1]);
+                    // intcodeComputer.getNextSignal();
+                }
+            };
+
+            traverse(startNode);
+
+            console.log(grid.toString(item => {
+                if (item.value === undefined) {
+                    return ' ';
+                } else if (item === startNode) {
+                    return '\x1b[33m' + '✯' + '\x1b[0m';
+                } else {
+                    return [
+                        '\x1b[31m' + '#' + '\x1b[0m',
+                        '\x1b[37m' + '.' + '\x1b[0m',
+                        '\x1b[33m' + '⚑' + '\x1b[0m',
+                    ][item.value];
+                }
+            }));
+
+            // document.querySelector('.answer').innerText =
+        </script>
+    </body>
+</html>

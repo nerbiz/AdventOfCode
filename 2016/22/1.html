@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const nodes = await fileReader.parse();
+            let viablePairsAmount = 0;
+
+            for (const node of nodes) {
+                // Skip empty nodes
+                if (node.used === 0) {
+                    continue;
+                }
+
+                // Find nodes in which the current's data fits
+                const otherNodes = nodes.filter(otherNode => otherNode !== node);
+                for (const otherNode of otherNodes) {
+                    if (node.used <= otherNode.available) {
+                        viablePairsAmount++;
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = viablePairsAmount;
+        </script>
+    </body>
+</html>

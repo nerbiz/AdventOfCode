@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const stream = await fileReader.parse();
+
+            document.querySelector('.answer').innerText = stream
+                // Remove canceled characters, including the !
+                .replaceAll(/!./g, '')
+                // Find all garbage
+                .match(/<.*?>/g)
+                // Get the garbage size of every match
+                .map(match => match.length - 2)
+                // Sum up the sizes
+                .reduce((sum, amount) => (sum + amount), 0)
+        </script>
+    </body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {maxNumber, ranges} = await fileReader.parse();
+            const allowed = [];
+            ranges.sort((a, b) => a[0] - b[0]);
+
+            // Join overlapping ranges, until no removing is possible anymore
+            let removedAmount;
+            do {
+                removedAmount = 0;
+
+                for (let i = ranges.length - 1; i > 0; i--) {
+                    const currentRange = ranges[i];
+                    const previousRange = ranges[i - 1];
+
+                    // See if the range start is between the previous range
+                    if (currentRange[0] < previousRange[1]) {
+                        if (currentRange[1] > previousRange[1]) {
+                            ranges[i - 1][1] = currentRange[1];
+                        }
+
+                        // Remove the redundant range
+                        ranges.splice(i, 1);
+                        removedAmount++;
+                    }
+                }
+            } while (removedAmount > 0);
+
+            // Join adjacent ranges
+            for (let i = ranges.length - 1; i > 0; i--) {
+                const currentRange = ranges[i];
+                const previousRange = ranges[i - 1];
+
+                if (currentRange[0] === previousRange[1] + 1) {
+                    ranges[i - 1][1] = currentRange[1];
+
+                    // Remove the redundant range
+                    ranges.splice(i, 1);
+                }
+            }
+
+            // Get the lowest and highest blocked number
+            let lowestBlocked = Infinity;
+            let highestBlocked = 0;
+            for (const range of ranges) {
+                lowestBlocked = Math.min(lowestBlocked, range[0]);
+                highestBlocked = Math.max(highestBlocked, range[1]);
+            }
+
+            // Add the numbers at the lower and higher end, if they are not blocked
+            for (let number = 0; number < lowestBlocked; number++) {
+                allowed.push(number);
+            }
+            for (let number = highestBlocked + 1; number <= maxNumber; number++) {
+                allowed.push(number);
+            }
+
+            // Get the numbers between blocked numbers
+            for (let rangeIndex = 0; rangeIndex < ranges.length - 1; rangeIndex++) {
+                const currentRange = ranges[rangeIndex];
+                const nextRange = ranges[rangeIndex + 1];
+
+                for (let number = currentRange[1] + 1; number < nextRange[0]; number++) {
+                    allowed.push(number);
+                }
+            }
+
+            document.querySelector('.answer').innerText = allowed.length;
+        </script>
+    </body>
+</html>

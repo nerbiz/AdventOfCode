@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import GameRound from './GameRound.js';
+            import GameWins from './GameWins.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {spells, player, boss} = await fileReader.parse();
+
+            for (const spell of spells) {
+                const gameRound = new GameRound(player, boss, spells, [], spell);
+                gameRound.start();
+            }
+
+            document.querySelector('.answer').innerText = GameWins.lowestManaCost;
+        </script>
+    </body>
+</html>
