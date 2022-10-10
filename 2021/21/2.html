@@ -3,19 +3,15 @@
     <head>
         <meta charset="UTF-8">
         <title>Advent of Code</title>
-        <style>
-            #answer {
-                font-size: 25px;
-            }
-        </style>
+        <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
-            import FileReader from '../../FileReader.js';
+            import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
-            import Utilities from '../../Utilities.js';
+            import Utilities from '../../classes/Utilities.js';
 
             const fileReader = new FileReader('./datatest.txt', new Parser());
             const positions = await fileReader.parse();
@@ -67,7 +63,7 @@
             console.log('All possible dice roll combinations and their outcomes');
             console.log(JSON.parse(JSON.stringify(possibilities)));
             console.log(possibilities.sort((a, b) => a[4] - b[4]));
-            
+
             console.log('Amount of times every outcome occurs');
             console.log(rollsOutcomeOccurrences);
 
@@ -162,14 +158,14 @@
                 }
 
                 player.turnsDiceRolls.sort((a, b) => (a.length - b.length));
-    
+
                 // Get the total amount of universes in which each outcome can occur
                 player.turnsUniverses = player.turnsDiceRolls
                     .map(outcomes => outcomes.map(outcome => rollsOutcomeOccurrences[outcome] * 3));
-    
+
                 const leastTurns = player.turnsUniverses.at(0).length;
                 const mostTurns = player.turnsUniverses.at(-1).length;
-    
+
                 // Group the total amount of universes of reaching the target score, by amount of turns
                 for (let turns = leastTurns; turns <= mostTurns; turns++) {
                     player.testGrouped[turns] = player.turnsUniverses
@@ -274,7 +270,7 @@
                     // Update the position (wrap from 10 back to 1) and score of the player
                     positions[playerNumber] = ((positions[playerNumber] + outcomes[playerNumber].at(-1) - 1) % maxPosition) + 1;
                     scores[playerNumber] += positions[playerNumber];
-    
+
                     // The player won
                     if (scores[playerNumber] >= winningScore) {
                         // console.log('-----');

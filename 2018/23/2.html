@@ -3,14 +3,10 @@
     <head>
         <meta charset="UTF-8">
         <title>Advent of Code</title>
-        <style>
-            #answer {
-                font-size: 25px;
-            }
-        </style>
+        <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
             // https://i.pinimg.com/originals/82/9a/f6/829af626d193a4b3cda398745fd0ce4b.png
@@ -55,7 +51,7 @@
                 }
             }
 
-            import SetPrototype from '../../SetPrototype.js';
+            import SetPrototype from '../../classes/SetPrototype.js';
             SetPrototype.registerIntersection();
             SetPrototype.registerDifference();
             const groups = [];
@@ -112,9 +108,9 @@
 
 
 
-            import FileReader from '../../FileReader.js';
+            import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
-            // import SetPrototype from '../../SetPrototype.js';
+            // import SetPrototype from '../../classes/SetPrototype.js';
 
             // SetPrototype.registerIntersection();
             const fileReader = new FileReader('./datatest2.txt', new Parser());

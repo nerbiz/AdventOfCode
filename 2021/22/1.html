@@ -3,19 +3,15 @@
     <head>
         <meta charset="UTF-8">
         <title>Advent of Code</title>
-        <style>
-            #answer {
-                font-size: 25px;
-            }
-        </style>
+        <link rel="stylesheet" href="../../style.css">
     </head>
     <body>
-        <p id="answer"></p>
+        <p class="answer"></p>
 
         <script type="module">
-            import FileReader from '../../FileReader.js';
+            import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
-            import Utilities from '../../Utilities.js';
+            import Utilities from '../../classes/Utilities.js';
 
             const fileReader = new FileReader('./datatest.txt', new Parser());
             const steps = await fileReader.parse();
