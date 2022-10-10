@@ -7,9 +7,9 @@ export default class Parser
      */
     parse(linesArray)
     {
-        // Add empty spaces to finish the grid
-        linesArray[3] = linesArray[3].concat(['  ']);
-        linesArray[4] = linesArray[4].concat(['  ']);
+        // Add empty spaces to make lines equal length
+        linesArray[3] += '  ';
+        linesArray[4] += '  ';
 
         return linesArray.map(line => line.split(''));
     }
