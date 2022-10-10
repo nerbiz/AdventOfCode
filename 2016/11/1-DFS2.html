@@ -27,8 +27,8 @@
             console.time('Time elapsed');
 
             const itemsAmount = items.length;
-            const generatorsAmount = itemsAmount / 2;
-            const firstGeneratorIndex = generatorsAmount + 1;
+            const microchipsAmount = itemsAmount / 2;
+            const firstGeneratorIndex = microchipsAmount + 1;
 
             // The goal is when all items are at the 4th floor
             const goal = (3).toString(10).repeat(itemsAmount + 1) - 0;
@@ -66,21 +66,19 @@
              * @returns {boolean}
              */
             const microchipFried = (state, indexes) => {
-                for (let i = 0; i < indexes.length; i++) {
-                    // Only check the microchips
-                    if (indexes[i] >= firstGeneratorIndex) {
+                const generatorFloors = [];
+                for (let i = firstGeneratorIndex; i <= itemsAmount; i++) {
+                    generatorFloors.push(getDigit(state, i));
+                }
+
+                for (let i = 1; i < firstGeneratorIndex; i++) {
+                    const microchipFloor = getDigit(state, i);
+                    if (generatorFloors[i - 1] === microchipFloor) {
                         continue;
                     }
 
-                    // Chip and generator index difference is the same as the chips/generators amount
-                    // If that index exists, the chip is safe
-                    if (indexes.includes(indexes[i] + generatorsAmount)) {
-                        continue;
-                    }
-
-                    // If not, the chip is fried if there are generators
-                    for (let j = i + 1; j < indexes.length; j++) {
-                        if (indexes[j] >= firstGeneratorIndex) {
+                    for (const floor of generatorFloors) {
+                        if (floor === microchipFloor) {
                             return true;
                         }
                     }
@@ -151,23 +149,15 @@
              * @returns {void}
              */
             const findFewestSteps = (state, path = []) => {
-                if (++loopCount === 1e7) {
+                if (++loopCount === 1e6) {
                     console.log({loopCount});
                     console.log({skipped});
                     console.log({reused});
                     console.log({possibleMoves});
+                    console.log({succeededStates});
+                    console.log({failedStates});
                     console.timeEnd('Time elapsed');
                     throw new Error('Too much recursion');
-                }
-
-                // See if all items are on the top floor
-                if (state === goal) {
-                    if (path.length < fewestSteps) {
-                        fewestSteps = path.length;
-                        console.log({fewestSteps, path});
-                    }
-
-                    return;
                 }
 
                 // Stop if the amount of steps is already larger than the fewest
@@ -177,20 +167,18 @@
                     return;
                 }
 
+                // See if all items are on the top floor
+                if (state === goal) {
+                    fewestSteps = path.length;
+                    console.log({fewestSteps});
+                    return;
+                }
+
                 // Don't check an already known failed state
                 if (failedStates.has(state)) {
                     skipped++;
                     return;
                 }
-
-                // Don't repeat a previous state
-                // (Copy the path to avoid same-reference)
-                path = path.slice(0);
-                if (path.includes(state)) {
-                    skipped++;
-                    return;
-                }
-                path.push(state);
 
                 // Get the indexes of items that are on the current floor
                 const floor = getDigit(state, 0);
@@ -202,11 +190,24 @@
                 }
 
                 // Check if any microchips are fried
-                if (! succeededStates.has(state) && microchipFried(state, itemIndexes)) {
+                if (! succeededStates.has(state)) {
+                    if (microchipFried(state, itemIndexes)) {
+                        skipped++;
+                        failedStates.add(state);
+                        return;
+                    }
+
+                    succeededStates.add(state);
+                }
+
+                // Don't repeat a previous state
+                // (Copy the path to avoid same-reference)
+                path = path.slice(0);
+                if (path.includes(state)) {
                     skipped++;
-                    failedStates.add(state);
                     return;
                 }
+                path.push(state);
 
                 succeededStates.add(state);
 
@@ -221,6 +222,8 @@
             console.log({loopCount});
             console.log({skipped});
             console.log({reused});
+            console.log({succeededStates});
+            console.log({failedStates});
 
             document.querySelector('.answer').innerText = fewestSteps;
             console.timeEnd('Time elapsed');
