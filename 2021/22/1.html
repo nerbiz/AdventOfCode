@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Utilities from '../../classes/Utilities.js';
+
+            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const steps = await fileReader.parse();
+            const cubes = [];
+
+            const startTime = new Date().getTime();
+
+            console.log(steps);
+
+            for (const step of steps.slice(0, 1)) {
+                for (let x = step.axes.x[0]; x <= step.axes.x[1]; x++) {
+                    for (let y = step.axes.y[0]; y <= step.axes.y[1]; y++) {
+                        for (let z = step.axes.z[0]; z <= step.axes.z[1]; z++) {
+                            cubes.push({x, y, z, status: step.status});
+                        }
+                    }
+                }
+            }
+
+            console.log(cubes);
+
+            /* for (const step of steps) {
+                for (let z = step.coordinates.z.from; z <= step.coordinates.z.to; z++) {
+                    for (let y = step.coordinates.y.from; y <= step.coordinates.y.to; y++) {
+                        for (let x = step.coordinates.x.from; x <= step.coordinates.x.to; x++) {
+                            Utilities.arraySetDeep(grid, [z, y, x], (step.status === 'on'));
+                        }
+                    }
+                }
+            }
+
+            console.log(grid);
+            console.log(grid.flat(2).filter(point => point === true).length); */
+
+            console.log('Done in ms:', new Date().getTime() - startTime);
+        </script>
+    </body>
+</html>
