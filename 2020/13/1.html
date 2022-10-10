@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {timestamp, busIds} = await fileReader.parse();
+
+            const earliest = busIds
+                .filter(id => id !== 'x')
+                .map(id => [id, id - (timestamp % id)])
+                .sort((a, b) => a[1] - b[1])
+                .at(0);
+
+            document.querySelector('.answer').innerText = earliest[0] * earliest[1];
+        </script>
+    </body>
+</html>
