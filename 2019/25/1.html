@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer monospace"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import AsciiComputer from '../AsciiComputer.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            console.time('Time elapsed');
+            const asciiComputer = new AsciiComputer(program);
+            const gridSize = 10;
+            const grid = Array2d.withData({value: '#'}, gridSize, gridSize);
+            const startRoom = grid.getItem(gridSize / 2, gridSize / 2);
+            const directions = ['up', 'right', 'down', 'left'];
+            const windDirections = ['north', 'east', 'south', 'west'];
+
+            const traverse = (room, indent = 0) => {
+                console.log('');
+                // Mark the room as traversable
+                room.value = '.';
+
+                // Get the output as lines, without the last two
+                const outputLines = asciiComputer.getNextOutput()
+                    .split('\n')
+                    .slice(0, -2);
+                // console.log(' '.repeat(indent), outputLines);
+
+                room.name = outputLines.shift();
+                room.description = outputLines.shift();
+                room.doors = [];
+                room.items = [];
+
+                let currentKey;
+                while (outputLines.length > 0) {
+                    const line = outputLines.shift();
+                    if (line === '') {
+                        continue;
+                    }
+
+                    // Add the remaining room properties
+                    if (! line.startsWith('-')) {
+                        currentKey = line.split(' ').at(0).toLowerCase();
+                        room[currentKey] = [];
+                    } else {
+                        room[currentKey].push(line.replace('- ', ''));
+                    }
+                }
+
+                // console.log(' '.repeat(indent), 'Current', room);
+                const neighbours = room.getAdjacentItems(true);
+                // console.log(' '.repeat(indent), 'Neighbours', neighbours);
+                console.log(' '.repeat(indent), room.name);
+                console.log(' '.repeat(indent), 'x', room.x, 'y', room.y);
+                console.log(' '.repeat(indent), room.description);
+                console.log(' '.repeat(indent), 'Doors', room.doors);
+                console.log(' '.repeat(indent), 'Items', room.items);
+
+                if (room.items.includes('monolith')) {
+                    asciiComputer.addInput('take monolith');
+                    console.log(
+                        '%c' + ' '.repeat(indent) + asciiComputer.getNextOutput().split('\n').at(0),
+                        'border-radius: 4px; padding: 5px; background-color: skyblue; color: #222'
+                    );
+                }
+
+                for (const direction in neighbours) {
+                    const directionIndex = directions.indexOf(direction);
+                    const windDirection = windDirections[directionIndex];
+                    // console.log(' '.repeatindent, '{direction, windDirection});
+
+                    if (
+                        room.doors.includes(windDirection)
+                        && neighbours[direction].value === '#'
+                    ) {
+                        console.log(' '.repeat(indent), 'Towards', windDirection);
+                        asciiComputer.addInput(windDirection);
+                        traverse(neighbours[direction], indent + 4);
+                        const oppositeIndex = (4 + directionIndex + 2) % 4;
+                        console.log(' '.repeat(indent), 'Back to', windDirections[oppositeIndex]);
+                        asciiComputer.addInput(windDirections[oppositeIndex]);
+                        console.log(' '.repeat(indent), asciiComputer.getNextOutput().split('\n').at(0));
+                    }
+                }
+            };
+
+            traverse(startRoom);
+
+            startRoom.value = '✯';
+            document.querySelector('.answer').innerText = grid.toString();
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>

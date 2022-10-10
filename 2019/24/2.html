@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const planet = new Array2d(await fileReader.parse());
+
+            // Add a property containing values per level
+            planet.forEach2d(location => location.value = {levels: {0: location.value}});
+
+            // Set the grid sides in the center location
+            const centerLocation = planet.getItem(2, 2);
+            centerLocation.grid = {
+                up: planet.getRow(0),
+                down: planet.getRow(planet.length - 1),
+                left: planet.getColumn(0),
+                right: planet.getColumn(planet.at(0).length - 1),
+            };
+
+            /**
+             * Get a side from the grid in the center location
+             * @param {Array2dItem} location
+             * @returns {Array}
+             */
+            const getCenterSide = location => {
+                if (location.x < centerLocation.x) {
+                    return centerLocation.grid.right;
+                } else if (location.x > centerLocation.x) {
+                    return centerLocation.grid.left;
+                } else if (location.y < centerLocation.y) {
+                    return centerLocation.grid.up;
+                } else if (location.y > centerLocation.y) {
+                    return centerLocation.grid.down;
+                }
+            };
+
+            /**
+             * Get the amount of bugs surrounding a location
+             * @param {Array2dItem} location
+             * @param {array} neighbours
+             * @param {number} currentLevel
+             * @returns {number}
+             */
+            const getBugsAmount = (location, neighbours, currentLevel) => {
+                let amount = 0;
+
+                for (const neighbour of neighbours) {
+                    if (neighbour === centerLocation) {
+                        amount += getBugsAmount(location, getCenterSide(location), currentLevel + 1);
+                    } else if (neighbour?.levels[currentLevel] === '#') {
+                        amount++;
+                    }
+                }
+
+                return amount;
+            };
+
+            for (let minute = 1; minute <= 1; minute++) {
+                let currentLevel = 0;
+
+                planet
+                    .tap2d(location => {
+                        // Skip the center location
+                        if (location === centerLocation) {
+                            return;
+                        }
+
+                        const adjacent = location.getAdjacentItems();
+                        const bugsAmount = getBugsAmount(location, adjacent, currentLevel);
+                        throw new Error('Done');
+
+                        if (location.value === '#' && bugsAmount !== 1) {
+                            location.newValue = '.';
+                        } else if (location.value === '.' && (bugsAmount === 1 || bugsAmount === 2)) {
+                            location.newValue = '#';
+                        } else {
+                            location.newValue = location.value;
+                        }
+                    })
+                    .forEach2d(location => {
+                        location.value = location.newValue;
+                        state += location.value;
+                    });
+            }
+
+            // document.querySelector('.answer').innerText =
+        </script>
+    </body>
+</html>
