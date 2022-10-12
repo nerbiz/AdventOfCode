@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerIndexesOf();
+            ArrayPrototype.registerSum();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            const memory = [];
+
+            let mask;
+            let zeroesIndexes;
+            let onesIndexes;
+            for (const instruction of program) {
+                if (instruction.type === 'mask') {
+                    mask = instruction.value;
+                    zeroesIndexes = mask.split('').indexesOf('0');
+                    onesIndexes = mask.split('').indexesOf('1');
+                    continue;
+                }
+
+                const {address, value} = instruction;
+                const binaryValue = value.toString(2).padStart(36, '0').split('');
+
+                for (const index of zeroesIndexes) {
+                    binaryValue[index] = '0';
+                }
+
+                for (const index of onesIndexes) {
+                    binaryValue[index] = '1';
+                }
+
+                memory[address] = parseInt(binaryValue.join(''), 2);
+            }
+
+            document.querySelector('.answer').innerText = memory.sum();
+        </script>
+    </body>
+</html>
