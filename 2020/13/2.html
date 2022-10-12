@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerTap();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {busIds} = await fileReader.parse();
+
+            // Create [offset, ID] arrays, without ignored IDs ('x')
+            busIds = Object.entries(busIds)
+                .tap(busId => busId[0] -= 0)
+                .filter(busId => busId[1] !== 'x');
+
+            let timestamp = 0;
+            let multiplier = 1;
+            const firstBusId = busIds.shift();
+            let otherBusId = busIds.shift();
+
+            // Try to find a match with a multiple of the first ID
+            while (timestamp += (multiplier * firstBusId[1])) {
+                if ((timestamp + otherBusId[0]) % otherBusId[1] === 0) {
+                    // If a match has been found, increase the multiplier
+                    // If the second ID is 7, check in multiples of 7 * first ID
+                    // If the third ID is 59, check in multiples of 7 * 59 * first ID
+                    multiplier *= otherBusId[1];
+
+                    // Stop when all IDs are used
+                    if (busIds.length === 0) {
+                        break;
+                    }
+
+                    // Find the matching timestamp with the next bus ID
+                    otherBusId = busIds.shift();
+                }
+            }
+
+            document.querySelector('.answer').innerText = timestamp;
+        </script>
+    </body>
+</html>
