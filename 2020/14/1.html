@@ -30,6 +30,25 @@
              */
             const getHighBits = number => (number - (number % 2 ** 32)) / 2 ** 32;
 
+            /**
+             * Apply masks to a value
+             * @param {number} value
+             * @param {number} mask0
+             * @param {number} mask1
+             * @returns {number}
+             */
+            const applyMasks = (value, mask0, mask1) => {
+                const valueHigh = getHighBits(value);
+                const mask0High = getHighBits(mask0);
+                const mask1High = getHighBits(mask1);
+
+                // (number | mask0) sets/keeps ones, (number & mask1) sets/keeps zeroes
+                // Use zero-fill right shift (>>> 0), to keep the number unsigned
+                // Multiply the high bits by 2^32, to shift them to the left
+                return (((value | mask0 >>> 0) & mask1) >>> 0)
+                    + ((((valueHigh | mask0High >>> 0) & mask1High) >>> 0) * 2 ** 32);
+            };
+
             for (const instruction of program) {
                 if (instruction.type === 'mask') {
                     // Create a mask where all Xs are zeroes, and one with ones
@@ -39,11 +58,7 @@
                 }
 
                 const {address, value} = instruction;
-
-                // (number | mask0) sets/keeps ones, (number & mask1) sets/keeps zeroes
-                // Use zero-fill right shift (>>> 0), to keep the number unsigned
-                memory[address] = (((value | mask0 >>> 0) & mask1) >>> 0)
-                    + (((getHighBits(value) | getHighBits(mask0) >>> 0) & getHighBits(mask1)) >>> 0) * 2 ** 32;
+                memory[address] = applyMasks(value, mask0, mask1);
             }
 
             document.querySelector('.answer').innerText = memory.sum();
