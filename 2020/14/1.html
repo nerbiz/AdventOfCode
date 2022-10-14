@@ -18,30 +18,32 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const program = await fileReader.parse();
             const memory = [];
+            let mask0;
+            let mask1;
 
-            let mask;
-            let zeroesIndexes;
-            let onesIndexes;
+            /**
+             * Get bits 33 up to 36 from a number
+             * Needed because binary operations discard any bits beyond 32-bit
+             * Subtract the value of the first 32 bits, then remove those 32 zeroes
+             * @param {number} number
+             * @returns {number}
+             */
+            const getHighBits = number => (number - (number % 2 ** 32)) / 2 ** 32;
+
             for (const instruction of program) {
                 if (instruction.type === 'mask') {
-                    mask = instruction.value;
-                    zeroesIndexes = mask.split('').indexesOf('0');
-                    onesIndexes = mask.split('').indexesOf('1');
+                    // Create a mask where all Xs are zeroes, and one with ones
+                    mask0 = parseInt(instruction.value.replaceAll('X', '0'), 2);
+                    mask1 = parseInt(instruction.value.replaceAll('X', '1'), 2);
                     continue;
                 }
 
                 const {address, value} = instruction;
-                const binaryValue = value.toString(2).padStart(36, '0').split('');
 
-                for (const index of zeroesIndexes) {
-                    binaryValue[index] = '0';
-                }
-
-                for (const index of onesIndexes) {
-                    binaryValue[index] = '1';
-                }
-
-                memory[address] = parseInt(binaryValue.join(''), 2);
+                // (number | mask0) sets/keeps ones, (number & mask1) sets/keeps zeroes
+                // Use zero-fill right shift (>>> 0), to keep the number unsigned
+                memory[address] = (((value | mask0 >>> 0) & mask1) >>> 0)
+                    + (((getHighBits(value) | getHighBits(mask0) >>> 0) & getHighBits(mask1)) >>> 0) * 2 ** 32;
             }
 
             document.querySelector('.answer').innerText = memory.sum();
