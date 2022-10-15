@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerIndexesOf();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const program = await fileReader.parse();
+            const memory = [];
+            const bitCombinations = [];
+            let mask;
+            let sum = 0;
+
+            /**
+             * Get bits 33 up to 36 from a number
+             * Needed because binary operations discard any bits beyond 32-bit
+             * Subtract the value of the first 32 bits, then remove those 32 zeroes
+             * @param {number} number
+             * @returns {number}
+             */
+            const getHighBits = number => (number - (number % 2**32)) / 2**32;
+
+            const getAddresses = (address, mask) => {
+                // This mask sets/keeps 1s in the address
+                const onesMask = parseInt(mask.replaceAll('X', '0'), 2);
+                // This mask sets 0s in the address at the X positions (floating bits)
+                const floatingMask = parseInt(mask.replaceAll(/[01]/g, '1').replaceAll('X', '0'), 2);
+                let addressHigh = getHighBits(address);
+
+                // Apply the masks to the address
+                address |= onesMask;
+                address &= floatingMask;
+                addressHigh |= getHighBits(onesMask);
+                addressHigh &= getHighBits(floatingMask);
+                address = (address >>> 0) + ((addressHigh >>> 0) * 2**32);
+
+                const maskArray = mask.split('');
+                const indexes = maskArray.indexesOf('X');
+
+                // Get/reuse all bit combinations for the floating bits
+                let combinations;
+                if (bitCombinations[indexes.length] !== undefined) {
+                    combinations = bitCombinations[indexes.length];
+                } else {
+                    combinations = [];
+                    for (let i = 0; i < 2 ** indexes.length; i++) {
+                        const bitArray = i.toString(2).padStart(indexes.length, '0').split('');
+                        combinations.push(bitArray);
+                    }
+                    bitCombinations[indexes.length] = combinations;
+                }
+
+                // Get all addresses, by applying all bit combinations/masks
+                return combinations.map(combination => {
+                    // Set the bits of the combination in the mask
+                    for (let i = 0; i < combination.length; i++) {
+                        maskArray[indexes[i]] = combination[i];
+                    }
+
+                    const mask = parseInt(maskArray.join(''), 2);
+                    const addressHigh = getHighBits(address);
+
+                    return ((address | mask) >>> 0)
+                        + ((addressHigh | getHighBits(mask)) >>> 0) * 2**32;
+                });
+            };
+
+            for (const instruction of program) {
+                // Set the mask for the following loops
+                if (instruction.type === 'mask') {
+                    mask = instruction.value;
+                    continue;
+                }
+
+                for (const address of getAddresses(instruction.address, mask)) {
+                    // If the address has a value, remove it from the sum
+                    if (memory[address] !== undefined) {
+                        sum -= memory[address];
+                    }
+
+                    // Set the memory value and add it to the sum
+                    memory[address] = instruction.value;
+                    sum += instruction.value;
+                }
+            }
+
+            document.querySelector('.answer').innerText = sum;
+        </script>
+    </body>
+</html>

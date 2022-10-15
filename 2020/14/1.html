@@ -13,7 +13,6 @@
             import Parser from './Parser.js';
             import ArrayPrototype from '../../classes/ArrayPrototype.js';
 
-            ArrayPrototype.registerIndexesOf();
             ArrayPrototype.registerSum();
             const fileReader = new FileReader('./data.txt', new Parser());
             const program = await fileReader.parse();
@@ -38,15 +37,17 @@
              * @returns {number}
              */
             const applyMasks = (value, mask0, mask1) => {
-                const valueHigh = getHighBits(value);
-                const mask0High = getHighBits(mask0);
-                const mask1High = getHighBits(mask1);
+                let valueHigh = getHighBits(value);
 
                 // (number | mask0) sets/keeps ones, (number & mask1) sets/keeps zeroes
+                value |= mask0;
+                value &= mask1;
+                valueHigh |= getHighBits(mask0);
+                valueHigh &= getHighBits(mask1);
+
                 // Use zero-fill right shift (>>> 0), to keep the number unsigned
                 // Multiply the high bits by 2^32, to shift them to the left
-                return (((value | mask0 >>> 0) & mask1) >>> 0)
-                    + ((((valueHigh | mask0High >>> 0) & mask1High) >>> 0) * 2 ** 32);
+                return (value >>> 0) + ((valueHigh >>> 0) * 2**32);
             };
 
             for (const instruction of program) {
