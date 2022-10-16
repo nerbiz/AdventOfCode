@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {fields, nearbyTickets} = await fileReader.parse();
+
+            // Get all the ranges, sorted from lowest to highest
+            const fieldRanges = Object.values(fields)
+                .flat()
+                .sort((a, b) => a[0] - b[0]);
+
+            const valid = new Set();
+            let start = fieldRanges[0][0];
+            let end;
+
+            for (const range of fieldRanges) {
+                // If the range isn't part of or adjacent to the current,
+                // Register the range and start a new one
+                if (range[0] - end > 1) {
+                    for (let i = start; i <= end; i++) {
+                        valid.add(i);
+                    }
+
+                    start = range[0];
+                }
+
+                end = range[1];
+            }
+
+            // Add the final range
+            for (let i = start; i <= end; i++) {
+                valid.add(i);
+            }
+
+            // Sum up all invalid numbers of all tickets
+            let sum = 0;
+            for (const ticket of nearbyTickets) {
+                for (const number of ticket) {
+                    if (! valid.has(number)) {
+                        sum += number;
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = sum;
+        </script>
+    </body>
+</html>
