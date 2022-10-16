@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerDifference();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let {fields, ticket, nearbyTickets} = await fileReader.parse();
+            const validNumbers = new Set();
+
+            // Convert number ranges to number lists
+            for (const field in fields) {
+                const ranges = fields[field];
+                fields[field] = new Set();
+
+                for (const range of ranges) {
+                    for (let i = range[0]; i <= range[1]; i++) {
+                        fields[field].add(i);
+                        validNumbers.add(i);
+                    }
+                }
+            }
+
+            // Remove invalid tickets
+            nearbyTickets = nearbyTickets.filter(ticket => {
+                for (const value of ticket) {
+                    if (! validNumbers.has(value)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            // Add 'your' ticket to the tickets array
+            nearbyTickets.push(ticket);
+
+            const fieldLocations = [];
+            new Array(ticket.length).fill(null)
+                // Group all 'nth' values from all tickets
+                .map((location, index) => nearbyTickets.map(values => values[index]))
+                .forEach((values, index) => {
+                    const matchingFields = Object.keys(fields)
+                        .filter(field =>
+                            ! fieldLocations.includes(field)
+                            && values.every(value => fields[field].has(value))
+                        );
+
+                    fieldLocations[index] = (matchingFields.length === 1)
+                        ? matchingFields[0]
+                        : matchingFields;
+                });
+
+            // Reduce possibilities, until there's 1 possibility left for every location
+            while (true) {
+                const fieldsFound = fieldLocations.filter(location => ! Array.isArray(location));
+                // Stop if all field locations have been found
+                if (fieldsFound.length === ticket.length) {
+                    break;
+                }
+
+                for (let i = 0; i < fieldLocations.length; i++) {
+                    if (! Array.isArray(fieldLocations[i])) {
+                        continue;
+                    }
+
+                    // Keep only the field name, if there's only 1 possibility left
+                    fieldLocations[i] = fieldLocations[i].difference(fieldsFound);
+                    if (fieldLocations[i].length === 1) {
+                        fieldLocations[i] = fieldLocations[i][0];
+                    }
+                }
+            }
+
+            // Multiply ticket values that are in the 'departure' fields
+            let total = 1;
+            for (let i = 0; i < fieldLocations.length; i++) {
+                if (fieldLocations[i].startsWith('departure')) {
+                    total *= ticket[i];
+                }
+            }
+
+            document.querySelector('.answer').innerText = total;
+        </script>
+    </body>
+</html>
