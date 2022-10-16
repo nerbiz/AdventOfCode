@@ -20,34 +20,33 @@
                 .flat()
                 .sort((a, b) => a[0] - b[0]);
 
-            const valid = new Set();
-            let start = fieldRanges[0][0];
-            let end;
+            // Collect adjacent/overlapping ranges
+            const ranges = [fieldRanges.shift()];
+            let currentRange = ranges[0];
+            while (fieldRanges.length > 0) {
+                const [start, end] = fieldRanges.shift();
 
-            for (const range of fieldRanges) {
-                // If the range isn't part of or adjacent to the current,
-                // Register the range and start a new one
-                if (range[0] - end > 1) {
-                    for (let i = start; i <= end; i++) {
-                        valid.add(i);
-                    }
-
-                    start = range[0];
+                if (start - currentRange[1] > 1) {
+                    currentRange = [start, end];
+                    ranges.push(currentRange);
+                } else {
+                    currentRange[1] = end;
                 }
-
-                end = range[1];
             }
 
-            // Add the final range
-            for (let i = start; i <= end; i++) {
-                valid.add(i);
+            // Create a list of valid numbers, from the ranges
+            const validNumbers = new Set();
+            for (const range of ranges) {
+                for (let i = range[0]; i <= range[1]; i++) {
+                    validNumbers.add(i);
+                }
             }
 
             // Sum up all invalid numbers of all tickets
             let sum = 0;
             for (const ticket of nearbyTickets) {
                 for (const number of ticket) {
-                    if (! valid.has(number)) {
+                    if (! validNumbers.has(number)) {
                         sum += number;
                     }
                 }
