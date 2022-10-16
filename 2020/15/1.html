@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const numbers = await fileReader.parse();
+
+            // Create an array of spoken numbers
+            let turn = 0;
+            const spoken = [];
+            for (const number of numbers) {
+                spoken[number] = [0, ++turn];
+            }
+
+            // Start with -1, to force the first turn to be a new number
+            let lastSpoken = -1;
+            while (turn < 2020) {
+                if (spoken[lastSpoken] !== undefined) {
+                    // Speak the difference between the last 2 turns
+                    spoken[lastSpoken].shift();
+                    spoken[lastSpoken].push(turn);
+                    lastSpoken = spoken[lastSpoken][1] - spoken[lastSpoken][0];
+                } else {
+                    spoken[lastSpoken] = [0, turn];
+                    lastSpoken = 0;
+                }
+
+                turn++;
+            }
+
+            document.querySelector('.answer').innerText = lastSpoken;
+        </script>
+    </body>
+</html>
