@@ -15,26 +15,21 @@
             const fileReader = new FileReader('./data.txt', new Parser());
             const numbers = await fileReader.parse();
 
-            // Create an array of spoken numbers
+            // Create an array of spoken numbers,
+            // Index = spoken number, value = last turn when spoken
             let turn = 0;
             const spoken = [];
             for (const number of numbers) {
-                spoken[number] = [0, ++turn];
+                spoken[number] = ++turn;
             }
 
             // Start with -1, to force the first turn to be a new number
             let lastSpoken = -1;
             while (turn < 2020) {
-                if (spoken[lastSpoken] !== undefined) {
-                    // Speak the difference between the last 2 turns
-                    spoken[lastSpoken].shift();
-                    spoken[lastSpoken].push(turn);
-                    lastSpoken = spoken[lastSpoken][1] - spoken[lastSpoken][0];
-                } else {
-                    spoken[lastSpoken] = [0, turn];
-                    lastSpoken = 0;
-                }
+                const previousTurn = spoken[lastSpoken];
 
+                spoken[lastSpoken] = turn;
+                lastSpoken = (previousTurn !== undefined) ? turn - previousTurn : 0;
                 turn++;
             }
 
