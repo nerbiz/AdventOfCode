@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const grid = new Array2d(await fileReader.parse());
+            const cycles = 6;
+
+            // Each cycle the grid can expand at most 1 column/row
+            grid.expandAllSides(cycles, '.');
+
+            // The value of each cube contains values for all Z layers
+            // Layers are symmetrical, so only 1 direction is needed
+            grid.forEach2d(cube => {
+                const currentValue = cube.value;
+                cube.value = new Array(cycles).fill('.');
+                cube.value.unshift(currentValue);
+                cube.nextValue = cube.value.slice(0);
+
+                // Create an array of surrounding cubes
+                cube.surrounding = cube.getSurroundingItems()
+                    .filter(neighbour => neighbour !== undefined);
+            });
+
+            /**
+             * Get all values of the surrounding cubes
+             * @param {Array2dItem} cube
+             * @param {number} layer
+             * @returns {array}
+             */
+            const getSurroundingValues = (cube, layer) => {
+                // Of the first layer, the adjacent layers are symmetrical,
+                // so use the next layer as the previous
+                const previousLayer = (layer === 0) ? layer + 1 : layer - 1;
+                const values = [
+                    cube.value[layer + 1],
+                    cube.value[previousLayer]
+                ];
+
+                for (const neighbour of cube.surrounding) {
+                    values.push(
+                        neighbour.value[layer],
+                        neighbour.value[layer + 1],
+                        neighbour.value[previousLayer]
+                    );
+                }
+
+                return values;
+            };
+
+            let cycle = 0;
+            while (++cycle <= cycles) {
+                for (let layer = 0; layer <= cycle; layer++) {
+                    grid.forEach2d(cube => {
+                        const currentValue = cube.value[layer];
+                        const active = getSurroundingValues(cube, layer)
+                            .filter(value => value === '#')
+                            .length;
+
+                        // Decide whether to change the value
+                        if (currentValue === '#' && (active < 2 || active > 3)) {
+                            cube.nextValue[layer] = '.';
+                        } else if (currentValue === '.' && active === 3) {
+                            cube.nextValue[layer] = '#';
+                        }
+                    });
+                }
+
+                // Set all next values as the current values
+                grid.forEach2d(cube => {
+                    for (let i = 0; i < cube.nextValue.length; i++) {
+                        cube.value[i] = cube.nextValue[i];
+                    }
+                });
+            }
+
+            // The first layer is unique, other layers are symmetrical (duplicated)
+            const firstLayerActive = [];
+            const otherLayersActive = [];
+            grid.forEach2d(cube => {
+                if (cube.value[0] === '#') {
+                    firstLayerActive.push(cube.value[0]);
+                }
+
+                for (const value of cube.value.slice(1)) {
+                    if (value === '#') {
+                        otherLayersActive.push(value);
+                    }
+                }
+            });
+
+            document.querySelector('.answer').innerText = firstLayerActive.length
+                + (otherLayersActive.length * 2);
+        </script>
+    </body>
+</html>
