@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const grid = new Array2d(await fileReader.parse());
+            const cycles = 6;
+
+            // Each cycle the grid can expand at most 1 column/row
+            grid.expandAllSides(cycles, '.');
+
+            // The value of each cube contains values for all W layers
+            // Layers are symmetrical, so only 1 direction is needed
+            grid.forEach2d(cube => {
+                const currentValue = cube.value;
+
+                // Create an array for the W layers
+                cube.value = new Array(cycles + 1).fill(null)
+                    // Which contain values for each Z dimension
+                    .map(z => new Array(cycles + 1).fill('.'));
+                const firstW = new Array(cycles + 1).fill('.');
+                firstW.unshift(currentValue);
+                cube.value.unshift(firstW);
+
+                // Create another values array for temporary next values
+                cube.nextValue = cube.value.slice(0)
+                    .map(z => z.slice(0));
+
+                // Create an array of surrounding cubes
+                cube.surrounding = cube.getSurroundingItems()
+                    .filter(neighbour => neighbour !== undefined);
+            });
+
+            /**
+             * Get all values of the surrounding cubes
+             * @param {Array2dItem} cube
+             * @param {number} wLayer
+             * @param {number} zLayer
+             * @returns {array}
+             */
+            const getSurroundingValues = (cube, wLayer, zLayer) => {
+                // Of the first layer, the adjacent layers are symmetrical,
+                // so use the next layer as the previous
+                const previousWLayer = (wLayer === 0) ? wLayer + 1 : wLayer - 1;
+                const previousZLayer = (zLayer === 0) ? zLayer + 1 : zLayer - 1;
+                const values = [
+                    // All except cube.value[wLayer][zLayer], which is the current
+                    cube.value[wLayer][zLayer + 1],
+                    cube.value[wLayer][previousZLayer],
+                    cube.value[wLayer + 1][zLayer],
+                    cube.value[wLayer + 1][zLayer + 1],
+                    cube.value[wLayer + 1][previousZLayer],
+                    cube.value[previousWLayer][zLayer],
+                    cube.value[previousWLayer][zLayer + 1],
+                    cube.value[previousWLayer][previousZLayer]
+                ];
+
+                for (const neighbour of cube.surrounding) {
+                    values.push(
+                        neighbour.value[wLayer][zLayer],
+                        neighbour.value[wLayer][zLayer + 1],
+                        neighbour.value[wLayer][previousZLayer],
+                        neighbour.value[wLayer + 1][zLayer],
+                        neighbour.value[wLayer + 1][zLayer + 1],
+                        neighbour.value[wLayer + 1][previousZLayer],
+                        neighbour.value[previousWLayer][zLayer],
+                        neighbour.value[previousWLayer][zLayer + 1],
+                        neighbour.value[previousWLayer][previousZLayer]
+                    );
+                }
+
+                return values;
+            };
+
+            let cycle = 0;
+            while (++cycle <= cycles) {
+                for (let wLayer = 0; wLayer <= cycle; wLayer++) {
+                    for (let zLayer = 0; zLayer <= cycle; zLayer++) {
+                        grid.forEach2d(cube => {
+                            const currentValue = cube.value[wLayer][zLayer];
+                            const active = getSurroundingValues(cube, wLayer, zLayer)
+                                .filter(value => value === '#')
+                                .length;
+
+                            // Decide whether to change the value
+                            if (currentValue === '#' && (active < 2 || active > 3)) {
+                                cube.nextValue[wLayer][zLayer] = '.';
+                            } else if (currentValue === '.' && active === 3) {
+                                cube.nextValue[wLayer][zLayer] = '#';
+                            }
+                        });
+                    }
+                }
+
+                // Set all next values as the current values
+                grid.forEach2d(cube => {
+                    for (let w = 0; w < cube.nextValue.length; w++) {
+                        for (let z = 0; z < cube.nextValue[w].length; z++) {
+                            cube.value[w][z] = cube.nextValue[w][z];
+                        }
+                    }
+                });
+            }
+
+            let activeCubes = 0;
+            grid.forEach2d(cube => {
+                // Within W0, only Z0 is unique (add 1)
+                // Within W0, Z1 = Z-1 and Z2 = Z-2 and so on (add 2)
+                if (cube.value[0][0] === '#') {
+                    activeCubes++;
+                }
+
+                for (const value of cube.value[0].slice(1)) {
+                    if (value === '#') {
+                        activeCubes += 2;
+                    }
+                }
+
+                // W1 = W-1 and W2 = W-2 and so on
+                // Within these W layers, it's the same as W0
+                // But the W is duplicate, so double the addition amount
+                for (let w = 1; w < cube.value.length; w++) {
+                    if (cube.value[w][0] === '#') {
+                        activeCubes += 2;
+                    }
+
+                    for (const value of cube.value[w].slice(1)) {
+                        if (value === '#') {
+                            activeCubes += 4;
+                        }
+                    }
+                }
+            });
+
+            document.querySelector('.answer').innerText = activeCubes;
+        </script>
+    </body>
+</html>
