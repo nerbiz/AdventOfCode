@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const expressions = await fileReader.parse();
+
+            /**
+             * Skip to the index to where the sub expression ends
+             * @param {string} expression
+             * @param {number} index
+             * @returns {number}
+             */
+            const indexOfSubEnd = (expression, index) => {
+                let sub = 0;
+                for (let i = index; i < expression.length; i++) {
+                    if (expression[i] === '(') {
+                        sub++;
+                    } else if (expression[i] === ')') {
+                        sub--;
+                    }
+
+                    if (sub === 0) {
+                        return i;
+                    }
+                }
+            };
+
+            /**
+             * Resolve an expression
+             * @param {string} expression
+             * @param {number} index
+             * @returns {number}
+             */
+            const resolve = (expression, index = 0) => {
+                let result = 0;
+                let operator = '+';
+
+                while (index < expression.length) {
+                    const character = expression[index];
+
+                    switch (character) {
+                        case '(':
+                            (operator === '+')
+                                ? result += resolve(expression, index + 1)
+                                : result *= resolve(expression, index + 1);
+                            index = indexOfSubEnd(expression, index);
+                            break;
+                        case ')':
+                            return result;
+                        case '+':
+                        case '*':
+                            operator = character;
+                            break;
+                        default:
+                            (operator === '+')
+                                ? result += (character - 0)
+                                : result *= (character - 0);
+                    }
+
+                    index++;
+                }
+
+                return result;
+            };
+
+            document.querySelector('.answer').innerText = expressions
+                .reduce((sum, expression) => sum + resolve(expression), 0);
+        </script>
+    </body>
+</html>
