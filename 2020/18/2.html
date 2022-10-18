@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const expressions = await fileReader.parse();
+
+            // Find sub-expressions between parentheses
+            const subExpressionRegExp = /\(([^(]*?)\)/g;
+
+            // Find operands with a + in between
+            const additionRegExp = /(\d+)\+(\d+)/g;
+
+            /**
+             * Resolve an expression
+             * @param {string} expression
+             * @returns {number}
+             */
+            const resolve = expression => {
+                // Resolve all additions
+                while (expression.includes('+')) {
+                    expression = expression.replaceAll(
+                        additionRegExp,
+                        (match, operand1, operand2) => (operand1 - 0) + (operand2 - 0)
+                    );
+                }
+
+                // Multiply all remaining numbers
+                return expression.split('*')
+                    .reduce((product, number) => product * number, 1);
+            };
+
+            document.querySelector('.answer').innerText = expressions
+                .reduce((sum, expression) => {
+                    // Resolve all sub-expressions between parentheses
+                    while (expression.includes('(')) {
+                        expression = expression.replaceAll(
+                            subExpressionRegExp,
+                            (match, subExpression) => resolve(subExpression)
+                        );
+                    }
+
+                    // Resolve the result after resolving parentheses
+                    return sum + resolve(expression);
+                }, 0);
+        </script>
+    </body>
+</html>
