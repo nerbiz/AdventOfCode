@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const numbers = await fileReader.parse();
+
+            // Create a map of spoken numbers,
+            // Key = spoken number, value = last turn when spoken
+            let turn = 0;
+            const spoken = new Map();
+            for (const number of numbers) {
+                spoken.set(number, ++turn);
+            }
+
+            // Start with -1, to force the first turn to be a new number
+            let lastSpoken = -1;
+            while (turn < 3e7) {
+                const previousTurn = spoken.get(lastSpoken);
+
+                spoken.set(lastSpoken, turn);
+                lastSpoken = (previousTurn !== undefined) ? turn - previousTurn : 0;
+                turn++;
+            }
+
+            document.querySelector('.answer').innerText = lastSpoken;
+        </script>
+    </body>
+</html>
