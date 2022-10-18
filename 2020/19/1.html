@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const {rules, messages} = await fileReader.parse();
+
+            // Convert rules to regular expression format
+            for (let i = 0; i < rules.length; i++) {
+                if (rules[i][0] === 'a' || rules[i][0] === 'b') {
+                    rules[i] = rules[i][0];
+                } else {
+                    rules[i] = '(' + rules[i]
+                        .map(subRule => subRule.map(number => 'r' + number).join(''))
+                        .join('|') + ')';
+                }
+            }
+
+            // Replace rule references with their corresponding regular expressions
+            while (true) {
+                let done = 0;
+                for (let i = 0; i < rules.length; i++) {
+                    rules[i] = rules[i].replaceAll(/r(\d+)/g, (match, ruleNumber) => rules[ruleNumber]);
+                    if (rules[i].match(/\d/) === null) {
+                        done++;
+                    }
+                }
+
+                // Stop replacing when all rules have been replaced
+                if (done === rules.length) {
+                    break;
+                }
+            }
+
+            document.querySelector('.answer').innerText = messages
+                .filter(message => new RegExp('^' + rules[0] + '$').test(message))
+                .length;
+        </script>
+    </body>
+</html>
