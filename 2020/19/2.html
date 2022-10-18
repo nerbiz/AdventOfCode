@@ -17,6 +17,10 @@
 
             // Convert rules to regular expression format
             for (let i = 0; i < rules.length; i++) {
+                if (rules[i] === undefined) {
+                    continue;
+                }
+
                 if (rules[i][0] === 'a' || rules[i][0] === 'b') {
                     rules[i] = rules[i][0];
                 } else {
@@ -30,6 +34,11 @@
             while (true) {
                 let done = 0;
                 for (let i = 0; i < rules.length; i++) {
+                    if (rules[i] === undefined) {
+                        done++;
+                        continue;
+                    }
+
                     rules[i] = rules[i].replaceAll(/r(\d+)/g, (match, ruleNumber) => rules[ruleNumber]);
                     if (rules[i].match(/\d/) === null) {
                         done++;
@@ -41,6 +50,17 @@
                     break;
                 }
             }
+
+            // Replace rule 8 and 11 with:
+            // 8: 42 | 42 8
+            // 11: 42 31 | 42 11 31
+            rules[8] = '(r42(r42)*)'
+                .replaceAll('r42', rules[42]);
+            rules[11] = '(r42r31|(r42){2}(r31){2}|(r42){3}(r31){3}|(r42){4}(r31){4}|(r42){5}(r31){5})'
+                .replaceAll('r42', rules[42])
+                .replaceAll('r31', rules[31]);
+            // Only rule 0 references 8 and 11
+            rules[0] = rules[8] + rules[11];
 
             const regExp = new RegExp('^' + rules[0] + '$');
             document.querySelector('.answer').innerText = messages
