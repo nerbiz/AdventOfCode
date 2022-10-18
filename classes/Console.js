@@ -63,6 +63,19 @@ export default class Console
     }
 
     /**
+     * Log a value in an information block
+     * @param {string} value
+     * @returns {void}
+     */
+    static infoBlock(value)
+    {
+        console.log(
+            '%c' + value,
+            'border-radius: 4px; padding: 5px; background-color: skyblue; color: #222;'
+        );
+    }
+
+    /**
      * Construct a console message with multiple properties like color
      * @param parameters
      * @returns {void}
