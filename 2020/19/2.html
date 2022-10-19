@@ -56,7 +56,11 @@
             // 11: 42 31 | 42 11 31
             rules[8] = '(r42(r42)*)'
                 .replaceAll('r42', rules[42]);
-            rules[11] = '(r42r31|(r42){2}(r31){2}|(r42){3}(r31){3}|(r42){4}(r31){4}|(r42){5}(r31){5})'
+            let rule11 = [];
+            for (let i = 1; i <= 5; i++) {
+                rule11.push('r42'.repeat(i) + 'r31'.repeat(i));
+            }
+            rules[11] = ('(' + rule11.join('|') + ')')
                 .replaceAll('r42', rules[42])
                 .replaceAll('r31', rules[31]);
             // Only rule 0 references 8 and 11
