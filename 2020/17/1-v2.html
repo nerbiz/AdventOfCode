@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const grid = await fileReader.parse();
+            const cycles = 6;
+
+            // Each coordinate is 3 bytes, these numbers are used for masks
+            const xByte = 2**8 - 1;
+            const yByte = xByte << 8;
+            const zByte = yByte << 8;
+
+            // Fill all X,Y,Z coordinates with a 0 (use 3-nibble mechanism)
+            let states = new Map();
+            const gridSize = grid.length + (2 * cycles);
+            for (let x = 0; x < gridSize; x++) {
+                for (let y = 0; y < gridSize; y++) {
+                    for (let z = 0; z <= cycles; z++) {
+                        const coordinate = x + (y << 8) + (z << 16);
+                        states.set(coordinate, 0);
+                    }
+                }
+            }
+
+            // Set cube states from the grid, with offset to place them in the center
+            const xOffset = Math.floor((gridSize - grid[0].length) / 2);
+            const yOffset = Math.floor((gridSize - grid.length) / 2);
+            for (let y = 0; y < grid.length; y++) {
+                for (let x = 0; x < grid[0].length; x++) {
+                    const coordinate = ((y + yOffset) << 8) + (x + xOffset);
+                    states.set(coordinate, Number(grid[y][x] === '#'));
+                }
+            }
+
+            const getActiveNeighbourAmount = coordinates => {
+                const currentZ = (coordinates & zByte) >> 16;
+                let sum = 0;
+
+                for (let dX = -1; dX <= 1; dX++) {
+                    const neighbourX = coordinates + dX;
+
+                    for (let dY = -1; dY <= 1; dY++) {
+                        const neighbourY = neighbourX + (dY * (1 << 8));
+
+                        for (let dZ = -1; dZ <= 1; dZ++) {
+                            // Of the first layer (Z0), the adjacent layers are symmetrical,
+                            // so use the next layer as the previous
+                            const zMultiplier = (currentZ === 0) ? Math.abs(dZ): dZ;
+
+                            const neighbour = neighbourY + (zMultiplier * (1 << 16));
+                            if (neighbour !== coordinates) {
+                                sum += states.get(neighbour) || 0;
+                            }
+                        }
+                    }
+                }
+
+                return sum;
+            };
+
+            let tempStates = new Map(states);
+            let cycle = 0;
+            while (++cycle <= cycles) {
+                for (const [coordinates, state] of states) {
+                    if ((coordinates & zByte) >> 16 > cycle) {
+                        continue;
+                    }
+
+                    // Decide whether to change the value
+                    const active = getActiveNeighbourAmount(coordinates);
+                    if (state === 1 && (active < 2 || active > 3)) {
+                        tempStates.set(coordinates, 0);
+                    } else if (state === 0 && active === 3) {
+                        tempStates.set(coordinates, 1);
+                    }
+                }
+
+                states = tempStates;
+                tempStates = new Map(states);
+            }
+
+            let activeCubes = 0;
+            for (const [coordinates, state] of states) {
+                // The first layer (Z0) is unique (add 1)
+                // Other layers (Z>0) are symmetrical (add 2)
+                activeCubes += ((coordinates & zByte) >> 16 === 0)
+                    ? state
+                    : state * 2;
+            }
+
+            document.querySelector('.answer').innerText = activeCubes;
+        </script>
+    </body>
+</html>
