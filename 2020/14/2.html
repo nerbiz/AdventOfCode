@@ -28,7 +28,7 @@
              * @param {number} number
              * @returns {number}
              */
-            const getHighBits = number => (number - (number % 2**32)) / 2**32;
+            const getHighBits = number => Math.floor(number / 2**32);
 
             const getAddresses = (address, mask) => {
                 // This mask sets/keeps 1s in the address
