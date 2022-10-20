@@ -76,6 +76,16 @@ export default class Console
     }
 
     /**
+     * Create a horizontal line
+     * @param parameters
+     * @returns {void}
+     */
+    static line(...parameters)
+    {
+        this.build(...parameters, '-'.repeat(50));
+    }
+
+    /**
      * Construct a console message with multiple properties like color
      * @param parameters
      * @returns {void}
