@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerProduct();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const tileData = await fileReader.parse();
+            const cornerTiles = [];
+
+            /**
+             * Convert a tile border (pixels) to a number
+             * @param {array} border
+             * @returns {number}
+             */
+            const borderToNumber = border => {
+                const pixels = border.map(pixel => pixel.value).join('')
+                    .replaceAll('.', '0')
+                    .replaceAll('#', '1');
+
+                // Also reversed, because the orientation can be different
+                const reversed = pixels.split('').reverse().join('');
+
+                const number1 = parseInt(pixels, 2);
+                const number2 = parseInt(reversed, 2);
+
+                // Join the numbers (both 10 bits)
+                return (Math.min(number1, number2) << 10)
+                    + Math.max(number1, number2);
+            };
+
+            // Get simplified information for each tile
+            const tiles = tileData.map(tile => {
+                const grid = new Array2d(tile.grid);
+
+                return {
+                    id: tile.id,
+                    borders: [
+                        borderToNumber(grid.getRow(0)),
+                        borderToNumber(grid.getColumn(grid[0].length - 1)),
+                        borderToNumber(grid.getRow(grid.length - 1)),
+                        borderToNumber(grid.getColumn(0)),
+                    ],
+                    adjacent: [],
+                };
+            });
+
+            // Find adjacent tiles of all tiles
+            for (let i = 0; i < tiles.length; i++) {
+                const tile = tiles[i];
+
+                for (const otherTile of tiles.slice(i + 1)) {
+                    for (const border of tile.borders) {
+                        if (otherTile.borders.includes(border)) {
+                            tile.adjacent.push(otherTile);
+                            otherTile.adjacent.push(tile);
+                        }
+                    }
+                }
+
+                // If there are 2 adjacent tiles, it's a corner tile
+                if (tile.adjacent.length === 2) {
+                    cornerTiles.push(tile);
+                }
+
+                // Stop when all corners have been found
+                if (cornerTiles.length === 4) {
+                    break;
+                }
+            }
+
+            document.querySelector('.answer').innerText = cornerTiles
+                .map(tile => tile.id)
+                .product();
+        </script>
+    </body>
+</html>
