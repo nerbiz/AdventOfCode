@@ -408,7 +408,7 @@ export default class Array2d extends Array
      */
     getItems(xyPairs)
     {
-        return xyPairs.map(xyPair => this.getItem(...xyPair));
+        return xyPairs.map(xyPair => this.getItem(xyPair[0], xyPair[1]));
     }
 
     /**
@@ -650,6 +650,97 @@ export default class Array2d extends Array
             .expandHorizontally(amount, value, customData)
             .expandVertically(amount * -1, value, customData)
             .expandVertically(amount, value, customData);
+    }
+
+    /**
+     * Rotate the 2D array clockwise
+     * @returns {Array2d}
+     */
+    rotate()
+    {
+        if (this.length !== this[0].length) {
+            throw new Error('Only rotation of squares is currently supported');
+        }
+
+        const maxX = Math.ceil(this[0].length / 2);
+        const maxY = Math.ceil(this.length / 2);
+
+        for (let x = 0; x < maxX; x++) {
+            for (let y = 0; y < maxY; y++) {
+                // Don't rotate the center in a grid of odd size
+                const xHalf = Math.floor(this[0].length / 2);
+                const yHalf = Math.floor(this.length / 2);
+                if (x === xHalf && y === yHalf) {
+                    continue;
+                }
+
+                // Get the next 3 pixels to move
+                let xCopy;
+                let nextX = x;
+                let nextY = y;
+                const next = new Array(3).fill(null)
+                    .map(item => {
+                        xCopy = nextX;
+                        nextX = this[0].length - 1 - nextY;
+                        nextY = xCopy;
+                        return this.getItem(nextX, nextY);
+                    });
+
+                // Move the values to the next items
+                const item = this.getItem(x, y);
+                const itemValue = item.value;
+                item.value = next[2].value;
+                next[2].value = next[1].value;
+                next[1].value = next[0].value;
+                next[0].value = itemValue;
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     * Mirror the 2D array horizontally
+     * @returns {Array2d}
+     */
+    flipHorizontally()
+    {
+        const lastItemIndex = Math.floor(this[0].length / 2);
+
+        for (let i = 0; i < this.length; i++) {
+            const row = this[i];
+
+            for (let j = 0; j < lastItemIndex; j++) {
+                const otherItem = row[row.length - 1 - j];
+                const itemValue = row[j].value;
+                row[j].value = otherItem.value;
+                otherItem.value = itemValue;
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     * Mirror the 2D array vertically
+     * @returns {Array2d}
+     */
+    flipVertically()
+    {
+        const lastRowIndex = Math.floor(this.length / 2);
+
+        for (let i = 0; i < lastRowIndex; i++) {
+            const row = this[i];
+            const otherRow = this[this.length - 1 - i];
+
+            for (let j = 0; j < row.length; j++) {
+                const itemValue = row[j].value;
+                row[j].value = otherRow[j].value;
+                otherRow[j].value = itemValue;
+            }
+        }
+
+        return this;
     }
 
     /**
