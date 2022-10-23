@@ -656,7 +656,7 @@ export default class Array2d extends Array
      * Rotate the 2D array clockwise
      * @returns {Array2d}
      */
-    rotate()
+    rotateClockwise()
     {
         if (this.length !== this[0].length) {
             throw new Error('Only rotation of squares is currently supported');

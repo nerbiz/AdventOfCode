@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let tiles = await fileReader.parse();
+
+            /**
+             * Convert borders of a grid to numbers
+             * @param {array} tile
+             * @returns {array}
+             */
+            const getBorderNumbers = tile => {
+                return [
+                    tile[0].join(''),
+                    tile.map(row => row.at(-1)).join(''),
+                    tile.at(-1).join(''),
+                    tile.map(row => row[0]).join(''),
+                ].map(binary => [
+                    parseInt(binary, 2),
+                    // Also reversed, because the orientation can be different
+                    parseInt(binary.split('').reverse().join(''), 2),
+                ]);
+            };
+
+            tiles = tiles.map(tile => ({
+                id: tile.id,
+                grid: new Array2d(tile.grid),
+                borders: getBorderNumbers(tile.grid),
+                adjacent: new Array(4).fill(undefined),
+            }));
+
+            const cornerTiles = [];
+
+            // Find adjacent tiles of all tiles
+            for (let i = 0; i < tiles.length; i++) {
+                const tile = tiles[i];
+                const borders = tile.borders.flat();
+
+                for (const otherTile of tiles.slice(i + 1)) {
+                    const otherBorders = otherTile.borders.flat();
+
+                    for (let direction = 0; direction < borders.length; direction++) {
+                        const otherDirection = otherBorders.indexOf(borders[direction]);
+
+                        if (otherDirection > -1) {
+                            // Borders have indexes 0..7, convert them to 0..3
+                            tile.adjacent[direction >> 1] = otherTile;
+                            otherTile.adjacent[otherDirection >> 1] = tile;
+                        }
+                    }
+                }
+
+                const adjacentAmount = tile.adjacent
+                    .filter(otherTile => otherTile !== undefined)
+                    .length;
+                if (adjacentAmount === 2) {
+                    cornerTiles.push(tile);
+                }
+            }
+
+            const rotateTile = tile => {
+                tile.adjacent.unshift(tile.adjacent.pop());
+                tile.grid.rotateClockwise();
+            };
+
+            const flipTileHorizontally = tile => {
+                const adjacentRight = tile.adjacent?.[1];
+                tile.adjacent[1] = tile.adjacent[3];
+                tile.adjacent[3] = adjacentRight;
+                tile.grid.flipHorizontally();
+            };
+
+            const flipTileVertically = tile => {
+                const adjacentDown = tile.adjacent?.[2];
+                tile.adjacent[2] = tile.adjacent[0];
+                tile.adjacent[0] = adjacentDown;
+                tile.grid.flipVertically();
+            };
+
+            // Create an array that will hold all the tiles
+            const imageTiles = new Array(Math.sqrt(tiles.length))
+                .fill(undefined)
+                .map(part => new Array(Math.sqrt(tiles.length)));
+
+            // Rotate the tile, so that adjacent tiles are in right and down directions
+            let currentTile = cornerTiles[0];
+            while (currentTile.adjacent[0] !== undefined || currentTile.adjacent[3] !== undefined) {
+                rotateTile(currentTile);
+            }
+
+            imageTiles[0][0] = currentTile;
+            for (let y = 0; y < imageTiles.length; y++) {
+                for (let x = 0; x < imageTiles[0].length; x++) {
+                    // Align the tile to the right
+                    let rightTile;
+                    if (x < imageTiles[0].length - 1) {
+                        rightTile = currentTile.adjacent[1];
+                        imageTiles[y][x + 1] = rightTile;
+
+                        // Rotate until the left-adjacent tile is the current tile
+                        while (rightTile.adjacent[3] !== currentTile) {
+                            rotateTile(rightTile);
+                        }
+
+                        // See if the tile needs to be flipped vertically
+                        if (
+                            (y === 0 && rightTile.adjacent[0] !== undefined)
+                            || (y > 0 && rightTile.adjacent[0] !== imageTiles[y - 1][x + 1])
+                        ) {
+                            flipTileVertically(rightTile);
+                        }
+                    }
+
+                    // Align the tile to the bottom
+                    if (y < imageTiles.length - 1) {
+                        const downTile = currentTile.adjacent[2];
+                        imageTiles[y + 1][x] = downTile;
+
+                        // Rotate until the up-adjacent tile is the current tile
+                        while (downTile.adjacent[0] !== currentTile) {
+                            rotateTile(downTile);
+                        }
+
+                        // See if the tile needs to be flipped horizontally
+                        if (
+                            (x === 0 && downTile.adjacent[3] !== undefined)
+                            || (x > 0 && downTile.adjacent[3] !== imageTiles[y][x - 1].adjacent[2])
+                        ) {
+                            flipTileHorizontally(downTile);
+                        }
+                    }
+
+                    currentTile = (x < imageTiles[0].length - 1)
+                        ? rightTile
+                        : imageTiles[y + 1]?.[0];
+                }
+            }
+
+            /*// Show the grid with all tiles properly aligned
+            const debugGridSize = (Math.sqrt(tiles.length) * 10) + Math.sqrt(tiles.length) + 1;
+            const debugGrid = [new Array(debugGridSize).fill('-')];
+            const gridRowLength = tiles[0].grid.length;
+            for (let y = 0; y < imageTiles.length; y++) {
+                for (let gridY = 0; gridY < gridRowLength; gridY++) {
+                    let row = ['|'];
+                    for (const tile of imageTiles[y]) {
+                        if (tile === undefined) {
+                            row = row.concat(' '.repeat(10), ['|']);
+                        } else {
+                            row = row.concat(
+                                tile.grid[gridY].map(pixel => pixel.value === '1' ? '#' : '.'),
+                                ['|']
+                            );
+                        }
+                    }
+                    debugGrid.push(row);
+                }
+                debugGrid.push(new Array(debugGridSize).fill('-'));
+            }
+            console.log(new Array2d(debugGrid).toString());*/
+
+            // Cut off the borders of each tile
+            const gridSize = tiles[0].grid.length;
+            for (let y = 0; y < imageTiles.length; y++) {
+                for (let x = 0; x < imageTiles[0].length; x++) {
+                    imageTiles[y][x] = imageTiles[y][x].grid
+                        .slice2d(1, 1, gridSize - 1, gridSize - 1);
+                }
+            }
+
+            // Combine all the tiles into a complete image
+            let completeImage = [];
+            for (let y = 0; y < imageTiles.length; y++) {
+                for (let gridY = 0; gridY < gridSize - 2; gridY++) {
+                    const row = imageTiles[y]
+                        .map(tile => tile.getRow(gridY).map(pixel => pixel.value))
+                        .flat();
+
+                    completeImage.push(row);
+                }
+            }
+            completeImage = new Array2d(completeImage);
+            let binaryRows = completeImage.getAllValues().map(row => row.join(''));
+
+            let seaMonster = [
+                '                  # ',
+                '#    ##    ##    ###',
+                ' #  #  #  #  #  #   ',
+            ];
+            const seaMonsterPixels = seaMonster.join('').replaceAll(' ', '').length;
+            const seaMonsterLength = seaMonster[0].length;
+            seaMonster = seaMonster.map(row => {
+                row = row.replaceAll(' ', '0').replaceAll('#', '1');
+                return parseInt(row, 2);
+            });
+
+            let rotated = 0;
+            let flipped = false;
+            let seaMonstersFound = 0;
+            const rowLength = completeImage[0].length;
+            const maxShift = completeImage[0].length - seaMonsterLength;
+
+            while (seaMonstersFound === 0) {
+                for (let y = 1; y < binaryRows.length - 2; y++) {
+                    for (let shift = 0; shift <= maxShift; shift++) {
+                        // Get a portion of 3 rows, for matching with a sea monster
+                        const sliceStart = rowLength - seaMonsterLength - shift;
+                        const sliceEnd = rowLength - shift;
+                        const rowNum = parseInt(binaryRows[y].slice(sliceStart, sliceEnd), 2);
+                        const previousRowNum = parseInt(binaryRows[y - 1].slice(sliceStart, sliceEnd), 2);
+                        const nextRowNum = parseInt(binaryRows[y + 1].slice(sliceStart, sliceEnd), 2);
+
+                        // Use bitwise AND for finding a sea monster
+                        if (
+                            (rowNum & seaMonster[1]) === seaMonster[1]
+                            && (nextRowNum & seaMonster[2]) === seaMonster[2]
+                            && (previousRowNum & seaMonster[0]) === seaMonster[0]
+                        ) {
+                            seaMonstersFound++;
+                            shift += seaMonsterLength - 1;
+                        }
+                    }
+                }
+
+                if (seaMonstersFound === 0) {
+                    completeImage.rotateClockwise();
+                    binaryRows = completeImage.getAllValues().map(row => row.join(''));
+                    rotated++;
+                }
+
+                if (rotated === 4) {
+                    if (flipped === true) {
+                        break;
+                    }
+
+                    completeImage.flipHorizontally();
+                    binaryRows = completeImage.getAllValues().map(row => row.join(''), 2);
+                    rotated = 0;
+                    flipped = true;
+                }
+            }
+
+            // Show the complete image
+            // console.log(completeImage.toString().replaceAll('0', '.').replaceAll('1', '#'));
+
+            document.querySelector('.answer').innerText = completeImage.getAllValues(true)
+                .filter(pixel => pixel === '1').length
+                - (seaMonsterPixels * seaMonstersFound);
+        </script>
+    </body>
+</html>

@@ -11,7 +11,12 @@ export default class Parser
         while (linesArray.length > 0) {
             tiles.push({
                 id: linesArray.shift().replaceAll(/\D/g, '') - 0,
-                grid: linesArray.splice(0, 10).map(row => row.split('')),
+                grid: linesArray.splice(0, 10)
+                    .map(row => row
+                        .replaceAll('.', '0')
+                        .replaceAll('#', '1')
+                        .split('')
+                    ),
             });
 
             linesArray.shift();
