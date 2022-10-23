@@ -21,7 +21,7 @@
             const yByte = xByte << 8;
             const zByte = yByte << 8;
 
-            // Fill all X,Y,Z coordinates with a 0 (use 3-nibble mechanism)
+            // Fill all X,Y,Z coordinates with a 0 (use 3-byte mechanism)
             let states = new Map();
             const gridSize = grid.length + (2 * cycles);
             for (let x = 0; x < gridSize; x++) {
