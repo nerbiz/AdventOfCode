@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let cups = await fileReader.parse();
+            const cupsAmount = cups.length;
+
+            let currentIndex = 0;
+            for (let round = 0; round < 100; round++) {
+                let currentCup = cups[currentIndex];
+                const taken = cups.splice(currentIndex + 1, 3);
+
+                let destinationCup = (cups[currentIndex] - 1) || 9;
+                let decreaser = destinationCup - 1;
+
+                while (taken.includes(destinationCup)) {
+                    destinationCup = ((cupsAmount + --decreaser) % cupsAmount) + 1;
+                }
+
+                cups.splice(cups.indexOf(destinationCup) + 1, 0, ...taken);
+                const nextIndex = (cups.indexOf(currentCup) + 1) % cupsAmount;
+                cups = cups.slice(nextIndex).concat(cups.slice(0, nextIndex));
+            }
+
+            const oneIndex = cups.indexOf(1);
+            cups = cups.slice(oneIndex + 1).concat(cups.slice(0, oneIndex));
+
+            document.querySelector('.answer').innerText = cups.join('');
+        </script>
+    </body>
+</html>
