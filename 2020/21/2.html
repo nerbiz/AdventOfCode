@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerIntersection();
+            ArrayPrototype.registerDifference();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const list = await fileReader.parse();
+
+            // Create an {allergen: [ingredients1, ingredients2, ...]} object
+            const allergens = {};
+            for (const item of list) {
+                for (const allergen of item.allergens) {
+                    allergens[allergen] = allergens[allergen] || [];
+                    allergens[allergen].push(item.ingredients);
+                }
+            }
+
+            // Keep only matching ingredients per allergen
+            for (const name in allergens) {
+                allergens[name] = allergens[name][0]
+                    .intersection(...allergens[name].slice(1));
+            }
+
+            // Keep looking, until each allergen has 1 matching ingredient
+            const found = [];
+            const allergensAmount = Object.keys(allergens).length;
+            while (found.length < allergensAmount) {
+                for (const name in allergens) {
+                    // Remove found ingredients from the list of the allergen
+                    if (allergens[name].length > 1) {
+                        allergens[name] = allergens[name].difference(found);
+                    }
+
+                    // If only 1 ingredient remains, add it as found
+                    if (allergens[name].length === 1 && ! found.includes(allergens[name][0])) {
+                        found.push(allergens[name][0]);
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = Object.entries(allergens)
+                .sort((a, b) => a[0] < b[0] ? -1 : 1)
+                .map(entry => entry[1][0])
+                .join(',');
+        </script>
+    </body>
+</html>
