@@ -16,27 +16,33 @@
             let cups = await fileReader.parse();
             const cupsAmount = cups.length;
 
-            let currentIndex = 0;
             for (let round = 0; round < 100; round++) {
-                let currentCup = cups[currentIndex];
-                const taken = cups.splice(currentIndex + 1, 3);
+                // Take 3 cups out of the group
+                let currentCup = cups[0];
+                const taken = cups.slice(1, 4);
+                cups = currentCup + cups.slice(4);
 
-                let destinationCup = (cups[currentIndex] - 1) || 9;
-                let decreaser = destinationCup - 1;
+                // Decide the destination for the taken cups
+                let destinationCup;
+                let decreaser = 1;
+                do {
+                    // Wrap around from 3, 2, 1, back to 9, 8...
+                    destinationCup = ((cupsAmount + currentCup - ++decreaser) % cupsAmount) + 1;
+                } while (taken.indexOf(destinationCup) > -1);
 
-                while (taken.includes(destinationCup)) {
-                    destinationCup = ((cupsAmount + --decreaser) % cupsAmount) + 1;
-                }
+                // Place the taken cups
+                const destinationIndex = cups.indexOf(destinationCup) + 1;
+                cups = cups.slice(0, destinationIndex)
+                    + taken
+                    + cups.slice(destinationIndex);
 
-                cups.splice(cups.indexOf(destinationCup) + 1, 0, ...taken);
-                const nextIndex = (cups.indexOf(currentCup) + 1) % cupsAmount;
-                cups = cups.slice(nextIndex).concat(cups.slice(0, nextIndex));
+                // Shift the group to the left, for the next round
+                cups = cups.slice(1) + cups[0];
             }
 
             const oneIndex = cups.indexOf(1);
-            cups = cups.slice(oneIndex + 1).concat(cups.slice(0, oneIndex));
-
-            document.querySelector('.answer').innerText = cups.join('');
+            document.querySelector('.answer').innerText = cups.slice(oneIndex + 1)
+                + cups.slice(0, oneIndex);
         </script>
     </body>
 </html>
