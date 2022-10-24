@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const decks = await fileReader.parse();
+
+            const playGame = decks => {
+                const histories = [[], []];
+
+                while (true) {
+                    // A player wins if the other player's deck is empty
+                    if (decks[1].length === 0) {
+                        return 0;
+                    } else if (decks[0].length === 0) {
+                        return 1;
+                    }
+
+                    // Get the current state of player decks
+                    const states = [
+                        decks[0].join(','),
+                        decks[1].join(','),
+                    ];
+
+                    // Player 1 wins if a previous deck state occurs again
+                    if (histories[0].includes(states[0]) || histories[1].includes(states[1])) {
+                        return 0;
+                    }
+
+                    histories[0].push(states[0]);
+                    histories[1].push(states[1]);
+
+                    const cards = [
+                        decks[0].shift(),
+                        decks[1].shift(),
+                    ];
+
+                    // If the card amounts are at least the value of the drawn cards, do a sub-game,
+                    // otherwise the higher drawn value wins
+                    let winner;
+                    if (decks[0].length >= cards[0] && decks[1].length >= cards[1]) {
+                        winner = playGame([
+                            decks[0].slice(0, cards[0]),
+                            decks[1].slice(0, cards[1]),
+                        ]);
+                    } else {
+                        winner = (cards[0] > cards[1]) ? 0 : 1;
+                    }
+
+                    (winner === 0)
+                        ? decks[0].push(cards[0], cards[1])
+                        : decks[1].push(cards[1], cards[0]);
+                }
+            };
+
+            const winner = playGame(decks);
+
+            document.querySelector('.answer').innerText = decks[winner]
+                .map((card, index, deck) => card * (deck.length - index))
+                .reduce((sum, value) => sum + value, 0);
+        </script>
+    </body>
+</html>
