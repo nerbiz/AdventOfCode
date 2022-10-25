@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const paths = await fileReader.parse();
+            const flip = new Set();
+
+            for (const path of paths) {
+                let x = 0;
+                let y = 0;
+                let z = 0;
+
+                for (const step of path) {
+                    switch (step) {
+                        case 'e':
+                            x--;
+                            y++;
+                            break;
+                        case 'w':
+                            x++;
+                            y--;
+                            break;
+                        case 'ne':
+                            y++;
+                            z++;
+                            break;
+                        case 'nw':
+                            x++;
+                            z++;
+                            break;
+                        case 'se':
+                            x--;
+                            z--;
+                            break;
+                        case 'sw':
+                            y--;
+                            z--;
+                            break;
+                    }
+                }
+
+                const tile = x + ',' + y + ',' + z;
+                if (flip.has(tile)) {
+                    flip.delete(tile);
+                } else {
+                    flip.add(tile);
+                }
+            }
+
+            document.querySelector('.answer').innerText = flip.size;
+        </script>
+    </body>
+</html>
