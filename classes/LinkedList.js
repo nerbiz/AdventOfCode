@@ -101,6 +101,44 @@ export default class LinkedList
     }
 
     /**
+     * Connect 2 nodes
+     * @param {LinkedListNode} leftNode
+     * @param {LinkedListNode} rightNode
+     * @returns {void}
+     */
+    connect(leftNode, rightNode)
+    {
+        leftNode.next = rightNode;
+        rightNode.previous = leftNode;
+    }
+
+    /**
+     * Find a node with a specific value
+     * @param {any} value
+     * @param {LinkedListNode|undefined} startNode The node to start searching from
+     * @returns {LinkedListNode|undefined}
+     */
+    find(value, startNode = undefined)
+    {
+        startNode = startNode || this.firstNode;
+        if (startNode.value === value) {
+            return startNode;
+        }
+
+        let currentNode = startNode.next;
+        while (currentNode.value !== value) {
+            currentNode = currentNode.next;
+
+            // Prevent infinite loops
+            if (currentNode === startNode) {
+                return;
+            }
+        }
+
+        return currentNode;
+    }
+
+    /**
      * Remove a node
      * @param {LinkedListNode} node
      * @returns {void}
@@ -188,15 +226,16 @@ export default class LinkedList
 
     /**
      * Get all values as an array
+     * @param {boolean} asNodes
      * @returns {array}
      */
-    toArray()
+    toArray(asNodes = false)
     {
-        const values = [];
+        const items = [];
 
         let currentNode = this.firstNode;
         while (true) {
-            values.push(currentNode.value);
+            items.push(asNodes ? currentNode : currentNode.value);
             currentNode = currentNode.next;
 
             // Prevent infinite loop, nodes wrap from last to first
@@ -205,6 +244,6 @@ export default class LinkedList
             }
         }
 
-        return values;
+        return items;
     }
 }
