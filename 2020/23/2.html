@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import LinkedList from '../../classes/LinkedList.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const cupNumbers = (await fileReader.parse())
+                .split('')
+                .map(number => number - 0);
+
+            // Put the cup numbers in a linked list
+            const cups = new LinkedList();
+            for (const number of cupNumbers) {
+                cups.add(number);
+            }
+            const valueOneCup = cups.find(1);
+
+            // Set the normal previous number cup (value - 1) in the cups
+            for (const cup of cups.toArray(true)) {
+                cup.orderedPrevious = cups.find(
+                    (cup.value === 1) ? cups.size : cup.value - 1
+                );
+            }
+
+            // Add cups, up to 1 million
+            for (let add = 10; add <= 1e6; add++) {
+                cups.add(add);
+
+                const added = cups.getLast();
+                added.orderedPrevious = (add === 10)
+                    ? cups.find(9)
+                    : added.previous;
+            }
+
+            // Set the last cup as the previous ordered cup of the first
+            valueOneCup.orderedPrevious = cups.getLast();
+
+            let currentCup = cups.firstNode;
+
+            for (let round = 1; round <= 1e7; round++) {
+                // Take 3 cups
+                const takenCup1 = currentCup.next;
+                const takenCup2 = takenCup1.next;
+                const takenCup3 = takenCup2.next;
+
+                // Close the gap between the taken cups
+                cups.connect(currentCup, takenCup3.next);
+
+                // Find the destination cup, by decreasing value
+                let destinationCup = currentCup.orderedPrevious;
+                while (
+                    destinationCup === takenCup1
+                    || destinationCup === takenCup2
+                    || destinationCup === takenCup3
+                ) {
+                    destinationCup = destinationCup.orderedPrevious;
+                }
+
+                // Connect the taken cups after the destination cup
+                cups.connect(takenCup3, destinationCup.next);
+                cups.connect(destinationCup, takenCup1);
+
+                currentCup = currentCup.next;
+            }
+
+            document.querySelector('.answer').innerText = valueOneCup.next.value
+                * valueOneCup.next.next.value;
+        </script>
+    </body>
+</html>
