@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const paths = await fileReader.parse();
+            const blackTiles = new Set();
+
+            // Create the initial tile layout
+            for (const path of paths) {
+                let x = 0;
+                let y = 0;
+                let z = 0;
+
+                for (const step of path) {
+                    switch (step) {
+                        case 'e':
+                            x--;
+                            y++;
+                            break;
+                        case 'w':
+                            x++;
+                            y--;
+                            break;
+                        case 'ne':
+                            y++;
+                            z++;
+                            break;
+                        case 'nw':
+                            x++;
+                            z++;
+                            break;
+                        case 'se':
+                            x--;
+                            z--;
+                            break;
+                        case 'sw':
+                            y--;
+                            z--;
+                            break;
+                    }
+                }
+
+                const tile = x + ',' + y + ',' + z;
+                if (blackTiles.has(tile)) {
+                    blackTiles.delete(tile);
+                } else {
+                    blackTiles.add(tile);
+                }
+            }
+
+            /**
+             * Get information about a tile's neighbours
+             * @param {string} coordinates Coordinates in 'x,y,z' format
+             * @returns {object}
+             */
+            const getNeighboursInfo = coordinates => {
+                const [x, y, z] = coordinates.split(',').map(number => number - 0);
+
+                const neighbours = {
+                    whiteTiles: [],
+                    blackAmount: 0,
+                };
+
+                for (const coordinates of [
+                    (x+1) + ',' + y     + ',' + (z+1),
+                    x     + ',' + (y+1) + ',' + (z+1),
+                    (x+1) + ',' + (y-1) + ',' + z,
+                    (x-1) + ',' + (y+1) + ',' + z,
+                    x     + ',' + (y-1) + ',' + (z-1),
+                    (x-1) + ',' + y     + ',' + (z-1),
+                ]) {
+                    if (blackTiles.has(coordinates)) {
+                        neighbours.blackAmount++;
+                    } else {
+                        neighbours.whiteTiles.push(coordinates);
+                    }
+                }
+
+                return neighbours;
+            };
+
+            for (let day = 1; day <= 100; day++) {
+                const addTiles = [];
+                const deleteTiles = [];
+
+                // See if any black tiles need to be flipped to white
+                for (const blackTile of blackTiles) {
+                    const {whiteTiles, blackAmount} = getNeighboursInfo(blackTile);
+                    if (blackAmount === 0 || blackAmount > 2) {
+                        deleteTiles.push(blackTile);
+                    }
+
+                    // See if any white tiles needed to be flipped to black
+                    for (const whiteTile of whiteTiles) {
+                        const {blackAmount} = getNeighboursInfo(whiteTile);
+                        if (blackAmount === 2) {
+                            addTiles.push(whiteTile);
+                        }
+                    }
+                }
+
+                for (const tile of addTiles) {
+                    blackTiles.add(tile);
+                }
+
+                for (const tile of deleteTiles) {
+                    blackTiles.delete(tile);
+                }
+            }
+
+            document.querySelector('.answer').innerText = blackTiles.size;
+        </script>
+    </body>
+</html>
