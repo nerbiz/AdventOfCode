@@ -27,11 +27,15 @@
                     tile.map(row => row.at(-1)).join(''),
                     tile.at(-1).join(''),
                     tile.map(row => row[0]).join(''),
-                ].map(binary => [
-                    parseInt(binary, 2),
+                ].map(binary => {
+                    const normal = parseInt(binary, 2);
                     // Also reversed, because the orientation can be different
-                    parseInt(binary.split('').reverse().join(''), 2),
-                ]);
+                    const reversed = parseInt(binary.split('').reverse().join(''), 2);
+
+                    // Join the numbers (both 10 bits)
+                    return (Math.min(normal, reversed) << 10)
+                        + Math.max(normal, reversed);
+                });
             };
 
             tiles = tiles.map(tile => ({
@@ -55,9 +59,8 @@
                         const otherDirection = otherBorders.indexOf(borders[direction]);
 
                         if (otherDirection > -1) {
-                            // Borders have indexes 0..7, convert them to 0..3
-                            tile.adjacent[direction >> 1] = otherTile;
-                            otherTile.adjacent[otherDirection >> 1] = tile;
+                            tile.adjacent[direction] = otherTile;
+                            otherTile.adjacent[otherDirection] = tile;
                         }
                     }
                 }
@@ -70,25 +73,6 @@
                 }
             }
 
-            const rotateTile = tile => {
-                tile.adjacent.unshift(tile.adjacent.pop());
-                tile.grid.rotateClockwise();
-            };
-
-            const flipTileHorizontally = tile => {
-                const adjacentRight = tile.adjacent?.[1];
-                tile.adjacent[1] = tile.adjacent[3];
-                tile.adjacent[3] = adjacentRight;
-                tile.grid.flipHorizontally();
-            };
-
-            const flipTileVertically = tile => {
-                const adjacentDown = tile.adjacent?.[2];
-                tile.adjacent[2] = tile.adjacent[0];
-                tile.adjacent[0] = adjacentDown;
-                tile.grid.flipVertically();
-            };
-
             // Create an array that will hold all the tiles
             const imageTiles = new Array(Math.sqrt(tiles.length))
                 .fill(undefined)
@@ -97,7 +81,8 @@
             // Rotate the tile, so that adjacent tiles are in right and down directions
             let currentTile = cornerTiles[0];
             while (currentTile.adjacent[0] !== undefined || currentTile.adjacent[3] !== undefined) {
-                rotateTile(currentTile);
+                currentTile.adjacent.unshift(currentTile.adjacent.pop());
+                currentTile.grid.rotateClockwise();
             }
 
             imageTiles[0][0] = currentTile;
@@ -111,7 +96,8 @@
 
                         // Rotate until the left-adjacent tile is the current tile
                         while (rightTile.adjacent[3] !== currentTile) {
-                            rotateTile(rightTile);
+                            rightTile.adjacent.unshift(rightTile.adjacent.pop());
+                            rightTile.grid.rotateClockwise();
                         }
 
                         // See if the tile needs to be flipped vertically
@@ -119,7 +105,10 @@
                             (y === 0 && rightTile.adjacent[0] !== undefined)
                             || (y > 0 && rightTile.adjacent[0] !== imageTiles[y - 1][x + 1])
                         ) {
-                            flipTileVertically(rightTile);
+                            const adjacentDown = rightTile.adjacent?.[2];
+                            rightTile.adjacent[2] = rightTile.adjacent[0];
+                            rightTile.adjacent[0] = adjacentDown;
+                            rightTile.grid.flipVertically();
                         }
                     }
 
@@ -130,7 +119,8 @@
 
                         // Rotate until the up-adjacent tile is the current tile
                         while (downTile.adjacent[0] !== currentTile) {
-                            rotateTile(downTile);
+                            downTile.adjacent.unshift(downTile.adjacent.pop());
+                            downTile.grid.rotateClockwise();
                         }
 
                         // See if the tile needs to be flipped horizontally
@@ -138,7 +128,10 @@
                             (x === 0 && downTile.adjacent[3] !== undefined)
                             || (x > 0 && downTile.adjacent[3] !== imageTiles[y][x - 1].adjacent[2])
                         ) {
-                            flipTileHorizontally(downTile);
+                            const adjacentRight = downTile.adjacent?.[1];
+                            downTile.adjacent[1] = downTile.adjacent[3];
+                            downTile.adjacent[3] = adjacentRight;
+                            downTile.grid.flipHorizontally();
                         }
                     }
 
@@ -218,15 +211,15 @@
                         // Get a portion of 3 rows, for matching with a sea monster
                         const sliceStart = rowLength - seaMonsterLength - shift;
                         const sliceEnd = rowLength - shift;
-                        const rowNum = parseInt(binaryRows[y].slice(sliceStart, sliceEnd), 2);
-                        const previousRowNum = parseInt(binaryRows[y - 1].slice(sliceStart, sliceEnd), 2);
-                        const nextRowNum = parseInt(binaryRows[y + 1].slice(sliceStart, sliceEnd), 2);
+                        const row = parseInt(binaryRows[y].slice(sliceStart, sliceEnd), 2);
+                        const previousRow = parseInt(binaryRows[y - 1].slice(sliceStart, sliceEnd), 2);
+                        const nextRow = parseInt(binaryRows[y + 1].slice(sliceStart, sliceEnd), 2);
 
                         // Use bitwise AND for finding a sea monster
                         if (
-                            (rowNum & seaMonster[1]) === seaMonster[1]
-                            && (nextRowNum & seaMonster[2]) === seaMonster[2]
-                            && (previousRowNum & seaMonster[0]) === seaMonster[0]
+                            (row & seaMonster[1]) === seaMonster[1]
+                            && (nextRow & seaMonster[2]) === seaMonster[2]
+                            && (previousRow & seaMonster[0]) === seaMonster[0]
                         ) {
                             seaMonstersFound++;
                             shift += seaMonsterLength - 1;
