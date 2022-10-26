@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const publicKeys = await fileReader.parse();
+            const subjectNumber = 7;
+            const divider = 20201227;
+            let loopSize = 1;
+
+            // Only 1 loop size is needed, to calculate the encryption key
+            let value = subjectNumber;
+            while (++loopSize) {
+                value *= subjectNumber;
+                value %= divider;
+
+                if (value === publicKeys[0]) {
+                    break;
+                }
+            }
+
+            // Only 1 public key is needed, because the encryption keys are equal
+            const publicKey = publicKeys[1];
+            let encryptionKey = publicKey;
+
+            for (let i = 0; i < loopSize - 1; i++) {
+                encryptionKey *= publicKey;
+                encryptionKey %= divider;
+            }
+
+            document.querySelector('.answer').innerText = encryptionKey;
+        </script>
+    </body>
+</html>
