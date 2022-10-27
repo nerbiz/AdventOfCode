@@ -16,19 +16,22 @@
             const grid = await fileReader.parse();
             const cycles = 6;
 
-            // Each coordinate is 3 bytes, these numbers are used for masks
+            // Each coordinate is 4 bytes, these numbers are used for masks
             const xByte = 2**8 - 1;
             const yByte = xByte << 8;
             const zByte = yByte << 8;
+            const wByte = zByte << 8;
 
-            // Fill all X,Y,Z coordinates with a 0 (use 3-byte mechanism)
+            // Fill all X,Y,Z,W coordinates with a 0 (use 4-byte mechanism)
             let states = new Map();
             const gridSize = grid.length + (2 * cycles);
             for (let x = 0; x < gridSize; x++) {
                 for (let y = 0; y < gridSize; y++) {
                     for (let z = 0; z <= cycles; z++) {
-                        const coordinate = x + (y << 8) + (z << 16);
-                        states.set(coordinate, 0);
+                        for (let w = 0; w <= cycles; w++) {
+                            const coordinate = x + (y << 8) + (z << 16) + (w << 24);
+                            states.set(coordinate, 0);
+                        }
                     }
                 }
             }
@@ -44,8 +47,9 @@
             }
 
             const getActiveNeighbourAmount = coordinates => {
-                // Get the Z coordinate of the cube to get neighbours of
+                // Get the Z and W coordinate of the cube to get neighbours of
                 const currentZ = (coordinates & zByte) >> 16;
+                const currentW = (coordinates & wByte) >> 24;
                 let sum = 0;
 
                 for (let dX = -1; dX <= 1; dX++) {
@@ -58,10 +62,17 @@
                             // Of the first layer (Z0), the adjacent layers are symmetrical,
                             // so use the next layer as the previous
                             const zMultiplier = (currentZ === 0) ? Math.abs(dZ): dZ;
+                            const neighbourZ = neighbourY + (zMultiplier * (1 << 16));
 
-                            const neighbour = neighbourY + (zMultiplier * (1 << 16));
-                            if (neighbour !== coordinates) {
-                                sum += states.get(neighbour) || 0;
+                            for (let dW = -1; dW <= 1; dW++) {
+                                // Of the first layer (W0), the adjacent layers are symmetrical,
+                                // so use the next layer as the previous
+                                const wMultiplier = (currentW === 0) ? Math.abs(dW): dW;
+
+                                const neighbour = neighbourZ + (wMultiplier * (1 << 24));
+                                if (neighbour !== coordinates) {
+                                    sum += states.get(neighbour) || 0;
+                                }
                             }
                         }
                     }
@@ -75,7 +86,10 @@
             while (++cycle <= cycles) {
                 for (const [coordinates, state] of states) {
                     // Any layer beyond the last is empty, so skip it
-                    if ((coordinates & zByte) >> 16 > cycle) {
+                    if (
+                        (coordinates & zByte) >> 16 > cycle
+                        || (coordinates & wByte) >> 24 > cycle
+                    ) {
                         continue;
                     }
 
@@ -94,11 +108,28 @@
 
             let activeCubes = 0;
             for (const [coordinates, state] of states) {
-                // The first layer (Z0) is unique (add 1)
-                // Other layers (Z>0) are symmetrical (add 2)
-                activeCubes += ((coordinates & zByte) >> 16 === 0)
-                    ? state
-                    : state * 2;
+                const z = (coordinates & zByte) >> 16;
+                const w = (coordinates & wByte) >> 24;
+
+                if (w === 0) {
+                    // Within W0:
+                    // Only Z0 is unique (add 1)
+                    // Z1 = Z-1 and Z2 = Z-2 and so on (add 2)
+                    if (z === 0) {
+                        activeCubes += state;
+                    } else {
+                        activeCubes += state * 2;
+                    }
+                } else {
+                    // W1 = W-1 and W2 = W-2 and so on
+                    // Do the same as with W0, but because other W's are duplicate,
+                    // add double amounts
+                    if (z === 0) {
+                        activeCubes += state * 2;
+                    } else if (z > 0) {
+                        activeCubes += state * 4;
+                    }
+                }
             }
 
             document.querySelector('.answer').innerText = activeCubes;
