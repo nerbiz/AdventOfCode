@@ -21,14 +21,18 @@
             Math.mod = (number, divisor) => ((number % divisor) + divisor) % divisor;
 
             for (let [type, amount] of steps) {
+                // All operations use modulo to wrap around the deck size
                 switch (type) {
                     case 'new':
+                        // Make the index negative
                         cardIndex = Math.mod((cardIndex * -1) - 1, deckSize);
                         break;
                     case 'cut':
+                        // Shift the index left/right
                         cardIndex = Math.mod((cardIndex - amount), deckSize);
                         break;
                     case 'increment':
+                        // Move the index right by multiplying
                         cardIndex = (cardIndex * amount) % deckSize;
                         break;
                 }
