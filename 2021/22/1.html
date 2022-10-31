@@ -11,42 +11,30 @@
         <script type="module">
             import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
-            import Utilities from '../../classes/Utilities.js';
 
-            const fileReader = new FileReader('./datatest.txt', new Parser());
-            const steps = await fileReader.parse();
-            const cubes = [];
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let steps = await fileReader.parse();
+            const cubes = new Set();
 
-            const startTime = new Date().getTime();
+            // Cut off steps that go outside -50 or 50
+            steps = steps.slice(0, steps.findIndex(step => {
+                const values = step.slice(1).flat();
+                return (Math.max(50, ...values) > 50
+                    || Math.min(-50, ...values) < -50);
+            }));
 
-            console.log(steps);
-
-            for (const step of steps.slice(0, 1)) {
-                for (let x = step.axes.x[0]; x <= step.axes.x[1]; x++) {
-                    for (let y = step.axes.y[0]; y <= step.axes.y[1]; y++) {
-                        for (let z = step.axes.z[0]; z <= step.axes.z[1]; z++) {
-                            cubes.push({x, y, z, status: step.status});
+            for (const [status, xRange, yRange, zRange] of steps) {
+                for (let x = xRange[0]; x <= xRange[1]; x++) {
+                    for (let y = yRange[0]; y <= yRange[1]; y++) {
+                        for (let z = zRange[0]; z <= zRange[1]; z++) {
+                            const cube = x + ',' + y + ',' + z;
+                            (status === true) ? cubes.add(cube) : cubes.delete(cube);
                         }
                     }
                 }
             }
 
-            console.log(cubes);
-
-            /* for (const step of steps) {
-                for (let z = step.coordinates.z.from; z <= step.coordinates.z.to; z++) {
-                    for (let y = step.coordinates.y.from; y <= step.coordinates.y.to; y++) {
-                        for (let x = step.coordinates.x.from; x <= step.coordinates.x.to; x++) {
-                            Utilities.arraySetDeep(grid, [z, y, x], (step.status === 'on'));
-                        }
-                    }
-                }
-            }
-
-            console.log(grid);
-            console.log(grid.flat(2).filter(point => point === true).length); */
-
-            console.log('Done in ms:', new Date().getTime() - startTime);
+            document.querySelector('.answer').innerText = cubes.size;
         </script>
     </body>
 </html>
