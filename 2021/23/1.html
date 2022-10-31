@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+            import Pathfinding from '../../classes/Pathfinding.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const burrow = new Array2d(await fileReader.parse());
+
+            // The rooms where the amphipods need to end up in
+            const rooms = [
+                burrow.getItems([[3,2], [3, 3]]),
+                burrow.getItems([[5,2], [5, 3]]),
+                burrow.getItems([[7,2], [7, 3]]),
+                burrow.getItems([[9,2], [9, 3]]),
+            ];
+
+            // Indicates which rooms are done
+            const roomsDone = [false, false, false, false];
+
+            const aCharCode = 'A'.charCodeAt(0);
+            const amphipods = rooms
+                .flat()
+                .map(room => {
+                    const amphipod = {
+                        // Make the type numeric for energy calculation:
+                        // 10**0=1, 10**1=10, 10**2=100, 10**3=1000
+                        type: room.value.charCodeAt(0) - aCharCode,
+                        location: room,
+                    };
+
+                    // Set the amphipod as a property in the room
+                    room.value = '.';
+                    room.amphipod = amphipod;
+                    // Set the amphipod room type: 3, 5, 7, 9 becomes 0, 1, 2, 3
+                    room.type = (room.x - 3) >> 1;
+                    room.isRoom = true;
+
+                    return amphipod;
+                })
+                .sort((a, b) => a.type - b.type);
+
+            // The locations in front of rooms, where amphipods don't stop at
+            const roomFronts = burrow.getItems([
+                [3, 1], [5, 1], [7, 1], [9, 1]
+            ]);
+
+            // Set a property indicating that a location is part of the hallway
+            const hallway = burrow.slice2d(1, 1, 12, 2)
+                .tap2d(location => location.isHallway = true)
+                .at(0)
+                .filter(location => roomFronts.indexOf(location) === -1);
+
+            // All the traversable locations
+            const traversable = hallway.concat(rooms.flat());
+
+            // Used to get distances to all traversable locations,
+            // A* won't reach this target, but will set distance to each location
+            const unreachableLocation = burrow.getItem(0, 0);
+
+            // For pathfinding
+            const isObstacle = location => (
+                location.value === '#'
+                || location.amphipod !== undefined
+            );
+
+            /**
+             * Set an amphipod in a new location
+             * @param {object} amphipod
+             * @param {Array2dItem} oldLocation
+             * @param {Array2dItem} newLocation
+             * @returns {void}
+             */
+            const moveAmphipod = (amphipod, oldLocation, newLocation) => {
+                oldLocation.amphipod = undefined;
+                newLocation.amphipod = amphipod;
+                amphipod.location = newLocation;
+            };
+
+            /**
+             * Get a string representation of the current burrow state
+             * @returns {string}
+             */
+            const getBurrowState = () => {
+                let state = '';
+
+                for (const location of traversable) {
+                    state += (location.amphipod !== undefined)
+                        ? location.amphipod.type
+                        : location.value;
+                }
+
+                return state;
+            };
+
+            /**
+             * Get the estimated amount of remaining energy required
+             * @returns {number}
+             */
+            const energyEstimate = () => {
+                let energy = 0;
+                for (const amphipod of amphipods) {
+                    if (amphipod.isHome === true) {
+                        continue;
+                    }
+
+                    // See in which position of the room the amphipod needs to go
+                    const room = (rooms[amphipod.type][1].amphipod?.type === amphipod.type)
+                        ? rooms[amphipod.type][0]
+                        : rooms[amphipod.type][1];
+
+                    energy += (Math.abs(room.x - amphipod.location.x)
+                        + Math.abs(room.y - amphipod.location.y))
+                        * (10 ** amphipod.type);
+                }
+
+                return energy;
+            };
+
+            let leastEnergyUsed = Infinity;
+            let energyUsed = 0;
+
+            /**
+             * Traverse the burrow, to find the least amount of energy required
+             * @param {array} states
+             * @returns {void}
+             */
+            (function traverse(states = []) {
+                // Skip the same state that previously happened
+                const state = getBurrowState();
+                if (states.indexOf(state) > -1) {
+                    return;
+                }
+                states.push(state);
+
+                // Stop if the amount of energy used is already more than the least
+                if (energyUsed + energyEstimate() >= leastEnergyUsed) {
+                    return;
+                }
+
+                // See if all amphipods are in place
+                if (roomsDone.every(done => done === true)) {
+                    leastEnergyUsed = energyUsed;
+                    return;
+                }
+
+                for (const amphipod of amphipods) {
+                    // Skip amphipods that are in completed rooms
+                    if (amphipod.isHome === true || roomsDone[amphipod.type] === true) {
+                        continue;
+                    }
+
+                    // Get distances (if reachable) to all traversable locations
+                    const currentLocation = amphipod.location;
+                    Pathfinding.aStar(burrow, currentLocation, unreachableLocation, isObstacle);
+                    const distances = new Map();
+                    for (const location of traversable) {
+                        if (location !== currentLocation) {
+                            distances.set(location, location.G);
+                        }
+                    }
+
+                    // See if the amphipod can go into its room
+                    // This can happen from a room, or from the hallway
+                    const targetRoom = rooms[amphipod.type];
+                    if (targetRoom[1].amphipod === undefined) {
+                        const targetDistance = distances.get(targetRoom[1]);
+
+                        if (targetDistance !== undefined) {
+                            energyUsed += targetDistance * (10 ** amphipod.type);
+                            moveAmphipod(amphipod, currentLocation, targetRoom[1]);
+                            amphipod.isHome = true;
+                            traverse(states.slice(0));
+
+                            // Revert when coming back from traversing
+                            amphipod.isHome = false;
+                            moveAmphipod(amphipod, targetRoom[1], currentLocation);
+                            energyUsed -= targetDistance * (10 ** amphipod.type);
+                        }
+                    } else if (
+                        ! currentLocation.isRoom
+                        && targetRoom[0].amphipod === undefined
+                        && targetRoom[1].amphipod.type === amphipod.type
+                    ) {
+                        const targetDistance = distances.get(targetRoom[0]);
+
+                        if (targetDistance !== undefined) {
+                            energyUsed += targetDistance * (10 ** amphipod.type);
+                            moveAmphipod(amphipod, currentLocation, targetRoom[0]);
+                            amphipod.isHome = true;
+                            roomsDone[amphipod.type] = true;
+                            traverse(states.slice(0));
+
+                            // Revert when coming back from traversing
+                            roomsDone[amphipod.type] = false;
+                            amphipod.isHome = false;
+                            moveAmphipod(amphipod, targetRoom[0], currentLocation);
+                            energyUsed -= targetDistance * (10 ** amphipod.type);
+                        }
+                    }
+
+                    if (currentLocation.isHallway) {
+                        continue;
+                    }
+
+                    // Try hallway locations, if the amphipod is in a room
+                    for (const location of hallway) {
+                        // Skip occupied locations
+                        if (location.amphipod !== undefined) {
+                            continue;
+                        }
+
+                        const targetDistance = distances.get(location);
+                        if (targetDistance !== undefined) {
+                            energyUsed += targetDistance * (10 ** amphipod.type);
+                            moveAmphipod(amphipod, currentLocation, location);
+                            traverse(states.slice(0));
+
+                            // Revert when coming back from traversing
+                            moveAmphipod(amphipod, location, currentLocation);
+                            energyUsed -= targetDistance * (10 ** amphipod.type);
+                        }
+                    }
+                }
+            })();
+
+            document.querySelector('.answer').innerText = leastEnergyUsed;
+        </script>
+    </body>
+</html>
