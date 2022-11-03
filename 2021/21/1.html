@@ -14,42 +14,39 @@
 
             const fileReader = new FileReader('./data.txt', new Parser());
             const positions = await fileReader.parse();
-            const maxPosition = 10;
-            const maxDiceNumber = 100;
-            const rollsPerTurn = 3;
-            const scores = {
-                1: 0,
-                2: 0,
-            };
 
-            let diceValue = 0;
-            let diceRolls = 0;
+            // Make the positions 0-based
+            positions[0]--;
+            positions[1]--;
+
+            const rollsPerTurn = 3;
+            const scores = [0, 0];
             let losingPlayer;
+            let rolls = 0;
 
             // Loop until someone wins
-            playLoop: while (true) {
-                for (let playerNumber = 1; playerNumber <= 2; playerNumber++) {
-                    // Increase the dice value by the rolls per turn, wrap from max number back to 1 if needed
-                    diceValue = ((diceValue + rollsPerTurn) - 1) % maxDiceNumber + 1;
+            gameLoop: while (true) {
+                for (let playerNumber = 0; playerNumber <= 1; playerNumber++) {
+                    // Increase the dice value by the rolls per turn, wrap from 100 back to 1 if needed
+                    const diceValue = (++rolls * rollsPerTurn) % 100;
 
-                    // Roll the dice for the player, example:
-                    // 7 + 8 + 9  =  (9 * rolls) - triangular number of (rolls - 1)
-                    const diceSum = (diceValue * rollsPerTurn) - ((rollsPerTurn - 1) * rollsPerTurn / 2);
-                    diceRolls += rollsPerTurn;
+                    // Roll the dice for the player
+                    const diceSum = (diceValue * 3) - 3;
 
-                    // Update the position (wrap from 10 back to 1) and score of the player
-                    positions[playerNumber] = ((positions[playerNumber] + diceSum - 1) % maxPosition) + 1;
-                    scores[playerNumber] += positions[playerNumber];
+                    // Update the position (wrap from 9 back to 0)
+                    // The score is one more than the 0-based position
+                    positions[playerNumber] = (positions[playerNumber] + diceSum) % 10;
+                    scores[playerNumber] += positions[playerNumber] + 1;
 
                     // The player won
                     if (scores[playerNumber] >= 1000) {
-                        losingPlayer = (playerNumber % 2) + 1;
-                        break playLoop;
+                        losingPlayer = (playerNumber + 1) % 2;
+                        break gameLoop;
                     }
                 }
             }
 
-            document.querySelector('.answer').innerText = scores[losingPlayer] * diceRolls;
+            document.querySelector('.answer').innerText = scores[losingPlayer] * rolls * 3;
         </script>
     </body>
 </html>

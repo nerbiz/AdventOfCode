@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const positions = await fileReader.parse();
+
+            console.time('Time elapsed');
+
+            // Make the positions 0-based
+            positions[0]--;
+            positions[1]--;
+
+            // Create all possible dice roll outcomes
+            let universesPerTurn = 0;
+            const possibleOutcomes = {};
+            for (let rollOne = 1; rollOne <= 3; rollOne++) {
+                for (let rollTwo = 1; rollTwo <= 3; rollTwo++) {
+                    for (let rollThree = 1; rollThree <= 3; rollThree++) {
+                        // Each outcome means 3 universes,
+                        // and each outcome can happen multiple times
+                        const outcome = rollOne + rollTwo + rollThree;
+                        possibleOutcomes[outcome] = possibleOutcomes[outcome] || 0;
+                        possibleOutcomes[outcome] += 3;
+                        universesPerTurn += 3;
+                    }
+                }
+            }
+
+            console.log(possibleOutcomes);
+
+            const reach21 = (position, outcomes = '', score = 0) => {
+                const scoreReached = [];
+
+                for (const outcome in possibleOutcomes) {
+                    const newOutcomes = outcomes + outcome;
+                    const newPosition = (position + (outcome - 0)) % 10;
+                    const newScore = score + newPosition + 1;
+
+                    if (newScore >= 21) {
+                        scoreReached.push(newOutcomes);
+                        continue;
+                    }
+
+                    scoreReached.push(...reach21(newPosition, newOutcomes, newScore));
+                }
+
+                return scoreReached;
+            };
+
+            // Group the wins by turns amount
+            const getWins = position => reach21(position)
+                .reduce((totals, turns) => {
+                    totals[turns.length] = totals[turns.length] || [];
+                    totals[turns.length].push(turns);
+                    return totals;
+                }, []);
+
+            // Create an array of winning universes amount, where index is turns amount
+            const winningUniverses = [
+                getWins(positions[0]),
+                getWins(positions[1]),
+            ];
+
+            console.log(winningUniverses);
+
+            const totals = [[], []];
+            for (let turns = 3; turns <= 10; turns++) {
+                const wins = [
+                    winningUniverses[0][turns]
+                        .map(rounds => rounds.split('')
+                            .reduce((total, outcomes) => total * possibleOutcomes[outcomes], 1)
+                        ).reduce((total, universes) => total + universes, 0),
+                    (winningUniverses[1][turns - 1] || [])
+                        .map(rounds => rounds.split('')
+                            .reduce((total, outcomes) => total * possibleOutcomes[outcomes], 1)
+                        ).reduce((total, universes) => total + universes, 0)
+                ];
+
+                const loses = [
+                    (universesPerTurn ** turns) - wins[0],
+                    (universesPerTurn ** (turns - 1)) - wins[1],
+                ];
+
+                totals[0][turns] = wins[0]/* + loses[1]*/;
+                totals[1][turns - 1] = wins[1]/* + loses[0]*/;
+            }
+
+            console.log('Totals', totals);
+            console.log('Total', totals.map(
+                total => total.reduce((total, universes) => total + universes, 0)
+            ));
+            console.log('Digits', totals.map(
+                total => total.reduce((total, universes) => total + universes, 0).toString(10).length
+            ));
+
+            // document.querySelector('.answer').innerText =
+            console.log('');
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
