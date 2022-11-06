@@ -12,10 +12,8 @@
             import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
 
-            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const fileReader = new FileReader('./data.txt', new Parser());
             const positions = await fileReader.parse();
-
-            console.time('Time elapsed');
 
             // Make the positions 0-based
             positions[0]--;
@@ -26,73 +24,43 @@
             for (let rollOne = 1; rollOne <= 3; rollOne++) {
                 for (let rollTwo = 1; rollTwo <= 3; rollTwo++) {
                     for (let rollThree = 1; rollThree <= 3; rollThree++) {
-                        // Each outcome means 3 universes,
-                        // and each outcome can happen multiple times
                         const outcome = rollOne + rollTwo + rollThree;
                         possibleOutcomes[outcome] = possibleOutcomes[outcome] || 0;
-                        possibleOutcomes[outcome] += 3;
+                        possibleOutcomes[outcome]++;
                     }
                 }
             }
 
-            console.log(possibleOutcomes);
-
-            const universes = [0, 0];
-
-            let loopCount = 0;
-            const gameRound = (p1Position, p1Outcomes, p1Score, p2Position, p2Outcomes, p2Score) => {
-                if (++loopCount === 10e6) {
-                    console.log('Universes', universes);
-                    console.log('Universes digits', universes.map(number => number.toString(10).length));
-                    console.timeEnd('Time elapsed');
-                    throw new Error('Too much recursion');
-                }
-
+            const allUniverses = [0, 0];
+            (function gameRound(p1Position, p2Position, p1Score = 0, p2Score = 0, universes = 1) {
                 // Roll dice for player 1 and add score
                 for (const outcome1 in possibleOutcomes) {
-                    const newOutcomes1 = p1Outcomes + outcome1;
-                    const newPosition1 = (p1Position + (outcome1 - 0)) % 10;
-                    const newScore1 = p1Score + newPosition1 + 1;
+                    const universes1 = universes * possibleOutcomes[outcome1];
+                    const p1PositionNew = (p1Position + (outcome1 - 0)) % 10;
+                    const p1ScoreNew = p1Score + p1PositionNew + 1;
 
-                    if (newScore1 >= 21) {
-                        universes[0] += newOutcomes1
-                            .split('')
-                            .map(outcome => possibleOutcomes[outcome])
-                            .reduce((total, universes) => total * universes, 1);
-
+                    if (p1ScoreNew >= 21) {
+                        allUniverses[0] += universes1;
                         continue;
                     }
 
                     // Roll dice for player 2 and add score
                     for (const outcome2 in possibleOutcomes) {
-                        const newOutcomes2 = p2Outcomes + outcome2;
-                        const newPosition2 = (p2Position + (outcome2 - 0)) % 10;
-                        const newScore2 = p2Score + newPosition2 + 1;
+                        const universes2 = universes1 * possibleOutcomes[outcome2];
+                        const p2PositionNew = (p2Position + (outcome2 - 0)) % 10;
+                        const p2ScoreNew = p2Score + p2PositionNew + 1;
 
-                        if (newScore2 >= 21) {
-                            universes[1] += newOutcomes2
-                                .split('')
-                                .map(outcome => possibleOutcomes[outcome])
-                                .reduce((total, universes) => total * universes, 1);
-
+                        if (p2ScoreNew >= 21) {
+                            allUniverses[1] += universes2;
                             continue;
                         }
 
-                        gameRound(newPosition1, newOutcomes1, newScore1,
-                            newPosition2, newOutcomes2, newScore2);
+                        gameRound(p1PositionNew, p2PositionNew, p1ScoreNew, p2ScoreNew, universes2);
                     }
                 }
-            };
+            })(positions[0], positions[1]);
 
-            gameRound(positions[0], '', 0, positions[1], '', 0);
-
-            console.log(possibleOutcomes);
-            console.log('Universes', universes);
-            console.log('Universes digits', universes.map(number => number.toString(10).length));
-            console.log({loopCount});
-
-            // document.querySelector('.answer').innerText =
-            console.timeEnd('Time elapsed');
+            document.querySelector('.answer').innerText = Math.max(...allUniverses);
         </script>
     </body>
 </html>

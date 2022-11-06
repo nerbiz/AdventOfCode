@@ -38,39 +38,129 @@
             }
 
             console.log(possibleOutcomes);
+            console.log({universesPerTurn});
 
-            const reach21 = (position, outcomes = '', score = 0) => {
-                const scoreReached = [];
-
+            const reach21 = (position, outcomes = '', score = 0, reached = [], notReached = []) => {
                 for (const outcome in possibleOutcomes) {
                     const newOutcomes = outcomes + outcome;
                     const newPosition = (position + (outcome - 0)) % 10;
                     const newScore = score + newPosition + 1;
 
                     if (newScore >= 21) {
-                        scoreReached.push(newOutcomes);
+                        // Group the wins by turns amount
+                        reached[newOutcomes.length] = reached[newOutcomes.length] || [];
+                        reached[newOutcomes.length].push(newOutcomes);
                         continue;
                     }
 
-                    scoreReached.push(...reach21(newPosition, newOutcomes, newScore));
+                    notReached[newOutcomes.length] = notReached[newOutcomes.length] || [];
+                    notReached[newOutcomes.length].push(newOutcomes);
+                    reach21(newPosition, newOutcomes, newScore, reached, notReached);
                 }
 
-                return scoreReached;
+                return [reached, notReached];
             };
 
-            // Group the wins by turns amount
-            const getWins = position => reach21(position)
-                .reduce((totals, turns) => {
-                    totals[turns.length] = totals[turns.length] || [];
-                    totals[turns.length].push(turns);
-                    return totals;
-                }, []);
-
             // Create an array of winning universes amount, where index is turns amount
-            const winningUniverses = [
-                getWins(positions[0]),
-                getWins(positions[1]),
+            const reachedUnreached = [
+                reach21(positions[0]),
+                reach21(positions[1]),
             ];
+
+            /*
+            Plan:
+            - Voor elke hoeveelheid rondes waarin P1 wint (3 rondes t/m 10 rondes)
+            - Bijvoorbeeld: P1 wint in 4 rondes
+                - Verliezende rondes van P2 pakken (3 rondes: als P1 in 4 rondes wint, deed P2 3 rondes)
+                - Hoeveelheid mogelijkheden om in 4 rondes te winnen pakken
+                - Vermenigvuldigen met de verliezende rondes
+                    - Want bij elke optie van winnen in 4 rondes, zijn alle verliezende 3 rondes mogelijk
+                - Optellen bij winnend aantal rondes
+                    - 3334, 3335, 3336.. bijvoorbeeld, daarvan alle mogelijkheden optellen
+            */
+
+            console.log(reachedUnreached);
+
+            const p1Wins = reachedUnreached[0][0].map(outcomes => {
+                return outcomes.map(outcome => {
+                    return outcome.split('')
+                        .map(outcome => possibleOutcomes[outcome])
+                        .reduce((total, universes) => total * universes, 1);
+                }).reduce((total, universes) => total + universes, 0);
+            });
+            const p1Loses = reachedUnreached[0][1].map(outcomes => {
+                return outcomes.map(outcome => {
+                    return outcome.split('')
+                        .map(outcome => possibleOutcomes[outcome])
+                        .reduce((total, universes) => total * universes, 1);
+                }).reduce((total, universes) => total + universes, 0);
+            });
+            const p2Wins = reachedUnreached[1][0].map(outcomes => {
+                return outcomes.map(outcome => {
+                    return outcome.split('')
+                        .map(outcome => possibleOutcomes[outcome])
+                        .reduce((total, universes) => total * universes, 1);
+                }).reduce((total, universes) => total + universes, 0);
+            });
+            const p2Loses = reachedUnreached[1][1].map(outcomes => {
+                return outcomes.map(outcome => {
+                    return outcome.split('')
+                        .map(outcome => possibleOutcomes[outcome])
+                        .reduce((total, universes) => total * universes, 1);
+                }).reduce((total, universes) => total + universes, 0);
+            });
+            console.log({p1Wins});
+            console.log({p2Loses});
+
+            const answerPerhaps = p1Wins
+                .map((universes, turns) => {
+                    const loses = p2Loses.filter((universes2, turns2) => turns2 < turns - 1)
+                        .reduce((total, universes) => total + universes, 0);
+
+                    return universes + (reachedUnreached[0][0][turns].length * loses);
+                })
+                .reduce((total, universes) => total + universes, 0);
+
+            console.log({answerPerhaps});
+            console.log('Digits:', answerPerhaps.toString(10).length);
+
+            throw new Error('Done');
+
+            console.log(winningUniverses[0].map(winning => {
+                let total = 0;
+                for (const outcomes of winning) {
+                    let universes = 1;
+                    for (const outcome of outcomes) {
+                        universes *= possibleOutcomes[outcome];
+                    }
+                    total += universes;
+                }
+                return total;
+            }));
+            console.log(winningUniverses[1].map(winning => {
+                let total = 0;
+                for (const outcomes of winning) {
+                    let universes = 1;
+                    for (const outcome of outcomes) {
+                        universes *= possibleOutcomes[outcome];
+                    }
+                    total += universes;
+                }
+                return total;
+            }));
+
+            console.log(
+                winningUniverses[0].flat()
+                    .map(rounds => rounds.split('')
+                        .reduce((total, outcomes) => total * possibleOutcomes[outcomes], 1)
+                    ).reduce((total, universes) => total + universes, 0),
+                winningUniverses[1].flat()
+                    .map(rounds => rounds.split('')
+                        .reduce((total, outcomes) => total * possibleOutcomes[outcomes], 1)
+                    ).reduce((total, universes) => total + universes, 0),
+            );
+
+            throw new Error('Done');
 
             console.log(winningUniverses);
 
