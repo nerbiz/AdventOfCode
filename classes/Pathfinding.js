@@ -102,11 +102,10 @@ export default class Pathfinding
         const unvisitedQueue = new PriorityQueue();
         unvisitedQueue.enqueue(startNode.distance, startNode);
 
-        while (! unvisitedQueue.isEmpty()) {
+        findTarget: while (! unvisitedQueue.isEmpty()) {
             // Get the next nearest node from the unvisited queue
             const nearestNode = unvisitedQueue.dequeue();
 
-            let targetReached = false;
             for (const adjacent of nearestNode.getAdjacentItems()) {
                 // The adjacent node should not be visited yet
                 if (adjacent === undefined || adjacent.visited === true) {
@@ -120,9 +119,9 @@ export default class Pathfinding
                     adjacent.previous = nearestNode;
                 }
 
+                // Stop searching after the target node is reached
                 if (adjacent === targetNode) {
-                    targetReached = true;
-                    break;
+                    break findTarget;
                 }
 
                 // Add the adjacent node to the queue, if it's not in there yet
@@ -132,11 +131,6 @@ export default class Pathfinding
             }
 
             nearestNode.visited = true;
-
-            // Stop searching after the target node is reached
-            if (targetReached === true) {
-                break;
-            }
         }
 
         // Construct the path
