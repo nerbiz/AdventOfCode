@@ -129,8 +129,8 @@ export default class ArrayPrototype
     {
         Object.defineProperty(Array.prototype, 'difference', {
             /**
-             * Get items from array 1, that don't exist in the other arrays
-             * @param {array} arrays 1 or more arrays to compare with
+             * Get items from the current array, that don't exist in the other arrays
+             * @param {array} arrays One or more arrays to compare with
              * @returns {array}
              */
             value: function difference(...arrays) {
@@ -143,6 +143,35 @@ export default class ArrayPrototype
 
                     return true;
                 });
+            },
+            enumerable: false,
+            writable: false,
+        });
+    }
+
+    static registerMutualDifference()
+    {
+        Object.defineProperty(Array.prototype, 'mutualDifference', {
+            /**
+             * Get the mutual difference between two arrays
+             * @param {array} array
+             * @returns {array}
+             */
+            value: function mutualDifference(array) {
+                const difference = [];
+
+                const loopAmount = Math.max(this.length, array.length);
+                for (let i = 0; i < loopAmount; i++) {
+                    if (this[i] !== undefined && array.indexOf(this[i]) === -1) {
+                        difference.push(this[i]);
+                    }
+
+                    if (array[i] !== undefined && this.indexOf(array[i]) === -1) {
+                        difference.push(array[i]);
+                    }
+                }
+
+                return difference;
             },
             enumerable: false,
             writable: false,
