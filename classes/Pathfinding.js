@@ -17,6 +17,7 @@ export default class Pathfinding
             node.G = undefined;
             node.F = undefined;
             node.previous = undefined;
+            node.visited = false;
         });
 
         // Calculate the F value of the start node
@@ -25,11 +26,10 @@ export default class Pathfinding
             + Math.abs(targetNode.y - startNode.y);
 
         const queue = [startNode];
-        const visited = [];
 
         while (queue.length > 0) {
             const currentNode = queue.sort((a, b) => a.F - b.F).shift();
-            visited.push(currentNode);
+            currentNode.visited = true;
 
             // Target reached
             if (currentNode === targetNode) {
@@ -41,7 +41,7 @@ export default class Pathfinding
                     // The node must not be an obstacle
                     || isObstacle(neighbour)
                     // The node must not be visited yet
-                    || visited.includes(neighbour)
+                    || neighbour.visited === true
                 ) {
                     continue;
                 }
@@ -96,6 +96,7 @@ export default class Pathfinding
         grid.forEach2d(node => {
             node.distance = Infinity;
             node.previous = undefined;
+            node.visited = false;
         });
 
         startNode.distance = 0;
