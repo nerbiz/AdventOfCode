@@ -498,7 +498,7 @@ export default class Array2d extends Array
      */
     getColumn(x)
     {
-        return this.map(row => row[x]);
+        return this.map(row => row.at(x));
     }
 
     /**
