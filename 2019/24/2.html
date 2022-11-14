@@ -13,88 +13,86 @@
             import Parser from './Parser.js';
             import Array2d from '../../classes/Array2d.js';
 
-            const fileReader = new FileReader('./datatest.txt', new Parser());
+            const fileReader = new FileReader('./data.txt', new Parser());
             const planet = new Array2d(await fileReader.parse());
-
-            // Add a property containing values per level
-            planet.forEach2d(location => location.value = {levels: {0: location.value}});
-
-            // Set the grid sides in the center location
             const centerLocation = planet.getItem(2, 2);
-            centerLocation.grid = {
-                up: planet.getRow(0),
-                down: planet.getRow(planet.length - 1),
-                left: planet.getColumn(0),
-                right: planet.getColumn(planet.at(0).length - 1),
-            };
+            const minutes = 200;
 
-            /**
-             * Get a side from the grid in the center location
-             * @param {Array2dItem} location
-             * @returns {Array}
-             */
-            const getCenterSide = location => {
-                if (location.x < centerLocation.x) {
-                    return centerLocation.grid.right;
-                } else if (location.x > centerLocation.x) {
-                    return centerLocation.grid.left;
-                } else if (location.y < centerLocation.y) {
-                    return centerLocation.grid.up;
-                } else if (location.y > centerLocation.y) {
-                    return centerLocation.grid.down;
+            planet.forEach2d(location => {
+                if (location.x === 2 && location.y === 2) {
+                    location.value = ' ';
+                    return;
                 }
+
+                // The value and bugs amount are objects with the Z-axis as the keys
+                location.value = {0: location.value};
+                location.bugsAmount = {};
+                location.neighbours = location.getAdjacentItems()
+                    .filter(neighbour => neighbour !== undefined && neighbour !== centerLocation)
+                    // Include the Z-axis (relative) of the neighbour
+                    .map(neighbour => [neighbour, 0]);
+            });
+
+            // Create references to the locations around the center
+            const aroundCenter = {
+                up: planet.getItem(2, 1),
+                down: planet.getItem(2, 3),
+                left: planet.getItem(1, 2),
+                right: planet.getItem(3, 2),
             };
 
-            /**
-             * Get the amount of bugs surrounding a location
-             * @param {Array2dItem} location
-             * @param {array} neighbours
-             * @param {number} currentLevel
-             * @returns {number}
-             */
-            const getBugsAmount = (location, neighbours, currentLevel) => {
-                let amount = 0;
+            // Set additional neighbours in all applicable locations
+            planet.getRow(0).forEach(location => location.neighbours.push([aroundCenter.up, -1]));
+            planet.getRow(-1).forEach(location => location.neighbours.push([aroundCenter.down, -1]));
+            planet.getColumn(0).forEach(location => location.neighbours.push([aroundCenter.left, -1]));
+            planet.getColumn(-1).forEach(location => location.neighbours.push([aroundCenter.right, -1]));
+            aroundCenter.up.neighbours.push(...planet.getRow(0).map(neighbour => [neighbour, 1]));
+            aroundCenter.down.neighbours.push(...planet.getRow(-1).map(neighbour => [neighbour, 1]));
+            aroundCenter.left.neighbours.push(...planet.getColumn(0).map(neighbour => [neighbour, 1]));
+            aroundCenter.right.neighbours.push(...planet.getColumn(-1).map(neighbour => [neighbour, 1]));
 
-                for (const neighbour of neighbours) {
-                    if (neighbour === centerLocation) {
-                        amount += getBugsAmount(location, getCenterSide(location), currentLevel + 1);
-                    } else if (neighbour?.levels[currentLevel] === '#') {
-                        amount++;
+            for (let minute = 1; minute <= minutes; minute++) {
+                // Set the bugs amount for each Z axis in each location
+                planet.forEach2d(location => {
+                    if (location === centerLocation) {
+                        return;
                     }
-                }
 
-                return amount;
-            };
+                    for (let z = 0 - minute; z <= minute; z++) {
+                        location.bugsAmount[z] = location.neighbours
+                            .filter(([neighbour, deltaZ]) => neighbour.value[z + deltaZ] === '#')
+                            .length;
+                    }
+                });
 
-            for (let minute = 1; minute <= 1; minute++) {
-                let currentLevel = 0;
+                // Set the values for each Z axis in each location
+                planet.forEach2d(location => {
+                    if (location === centerLocation) {
+                        return;
+                    }
 
-                planet
-                    .tap2d(location => {
-                        // Skip the center location
-                        if (location === centerLocation) {
-                            return;
+                    for (let z = 0 - minute; z <= minute; z++) {
+                        if (location.value[z] === undefined) {
+                            location.value[z] = '.';
                         }
 
-                        const adjacent = location.getAdjacentItems();
-                        const bugsAmount = getBugsAmount(location, adjacent, currentLevel);
-                        throw new Error('Done');
-
-                        if (location.value === '#' && bugsAmount !== 1) {
-                            location.newValue = '.';
-                        } else if (location.value === '.' && (bugsAmount === 1 || bugsAmount === 2)) {
-                            location.newValue = '#';
-                        } else {
-                            location.newValue = location.value;
+                        const bugsAmount = location.bugsAmount[z];
+                        if (location.value[z] === '#' && bugsAmount !== 1) {
+                            location.value[z] = '.';
+                        } else if (location.value[z] === '.'
+                            && (bugsAmount === 1 || bugsAmount === 2)
+                        ) {
+                            location.value[z] = '#';
                         }
-                    })
-                    .forEach2d(location => {
-                        location.value = location.newValue;
-                        state += location.value;
-                    });
+                    }
+                });
             }
 
-            // document.querySelector('.answer').innerText =
+            document.querySelector('.answer').innerText = planet
+                .map2d(location => Object.values(location.value))
+                .flat(2)
+                .filter(value => value === '#')
+                .length;
         </script>
     </body>
 </html>

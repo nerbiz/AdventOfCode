@@ -21,21 +21,20 @@
                 let state = '';
 
                 planet
-                    .tap2d(location => {
-                        const bugsAmount = location.getAdjacentItems()
+                    .tap2d(location =>
+                        location.bugsAmount = location.getAdjacentItems()
                             .filter(location => location?.value === '#')
-                            .length;
-
-                        if (location.value === '#' && bugsAmount !== 1) {
-                            location.newValue = '.';
-                        } else if (location.value === '.' && (bugsAmount === 1 || bugsAmount === 2)) {
-                            location.newValue = '#';
-                        } else {
-                            location.newValue = location.value;
-                        }
-                    })
+                            .length
+                    )
                     .forEach2d(location => {
-                        location.value = location.newValue;
+                        if (location.value === '#' && location.bugsAmount !== 1) {
+                            location.value = '.';
+                        } else if (location.value === '.'
+                            && (location.bugsAmount === 1 || location.bugsAmount === 2)
+                        ) {
+                            location.value = '#';
+                        }
+
                         state += location.value;
                     });
 
@@ -48,9 +47,9 @@
 
             document.querySelector('.answer').innerText = planet
                 .flat()
-                .reduce((sum, location, index) => {
-                    return sum + (location.value === '#' ? 2 ** index : 0)
-                }, 0);
+                .reduce((sum, location, index) =>
+                    sum + (location.value === '#' ? 2 ** index : 0), 0
+                );
         </script>
     </body>
 </html>
