@@ -11,84 +11,132 @@
         <script type="module">
             import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
-            import ArrayPrototype from '../../classes/ArrayPrototype.js';
             import Array2d from '../../classes/Array2d.js';
             import Pathfinding from '../../classes/Pathfinding.js';
 
-            ArrayPrototype.registerTake();
-            ArrayPrototype.registerTap();
-            const fileReader = new FileReader('./datatest2.txt', new Parser(), false);
+            const fileReader = new FileReader('./data.txt', new Parser(), false);
             const maze = new Array2d(await fileReader.parse());
             const letterRegExp = /[A-Z]/;
-            const unreachableNode = maze.getItem(0, 0);
-            const isObstacle = node => node.value === '#' || letterRegExp.test(node.value);
 
-            /*
-            Plan:
-            - Outer/inner node detection: whether the . node is left, right, up or down
-            - Each node needs a nextFloor property (1 or -1)
-            - Limit of going down is amount of inner portals? Stop if floor amount is larger than portal amount?
-            - Recursive function needs a currentFloor parameter
-            */
+            // Find all edge tiles
+            const allEdgeTiles = [];
+            maze.forEach2d((tile, x, y) => {
+                if (letterRegExp.test(tile.value)) {
+                    const adjacent = tile.getAdjacentItems(true);
 
-            /*const portalNodes = maze.filter2d(node => node.value === '.')
-                .filter(node => node
-                    .getAdjacentItems()
-                    .filter(neighbour => letterRegExp.test(neighbour.value))
-                    .length > 0
-                )
-                .map(node => {
-                    let adjacent = node.getAdjacentItems(true);
-
-                    let direction;
-                    let letterNode;
-                    for (direction in adjacent) {
-                        if (letterRegExp.test(adjacent[direction].value)) {
-                            letterNode = adjacent[direction];
-                            break;
-                        }
+                    if (letterRegExp.test(adjacent.down?.value)) {
+                        const twoDown = maze.getItem(x, y + 2);
+                        const edgeTile = (adjacent.up?.value === '.') ? adjacent.up : twoDown;
+                        edgeTile.label = tile.value + adjacent.down.value;
+                        edgeTile.reachable = [];
+                        edgeTile.connected = undefined;
+                        edgeTile.isInner = (maze.getItem(edgeTile.x, edgeTile.y - 3)?.value === ' '
+                            || maze.getItem(edgeTile.x, edgeTile.y + 3)?.value === ' ');
+                        allEdgeTiles.push(edgeTile);
+                    } else if (letterRegExp.test(adjacent.right?.value)) {
+                        const twoRight = maze.getItem(x + 2, y);
+                        const edgeTile = (adjacent.left?.value === '.') ? adjacent.left : twoRight;
+                        edgeTile.label = tile.value + adjacent.right.value;
+                        edgeTile.reachable = [];
+                        edgeTile.connected = undefined;
+                        edgeTile.isInner = (maze.getItem(edgeTile.x - 3, edgeTile.y)?.value === ' '
+                            || maze.getItem(edgeTile.x + 3, edgeTile.y)?.value === ' ');
+                        allEdgeTiles.push(edgeTile);
                     }
+                }
+            });
 
-                    adjacent = letterNode.getAdjacentItems(true)[direction];
-                    console.log({direction, letterNode});
-                    throw new Error('Done');
-                });*/
+            let entranceTile;
+            let exitTile;
+            let maxLevel = 0;
+            const unreachableTile = maze.getItem(0, 0);
+            for (let i = 0; i < allEdgeTiles.length; i++) {
+                const edgeTile = allEdgeTiles[i];
 
-
-
-
-
-
-            /*const startNode = portalNodes.find(node => node.portalName === 'AA');
-            const targetNode = portalNodes.find(node => node.portalName === 'ZZ');
-            let fewestSteps = Infinity;
-
-            (function findTarget(fromNode, steps = 0, visited = []) {
-                // Stop if the amount of steps is already larger than the fewest
-                if (steps >= fewestSteps) {
-                    return;
+                // The maximum depth/recursion is the amount of inner edge tiles
+                if (edgeTile.isInner) {
+                    maxLevel++;
                 }
 
-                // Stop if the target node is found
-                if (fromNode === targetNode) {
-                    fewestSteps = steps;
-                    return;
+                // Get a reference to the entrance and exit tiles
+                if (edgeTile.label === 'AA') {
+                    entranceTile = edgeTile;
+                } else if (edgeTile.label === 'ZZ') {
+                    exitTile = edgeTile;
                 }
 
-                // Mark the node as visited, to prevent infinite loops
-                visited = visited.slice(0).concat(fromNode);
+                // Get the distance to all reachable tiles
+                Pathfinding.aStar(maze, edgeTile, unreachableTile, tile => tile.value !== '.');
 
-                // Move to other reachable portals
-                for (const next of fromNode.reachablePortals) {
-                    if (visited.includes(next.node)) {
+                for (const otherEdgeTile of allEdgeTiles.slice(i + 1)) {
+                    if (otherEdgeTile.label === edgeTile.label) {
+                        edgeTile.connected = otherEdgeTile;
+                        otherEdgeTile.connected = edgeTile;
                         continue;
                     }
 
-                    findTarget(next.node, steps + next.steps, visited);
-                }
-            })(startNode);*/
+                    if (otherEdgeTile.G === undefined) {
+                        continue;
+                    }
 
-            // document.querySelector('.answer').innerText =
+                    // Set the distance between the reachable edge tiles
+                    edgeTile.reachable.push([otherEdgeTile, otherEdgeTile.G]);
+                    otherEdgeTile.reachable.push([edgeTile, otherEdgeTile.G]);
+                }
+
+                // Sort by inner tiles first, then by distance
+                edgeTile.reachable.sort((a, b) => a[0].isInner === b[0].isInner
+                    ? a[1] - b[1]
+                    : a[0].isInner ? 1 : -1
+                );
+            }
+
+            const makeVisitedState = (tile, level) =>
+                tile.label + ':' + Number(tile.isInner) + ':' + level;
+
+            let shortestPath = Infinity;
+            (function findPath(edgeTile, pathLength = 0, level = 0, visited = '') {
+                // Add the current tile to the visited tiles
+                visited += makeVisitedState(edgeTile, level);
+
+                // Move to the connected edge tile
+                if (edgeTile.label !== 'AA' && edgeTile.label !== 'ZZ') {
+                    level += edgeTile.isInner ? 1 : -1;
+                    edgeTile = edgeTile.connected;
+                    pathLength++;
+                }
+
+                // Stop if the level is too high or low
+                if (level < 0 || level > maxLevel) {
+                    return;
+                }
+
+                // Stop if the current path is already longer than the shortest
+                if (pathLength >= shortestPath) {
+                    return;
+                }
+
+                // Check if the target is reached on the outermost level
+                if (edgeTile.label === 'ZZ') {
+                    if (level === 0) {
+                        shortestPath = pathLength;
+                    }
+
+                    return;
+                }
+
+                for (const [otherEdgeTile, distance] of edgeTile.reachable) {
+                    // Don't move to a previously visited tile
+                    const state = makeVisitedState(otherEdgeTile, level);
+                    if (visited.indexOf(state) > -1) {
+                        continue;
+                    }
+
+                    findPath(otherEdgeTile, pathLength + distance, level, visited.slice(0));
+                }
+            })(entranceTile);
+
+            document.querySelector('.answer').innerText = shortestPath;
         </script>
     </body>
 </html>

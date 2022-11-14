@@ -7,6 +7,9 @@ export default class Parser
      */
     parse(linesArray)
     {
+        // Remove the empty line at the end
+        linesArray.pop();
+
         // Each row in the maze/grid needs to be equal width
         const mazeWidth = Math.max(...linesArray.map(line => line.length));
 
