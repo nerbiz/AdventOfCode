@@ -16,15 +16,16 @@ fn main() {
 }
 
 fn part_1(numbers: &Vec<u32>) -> u32 {
-    let mut current_number: u32 = numbers[0];
     let mut increase_amount: u32 = 0;
 
-    for i in 1..numbers.len() {
-        if numbers[i] > current_number {
-            increase_amount += 1;
+    for (index, number) in numbers.iter().enumerate() {
+        if index == 0 {
+            continue;
         }
 
-        current_number = numbers[i];
+        if *number > numbers[index - 1] {
+            increase_amount += 1;
+        }
     }
 
     increase_amount
@@ -34,7 +35,7 @@ fn part_2(numbers: &Vec<u32>) -> u32 {
     let mut current_sum: u32 = get_sum(&numbers, 0);
     let mut increase_amount: u32 = 0;
 
-    for i in 1..numbers.len() {
+    for i in 1..numbers.len()-2 {
         let sum: u32 = get_sum(&numbers, i);
         if sum > current_sum {
             increase_amount += 1;
@@ -46,8 +47,8 @@ fn part_2(numbers: &Vec<u32>) -> u32 {
     increase_amount
 }
 
-fn get_sum(numbers: &Vec<u32>, start_index: usize) -> u32 {
-    numbers[start_index]
-        + numbers.get(start_index + 1).unwrap_or(&0)
-        + numbers.get(start_index + 2).unwrap_or(&0)
+fn get_sum(numbers: &Vec<u32>, from_index: usize) -> u32 {
+    numbers.get(from_index).unwrap_or(&0)
+        + numbers.get(from_index + 1).unwrap_or(&0)
+        + numbers.get(from_index + 2).unwrap_or(&0)
 }
