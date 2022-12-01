@@ -1,6 +1,6 @@
 mod part1;
 mod part2;
-use aoc_utils::input_as_string;
+use aoc_utils::input::input_as_string;
 
 fn main() {
     let input: String = input_as_string("2022/1/res/input.txt", true);

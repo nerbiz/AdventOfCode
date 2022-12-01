@@ -1,6 +1,6 @@
 mod part1;
 mod part2;
-use aoc_utils::input_as_lines;
+use aoc_utils::input::input_as_lines;
 
 fn main() {
     let input: Vec<String> = input_as_lines("2021/2/res/input.txt");

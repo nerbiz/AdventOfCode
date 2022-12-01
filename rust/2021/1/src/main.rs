@@ -1,6 +1,6 @@
 mod part1;
 mod part2;
-use aoc_utils::input_as_lines;
+use aoc_utils::input::input_as_lines;
 
 fn main() {
     let numbers: Vec<i32> = input_as_lines("2021/1/res/input.txt")
