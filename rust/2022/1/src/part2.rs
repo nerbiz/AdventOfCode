@@ -4,5 +4,5 @@ pub fn solve(elves: &Vec<Vec<i32>>) -> i32 {
         .collect();
 
     calories.sort_by(|a, b| b.cmp(a));
-    calories[0..3].iter().sum::<i32>()
+    calories[..3].iter().sum::<i32>()
 }
