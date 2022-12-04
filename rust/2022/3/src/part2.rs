@@ -8,16 +8,15 @@ pub fn solve(rucksacks: &Vec<String>) -> i32 {
                 .collect();
 
             elves[0].iter()
-                .filter(|character|
-                    elves[1].contains(character)
-                    && elves[2].contains(character)
+                .filter(|item_type| elves[1..].iter()
+                    .all(|elf| elf.contains(item_type))
                 )
-                .map(|character| character.to_owned())
                 .next()
                 .unwrap()
+                .to_owned()
         })
-        .map(|character| {
-            let char_code = character as i32;
+        .map(|item_type| {
+            let char_code: i32 = item_type as i32;
 
             match char_code > 'Z' as i32 {
                 true => char_code - 'a' as i32 + 1,

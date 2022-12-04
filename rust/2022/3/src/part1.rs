@@ -11,8 +11,8 @@ pub fn solve(rucksacks: &Vec<String>) -> i32 {
             let two: HashSet<char> = rucksack[1].chars().collect();
             one.intersection(&two).next().unwrap().to_owned()
         })
-        .map(|character| {
-            let char_code = character as i32;
+        .map(|item_type| {
+            let char_code: i32 = item_type as i32;
 
             match char_code > 'Z' as i32 {
                 true => char_code - 'a' as i32 + 1,
