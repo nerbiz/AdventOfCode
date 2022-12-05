@@ -1,4 +1,5 @@
 mod part1;
+mod part2;
 use aoc_utils::input::input_as_string;
 use std::collections::HashMap;
 
@@ -11,6 +12,7 @@ fn main() {
     // Create a <stack, crates> hashmap
     let mut stacks: HashMap<usize, Vec<String>> = HashMap::new();
     input[0].split('\n').rev().for_each(|line| {
+        // Group all characters by index, where index is the position in the line
         line.chars().enumerate().for_each(|(index, character)| {
             if character.is_alphabetic() {
                 stacks.entry(index)
@@ -30,6 +32,7 @@ fn main() {
     let steps: Vec<[usize; 3]> = input[1].trim()
         .split('\n')
         .map(|line| {
+            // Keep only the numbers of each line
             let numbers: Vec<usize> = line
                 .split(' ')
                 .filter_map(|part| part.parse().ok())
@@ -40,5 +43,6 @@ fn main() {
         })
         .collect();
 
-    println!("Part 1 answer: {}", part1::solve(&mut stacks, &steps));
+    println!("Part 1 answer: {}", part1::solve(&mut stacks.clone(), &steps));
+    println!("Part 2 answer: {}", part2::solve(&mut stacks, &steps));
 }
