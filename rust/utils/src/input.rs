@@ -4,11 +4,10 @@ pub fn input_as_string(file_path: &str, trim: bool) -> String {
     let contents: String = fs::read_to_string(file_path)
         .expect(&format!("The file '{}' needs to be readable", file_path));
 
-    if trim {
-        return String::from(contents.trim());
+    match trim {
+        true => String::from(contents.trim()),
+        false => contents,
     }
-
-    contents
 }
 
 pub fn input_as_lines(file_path: &str) -> Vec<String> {
