@@ -1,2 +1,3 @@
-pub fn solve(numbers: &Vec<i32>) -> i32 {
+pub fn solve(numbers: &Vec<String>) -> i32 {
+    0
 }
