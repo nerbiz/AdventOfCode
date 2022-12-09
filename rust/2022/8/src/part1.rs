@@ -1,14 +1,4 @@
-pub fn solve(rows: &Vec<Vec<u32>>) -> usize {
-    let mut columns: Vec<Vec<u32>> = Vec::new();
-    for (y, row) in rows.iter().enumerate() {
-        for (x, tree) in row.iter().enumerate() {
-            match y == 0 {
-                true => &columns.push(vec![*tree]),
-                false => &columns[x].push(*tree),
-            };
-        }
-    }
-
+pub fn solve(rows: &Vec<Vec<u32>>, columns: &Vec<Vec<u32>>) -> usize {
     let mut visible_amount: usize = 0;
 
     for (y, row) in rows.iter().enumerate() {
