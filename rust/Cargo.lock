@@ -33,6 +33,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc2022_10"
+version = "0.1.0"
+dependencies = [
+ "aoc_utils",
+]
+
+[[package]]
 name = "aoc2022_2"
 version = "0.1.0"
 dependencies = [
@@ -70,6 +77,13 @@ dependencies = [
 
 [[package]]
 name = "aoc2022_8"
+version = "0.1.0"
+dependencies = [
+ "aoc_utils",
+]
+
+[[package]]
+name = "aoc2022_9"
 version = "0.1.0"
 dependencies = [
  "aoc_utils",
