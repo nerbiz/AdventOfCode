@@ -1,8 +1,9 @@
 mod part1;
+mod part2;
 use aoc_utils::input::input_as_lines;
 
 fn main() {
-    let input = input_as_lines("2022/9/res/input.txt");
+    let input: Vec<String> = input_as_lines("2022/9/res/input.txt");
 
     let steps: Vec<(&str, i32)> = input.iter()
         .map(|line| {
@@ -13,4 +14,5 @@ fn main() {
         .collect();
 
     println!("Part 1 answer: {}", part1::solve(&steps));
+    println!("Part 2 answer: {}", part2::solve(&steps));
 }
