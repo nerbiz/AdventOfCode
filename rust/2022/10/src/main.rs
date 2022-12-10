@@ -1,4 +1,5 @@
 mod part1;
+mod part2;
 use aoc_utils::input::input_as_lines;
 
 fn main() {
@@ -17,4 +18,5 @@ fn main() {
         .collect();
 
     println!("Part 1 answer: {}", part1::solve(&instructions));
+    println!("Part 2 answer: {:#?}", part2::solve(&instructions));
 }
