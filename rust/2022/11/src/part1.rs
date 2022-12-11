@@ -6,34 +6,33 @@ pub fn solve(monkeys: &mut Vec<Monkey>) -> u32 {
 
     for _round in 0..20 {
         for index in 0..monkeys.len() {
-            // Indicates which item needs to go to which monkey
-            let mut move_items: Vec<(u32, usize)> = Vec::new();
+            // Indicates which level needs to go to which monkey
+            let mut move_levels: Vec<(u32, usize)> = Vec::new();
             let monkey: &mut Monkey = monkeys.get_mut(index).unwrap();
-            inspections[index] += monkey.items.len() as u32;
+            inspections[index] += monkey.levels.len() as u32;
 
-            monkey.items.drain(0..).for_each(|item| {
+            monkey.levels.drain(0..).for_each(|level| {
                 // Determine the number to calculate with
-                let operand = monkey.operation[1].parse::<u32>();
-                let amount: u32 = match operand.is_ok() {
-                    true => operand.unwrap(),
-                    false => item,
+                let amount: u32 = match monkey.operation[1].as_str() {
+                    "old" => level,
+                    _ => monkey.operation[1].parse::<u32>().unwrap(),
                 };
 
-                // Calculate the new worry level of the item
-                let item: u32 = (match monkey.operation[0].as_str() {
-                    "*" => item * amount,
-                    "+" | _ => item + amount,
+                // Calculate the new worry level
+                let level: u32 = (match monkey.operation[0].as_str() {
+                    "*" => level * amount,
+                    "+" | _ => level + amount,
                 }) / 3;
 
                 // true/false translates to 1/0, used with the next indexes vector
-                let is_movable: bool = item % monkey.divider == 0;
-                let next_index: usize = monkey.next[is_movable as usize];
-                move_items.push((item, next_index));
+                let is_divisible: bool = level % monkey.divider == 0;
+                let next_index: usize = monkey.next[is_divisible as usize];
+                move_levels.push((level, next_index));
             });
 
-            // Move the items to other monkey(s)
-            for (item, index) in move_items {
-                monkeys.get_mut(index).unwrap().items.push(item);
+            // Move the levels to other monkey(s)
+            for (level, index) in move_levels {
+                monkeys.get_mut(index).unwrap().levels.push(level);
             }
         }
     }
