@@ -3,7 +3,7 @@ mod part2;
 use aoc_utils::input::input_as_lines;
 
 fn main() {
-    let input = input_as_lines("2022/8/res/input.txt");
+    let input = input_as_lines("2022/8/res/input.txt", true);
 
     let rows: Vec<Vec<u32>> = input.iter()
         .map(|line| line.chars()

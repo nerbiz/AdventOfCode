@@ -9,7 +9,7 @@ pub struct Directory {
 }
 
 fn main() {
-    let input: Vec<String> = input_as_lines("2022/7/res/input.txt");
+    let input: Vec<String> = input_as_lines("2022/7/res/input.txt", true);
     let mut directories: Vec<Directory> = Vec::new();
     let mut dir_indexes: Vec<usize> = Vec::new();
 

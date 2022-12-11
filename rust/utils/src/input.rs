@@ -10,8 +10,8 @@ pub fn input_as_string(file_path: &str, trim: bool) -> String {
     }
 }
 
-pub fn input_as_lines(file_path: &str) -> Vec<String> {
-    input_as_string(file_path, true)
+pub fn input_as_lines(file_path: &str, trim: bool) -> Vec<String> {
+    input_as_string(file_path, trim)
         .split('\n')
         .map(|line| line.to_owned())
         .collect()
