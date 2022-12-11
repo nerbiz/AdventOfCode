@@ -4,7 +4,12 @@ pub fn solve(monkeys: &mut Vec<Monkey>) -> u64 {
     // Contains inspections amount by each monkey
     let mut inspections: Vec<u64> = monkeys.iter().map(|_| 0).collect();
 
-    for _round in 0..20 {
+    // To reduce the worry level, use a modulo operation
+    // This needs to be a number that is divisible by all dividers
+    let modulus: u64 = monkeys.iter()
+        .fold(1, |product, monkey| product * monkey.divider);
+
+    for _round in 0..10_000 {
         for index in 0..monkeys.len() {
             // Indicates which level needs to go to which monkey
             let mut move_levels: Vec<(u64, usize)> = Vec::new();
@@ -22,7 +27,7 @@ pub fn solve(monkeys: &mut Vec<Monkey>) -> u64 {
                 let level: u64 = (match monkey.operation[0].as_str() {
                     "*" => level * amount,
                     "+" | _ => level + amount,
-                }) / 3;
+                }) % modulus;
 
                 // true/false translates to 1/0, used with the next indexes vector
                 let is_divisible: bool = level % monkey.divider == 0;
