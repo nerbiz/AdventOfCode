@@ -1,8 +1,8 @@
-// mod part1;
+mod part1;
 mod part2;
 use aoc_utils::input::input_as_lines;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Monkey {
     levels: Vec<u64>,
     operation: Vec<String>,
@@ -37,6 +37,6 @@ fn main() {
         monkeys.push(Monkey { levels, operation, divider, next });
     }
 
-    // println!("Part 1 answer: {}", part1::solve(&mut monkeys));
+    println!("Part 1 answer: {}", part1::solve(&mut monkeys.clone()));
     println!("Part 2 answer: {}", part2::solve(&mut monkeys));
 }
