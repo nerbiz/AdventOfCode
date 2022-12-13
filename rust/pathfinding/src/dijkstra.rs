@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
-struct Node {
-    x: usize,
-    y: usize,
-    cost: u32,
+pub struct Node {
+    pub x: usize,
+    pub y: usize,
+    pub cost: u32,
     enqueued: bool,
     visited: bool,
     distance: u32,
@@ -12,6 +12,7 @@ struct Node {
     previous: Option<[usize; 2]>,
 }
 
+#[derive(Clone)]
 pub struct Grid {
     nodes: HashMap<[usize; 2], Node>,
     neighbour_condition: Option<fn(&u32, &u32) -> bool>,
@@ -38,6 +39,14 @@ impl Grid {
             nodes,
             neighbour_condition: None,
         }
+    }
+
+    pub fn get_nodes(&self) -> &HashMap<[usize; 2], Node> {
+        &self.nodes
+    }
+
+    pub fn get_nodes_mut(&mut self) -> &mut HashMap<[usize; 2], Node> {
+        &mut self.nodes
     }
 
     pub fn set_neighbour_condition(&mut self, closure: fn(&u32, &u32) -> bool) {

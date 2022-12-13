@@ -1,4 +1,5 @@
 mod part1;
+mod part2;
 use aoc_pathfinding::dijkstra::Grid;
 use aoc_utils::input::input_as_lines;
 
@@ -28,10 +29,10 @@ fn main() {
             .collect())
         .collect();
 
-    let mut area = Grid::from(&costs);
-
+    let mut area: Grid = Grid::from(&costs);
     // Valid neighbours can only be at most 1 higher
     area.set_neighbour_condition(|&cost, &other| other <= cost + 1);
 
-    println!("Part 1 answer: {}", part1::solve(&mut area, &start, &target).unwrap());
+    println!("Part 1 answer: {}", part1::solve(&mut area.clone(), &start, &target));
+    println!("Part 2 answer: {}", part2::solve(&mut area, &target));
 }
