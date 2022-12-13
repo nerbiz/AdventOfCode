@@ -47,6 +47,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc2022_12"
+version = "0.1.0"
+dependencies = [
+ "aoc_pathfinding",
+ "aoc_utils",
+]
+
+[[package]]
 name = "aoc2022_2"
 version = "0.1.0"
 dependencies = [
@@ -102,6 +110,10 @@ version = "0.1.0"
 dependencies = [
  "aoc_utils",
 ]
+
+[[package]]
+name = "aoc_pathfinding"
+version = "0.1.0"
 
 [[package]]
 name = "aoc_utils"

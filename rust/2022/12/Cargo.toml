@@ -1,0 +1,8 @@
+[package]
+name = "aoc2022_12"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aoc_utils = { path = "../../utils" }
+aoc_pathfinding = { path = "../../pathfinding" }
