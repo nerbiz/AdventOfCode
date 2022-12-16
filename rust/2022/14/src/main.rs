@@ -1,4 +1,7 @@
 mod part1;
+mod part2;
+
+use std::collections::HashSet;
 use aoc_utils::input::input_as_lines;
 
 fn main() {
@@ -31,6 +34,9 @@ fn main() {
         .map(|_| ".".repeat(max_x + 2).chars().collect::<Vec<char>>())
         .collect();
 
+    // The locations in the cave that are filled (with rock or sand)
+    let mut filled: HashSet<[usize; 2]> = HashSet::new();
+
     rocks.iter().for_each(|locations| {
         locations.iter()
             .enumerate()
@@ -39,14 +45,15 @@ fn main() {
                     return;
                 }
 
-                let prev = locations[index - 1];
+                let prev: [usize; 2] = locations[index - 1];
 
                 if location[0] == prev[0] {
-                    let from = prev[1].min(location[1]);
-                    let to = prev[1].max(location[1]);
+                    let from: usize = prev[1].min(location[1]);
+                    let to: usize = prev[1].max(location[1]);
 
                     for y in from..=to {
                         cave[y][location[0]] = '#';
+                        filled.insert([location[0], y]);
                     }
                 } else {
                     let from = prev[0].min(location[0]);
@@ -54,6 +61,7 @@ fn main() {
 
                     for x in from..=to {
                         cave[location[1]][x] = '#';
+                        filled.insert([x, location[1]]);
                     }
                 }
             });
@@ -61,16 +69,5 @@ fn main() {
 
 
     println!("Part 1 answer: {}", part1::solve(&mut cave));
-    show_cave(&cave, min_x);
-}
-
-pub fn show_cave(cave: &Vec<Vec<char>>, min_x: usize) {
-    cave.iter().for_each(|row| {
-        println!("{}", row[min_x-1..]
-            .iter()
-            .map(|char| char.to_string())
-            .collect::<Vec<String>>()
-            .join("")
-        );
-    });
+    println!("Part 2 answer: {}", part2::solve(&mut filled, max_y + 2));
 }
