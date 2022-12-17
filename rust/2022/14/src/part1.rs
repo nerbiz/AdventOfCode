@@ -1,7 +1,6 @@
-pub fn solve(cave: &mut Vec<Vec<char>>) -> u32 {
-    // Stop looping, when a sand unit reaches this y-coordinate
-    let stop_at_y: usize = cave.len() - 1;
+use std::collections::HashSet;
 
+pub fn solve(filled: &mut HashSet<[usize; 2]>, max_y: &usize) -> u32 {
     // The amount of sand units that have come to rest
     let mut at_rest_amount: u32 = 0;
 
@@ -12,23 +11,26 @@ pub fn solve(cave: &mut Vec<Vec<char>>) -> u32 {
         'fall: loop {
             // Move 1 step down, stop if it overflows
             location[1] += 1;
-            if location[1] == stop_at_y {
+            if &location[1] == max_y {
                 break 'new;
             }
 
             let [x, y]: [usize; 2] = location;
-            if cave[y + 1][x] != '.' {
-                // See if the sand unit can move diagonally
-                if cave[y + 1][x - 1] == '.' {
+
+            // See if the sand unit hits something, and then can move diagonally
+            if filled.contains(&[x, y + 1]) {
+                if !filled.contains(&[x - 1, y + 1]) {
                     location[0] -= 1;
                     continue 'fall;
-                } else if cave[y + 1][x + 1] == '.' {
+                }
+
+                if !filled.contains(&[x + 1, y + 1]) {
                     location[0] += 1;
                     continue 'fall;
                 }
 
                 // Otherwise the sand unit comes to rest
-                cave[y][x] = 'o';
+                filled.insert(location);
                 at_rest_amount += 1;
                 continue 'new;
             }
