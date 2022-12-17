@@ -62,6 +62,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc2022_15"
+version = "0.1.0"
+dependencies = [
+ "aoc_utils",
+ "fancy-regex",
+]
+
+[[package]]
 name = "aoc2022_2"
 version = "0.1.0"
 dependencies = [
