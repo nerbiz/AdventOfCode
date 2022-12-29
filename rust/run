@@ -1,0 +1,16 @@
+#!/bin/zsh
+
+if [[ $# -lt 2 ]]; then
+    echo "Please provide the year and day"
+else
+    year=$1
+    day=$2
+    bin="aoc${year}_${day}"
+    manifest="./${year}/${day}/Cargo.toml"
+
+    # Build the executable
+    cargo build --color=always --message-format=human --bin $bin --manifest-path $manifest
+
+    # Run the executable
+    ./target/debug/$bin
+fi
