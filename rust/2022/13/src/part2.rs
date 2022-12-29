@@ -13,23 +13,14 @@ pub fn solve(pairs: &Vec<Vec<Value>>) -> usize {
         )
     });
 
-    let mut packet_one_index: usize = 0;
-    let mut packet_two_index: usize = 0;
-
     // Find the two packet indexes to multiply
-    for (index, packet) in packets.iter().enumerate() {
-        if packet.to_string() == "[[2]]" {
-            packet_one_index = index + 1;
-        } else if packet.to_string() == "[[6]]" {
-            packet_two_index = index + 1;
-        }
+    let index1 = packets.iter()
+        .position(|packet| packet.to_string() == "[[2]]").unwrap();
+    let index2 = packets.iter()
+        .position(|packet| packet.to_string() == "[[6]]").unwrap();
 
-        if packet_one_index != 0 && packet_two_index != 0 {
-            break;
-        }
-    }
-
-    packet_one_index * packet_two_index
+    // Multiply the indexes as 1-based
+    (index1 + 1) * (index2 + 1)
 }
 
 fn check_lists(list1: &Vec<Value>, list2: &Vec<Value>) -> Ordering {
