@@ -55,6 +55,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc2022_13"
+version = "0.1.0"
+dependencies = [
+ "aoc_utils",
+ "serde_json",
+]
+
+[[package]]
 name = "aoc2022_14"
 version = "0.1.0"
 dependencies = [

@@ -1,0 +1,8 @@
+[package]
+name = "aoc2022_13"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aoc_utils = { path = "../../utils" }
+serde_json = "1.0.91"
