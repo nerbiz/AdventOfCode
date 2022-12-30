@@ -1,12 +1,14 @@
 mod part1;
 mod part2;
 use aoc_utils::input::input_as_lines;
+use aoc_utils::timing::Timing;
 use serde_json::Value;
 use std::cmp::Ordering;
 use std::cmp::Ordering::{Equal, Greater, Less};
 
 fn main() {
     let mut input: Vec<String> = input_as_lines("2022/13/res/input.txt", true);
+    let timing: Timing = Timing::start();
 
     // Add some extra entries for part 2
     input.push(String::from(""));
@@ -23,6 +25,7 @@ fn main() {
 
     println!("Part 1 answer: {}", part1::solve(&pairs[..pairs.len()-1]));
     println!("Part 2 answer: {}", part2::solve(&pairs));
+    timing.output();
 }
 
 pub fn compare_lists(list1: &Vec<Value>, list2: &Vec<Value>) -> Ordering {

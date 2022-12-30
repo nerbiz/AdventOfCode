@@ -1,9 +1,11 @@
 mod part1;
 mod part2;
 use aoc_utils::input::input_as_lines;
+use aoc_utils::timing::Timing;
 
 fn main() {
     let input = input_as_lines("2022/8/res/input.txt", true);
+    let timing: Timing = Timing::start();
 
     let rows: Vec<Vec<u32>> = input.iter()
         .map(|line| line.chars()
@@ -26,4 +28,5 @@ fn main() {
 
     println!("Part 1 answer: {}", part1::solve(&rows, &columns));
     println!("Part 2 answer: {}", part2::solve(&rows, &columns));
+    timing.output();
 }

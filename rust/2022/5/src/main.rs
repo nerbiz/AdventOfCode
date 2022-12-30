@@ -2,12 +2,14 @@ mod part1;
 mod part2;
 use aoc_utils::input::input_as_string;
 use std::collections::HashMap;
+use aoc_utils::timing::Timing;
 
 fn main() {
     let input: Vec<String> = input_as_string("2022/5/res/input.txt", false)
         .split("\n\n")
         .map(|str| str.to_owned())
         .collect();
+    let timing: Timing = Timing::start();
 
     // Create a <stack, crates> hashmap
     let mut stacks: HashMap<usize, Vec<String>> = HashMap::new();
@@ -45,4 +47,5 @@ fn main() {
 
     println!("Part 1 answer: {}", part1::solve(&mut stacks.clone(), &steps));
     println!("Part 2 answer: {}", part2::solve(&mut stacks, &steps));
+    timing.output();
 }

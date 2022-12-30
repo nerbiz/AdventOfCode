@@ -1,9 +1,11 @@
 mod part1;
 mod part2;
 use aoc_utils::input::input_as_lines;
+use aoc_utils::timing::Timing;
 
 fn main() {
     let input: Vec<String> = input_as_lines("2022/2/res/input.txt", true);
+    let timing: Timing = Timing::start();
     let a_code: i32 = 'A' as i32;
     let x_code: i32 = 'X' as i32;
 
@@ -24,4 +26,5 @@ fn main() {
 
     println!("Part 1 answer: {}", part1::solve(&rounds));
     println!("Part 2 answer: {}", part2::solve(&rounds));
+    timing.output();
 }
