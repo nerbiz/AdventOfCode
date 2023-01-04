@@ -1,26 +1,23 @@
 use std::collections::HashMap;
+use grid::Grid;
 
-pub fn solve(grove: &mut Vec<Vec<char>>) -> usize {
-    // Collect elves into a list
-    let mut elves: Vec<[usize; 2]> = grove.iter()
-        .enumerate()
-        .flat_map(|(y, row)| {
-            row.iter()
-                .enumerate()
-                .filter_map(|(x, char)| {
-                    match char {
-                        '#' => Some([x, y]),
-                        '.' | _ => None,
-                    }
-                })
-                .collect::<Vec<[usize; 2]>>()
-        })
-        .collect();
+pub fn solve(grove: &mut Grid<char>) -> usize {
+    // Collect elves into a list of [y, x] indexes
+    let mut elves: Vec<[usize; 2]> = Vec::new();
+    for y in 0..grove.rows() {
+        grove.iter_row(y)
+            .enumerate()
+            .for_each(|(x, char)| {
+                if *char == '#' {
+                    elves.push([y, x]);
+                }
+            });
+    }
 
-    // Create arrays of delta X/Y for surrounding positions
+    // Create arrays of delta Y/X for surrounding positions
     let surrounding: [[isize; 2]; 8] = [
-        [-1, -1], [0, -1], [1, -1], [1, 0],
-        [1, 1], [0, 1], [-1, 1], [-1, 0],
+        [-1, -1], [-1, 0], [-1, 1], [0, 1],
+        [1, 1], [1, 0], [1, -1], [0, -1],
     ];
 
     // Create arrays of indexes for N/S/W/E directions
@@ -35,30 +32,29 @@ pub fn solve(grove: &mut Vec<Vec<char>>) -> usize {
     let mut first_side_index: usize = 0;
 
     for _round in 0..10 {
-        // Contains new positions, with elves proposing to move there
+        // Contains new positions, with indexes of elves proposing to move there
         let mut moving_elves: HashMap<[usize; 2], Vec<usize>> = HashMap::new();
 
         // Changes to false, if any elf has neighbour(s)
         let mut all_separated: bool = true;
 
         for elf_index in 0..elves.len() {
-            let [elf_x, elf_y]: &[usize; 2] = elves.get(elf_index).unwrap();
+            let [elf_y, elf_x]: &[usize; 2] = elves.get(elf_index).unwrap();
             let mut has_neighbours = false;
 
+            // : Vec<char>
             let neighbours: Vec<char> = surrounding
-                .map(|[delta_x, delta_y]| {
+                .map(|[delta_y, delta_x]| {
                     let y: usize = (*elf_y as isize + delta_y) as usize;
                     let x: usize = (*elf_x as isize + delta_x) as usize;
 
-                    if let Some(row) = grove.get(y) {
-                        if let Some(neighbour) = row.get(x) {
-                            if *neighbour == '#' {
-                                has_neighbours = true;
-                                all_separated = false;
-                            }
-
-                            return *neighbour
+                    if let Some(neighbour) = grove.get(y, x) {
+                        if *neighbour == '#' {
+                            has_neighbours = true;
+                            all_separated = false;
                         }
+
+                        return *neighbour
                     }
 
                     '.'
@@ -76,17 +72,16 @@ pub fn solve(grove: &mut Vec<Vec<char>>) -> usize {
 
                 for neighbour_index in side_indexes.iter() {
                     // Look in the next direction, if there is a neighbour
-                    let neighbour: &char = neighbours.get(*neighbour_index).unwrap();
-                    if *neighbour == '#' {
+                    if neighbours[*neighbour_index] == '#' {
                         continue 'directions;
                     }
                 }
 
                 // Determine the new position, which is the middle (index 1) of a side
-                let [delta_x, delta_y]: &[isize; 2] = surrounding.get(side_indexes[1]).unwrap();
+                let [delta_y, delta_x]: &[isize; 2] = surrounding.get(side_indexes[1]).unwrap();
                 let move_to: [usize; 2] = [
-                    (*elf_x as isize + *delta_x) as usize,
                     (*elf_y as isize + *delta_y) as usize,
+                    (*elf_x as isize + *delta_x) as usize,
                 ];
 
                 // Add the proposed position to the collection
@@ -112,8 +107,8 @@ pub fn solve(grove: &mut Vec<Vec<char>>) -> usize {
             let elf: &mut [usize; 2] = elves.get_mut(*elf_index).unwrap();
 
             // Update the grove
-            grove[elf[1]][elf[0]] = '.';
-            grove[move_to[1]][move_to[0]] = '#';
+            grove[elf[0]][elf[1]] = '.';
+            grove[move_to[0]][move_to[1]] = '#';
 
             // Update the elf
             elf[0] = move_to[0];
@@ -124,13 +119,13 @@ pub fn solve(grove: &mut Vec<Vec<char>>) -> usize {
         first_side_index = (first_side_index + 1) % 4;
     }
 
-    let [min_x, max_x, min_y, max_y]: [usize; 4] = elves.iter().fold(
+    let [min_y, max_y, min_x, max_x]: [usize; 4] = elves.iter().fold(
         [usize::MAX, usize::MIN, usize::MAX, usize::MIN],
         |current, elf| [
-            current[0].min(elf[0]),
-            current[1].max(elf[0]),
-            current[2].min(elf[1]),
-            current[3].max(elf[1]),
+            current[0].min(elf[1]),
+            current[1].max(elf[1]),
+            current[2].min(elf[0]),
+            current[3].max(elf[0]),
         ]
     );
 

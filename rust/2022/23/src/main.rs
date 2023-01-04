@@ -1,30 +1,33 @@
 mod part1;
 use aoc_utils::input::input_as_lines;
 use aoc_utils::timing::Timing;
+use grid::Grid;
 
 fn main() {
     let input: Vec<String> = input_as_lines("2022/23/res/input.txt", true);
     let timing: Timing = Timing::start();
     let expand_size: usize = 10;
 
-    let mut grove: Vec<Vec<char>> = input.iter()
-        .map(|line| {
+    let mut grove: Vec<char> = input.iter()
+        .flat_map(|line| {
             // Expand the grove horizontally
-            let expanded = ".".repeat(expand_size)
+            let expanded: String = ".".repeat(expand_size)
                 + line
                 + &".".repeat(expand_size);
 
-            expanded.chars().collect()
+            expanded.chars().collect::<Vec<char>>()
         })
         .collect();
 
     // Expand the grove vertically
-    let mut empty_line: Vec<char> = grove.first().unwrap().clone();
-    empty_line.fill('.');
-    for _i in 0..expand_size {
-        grove.insert(0, empty_line.clone());
-        grove.push(empty_line.clone());
-    }
+    let row_length: usize = input[0].len() + (2 * expand_size);
+    let mut empty_rows: Vec<char> = ".".repeat(row_length * expand_size)
+        .chars()
+        .collect();
+    grove = empty_rows.clone().into_iter().chain(grove).collect();
+    grove.append(&mut empty_rows);
+
+    let mut grove: Grid<char> = Grid::from_vec(grove, row_length);
 
     println!("Part 1 answer: {}", part1::solve(&mut grove));
     timing.output();
