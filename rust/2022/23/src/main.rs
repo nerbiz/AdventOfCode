@@ -1,4 +1,5 @@
 mod part1;
+mod part2;
 use aoc_utils::input::input_as_lines;
 use aoc_utils::timing::Timing;
 use grid::Grid;
@@ -6,7 +7,7 @@ use grid::Grid;
 fn main() {
     let input: Vec<String> = input_as_lines("2022/23/res/input.txt", true);
     let timing: Timing = Timing::start();
-    let expand_size: usize = 10;
+    let expand_size: usize = 55;
 
     let mut grove: Vec<char> = input.iter()
         .flat_map(|line| {
@@ -29,6 +30,7 @@ fn main() {
 
     let mut grove: Grid<char> = Grid::from_vec(grove, row_length);
 
-    println!("Part 1 answer: {}", part1::solve(&mut grove));
+    println!("Part 1 answer: {}", part1::solve(&mut grove.clone()));
+    println!("Part 2 answer: {}", part2::solve(&mut grove));
     timing.output();
 }
