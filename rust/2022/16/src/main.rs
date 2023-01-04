@@ -12,15 +12,17 @@ pub struct Valve {
 }
 
 fn main() {
-    let input: Vec<String> = input_as_lines("2022/16/res/input-test.txt", true);
+    let input: Vec<String> = input_as_lines("2022/16/res/input.txt", true);
     let timing: Timing = Timing::start();
     let regex: Regex = Regex::new(r"([A-Z]{2}).*rate=(\d+).*valves? (.+)").unwrap();
 
+    // Collect flow rates, used for sorting the valves
     let mut flow_rates: HashMap<String, u32> = HashMap::new();
 
     let mut valves: Vec<Valve> = input.iter()
         .map(|line| {
             let matches: Captures = regex.captures(line).unwrap();
+
             let name: String = matches[1].to_string();
             let flow_rate: u32 = matches[2].parse().unwrap();
             let tunnels: Vec<String> = matches[3].split(", ")
@@ -42,13 +44,6 @@ fn main() {
         });
     });
 
-    // Convert the vector to a hashmap
-    let valves: HashMap<String, Valve> = valves.into_iter()
-        .map(|valve| (valve.name.clone(), valve))
-        .collect();
-
-    // Problem: results are different in separate runs: 1647, 1648 and 1649
-    // Amount of loops are also different
     println!("Part 1 answer: {}", part1::solve(&valves));
     timing.output();
 }
