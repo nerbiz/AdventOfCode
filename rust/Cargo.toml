@@ -1,5 +1,5 @@
 [workspace]
-members = ["utils", "pathfinding", "20*/*"]
+members = ["20*/*", "pathfinding", "structures", "utils"]
 
 [package]
 name = "nerbiz_aoc"
