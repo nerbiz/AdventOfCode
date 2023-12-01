@@ -96,7 +96,16 @@ dependencies = [
 name = "aoc2022_18"
 version = "0.1.0"
 dependencies = [
+ "aoc_structures",
  "aoc_utils",
+]
+
+[[package]]
+name = "aoc2022_19"
+version = "0.1.0"
+dependencies = [
+ "aoc_utils",
+ "regex",
 ]
 
 [[package]]

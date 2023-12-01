@@ -5,7 +5,6 @@ pub struct Node {
     pub x: usize,
     pub y: usize,
     pub cost: u32,
-    enqueued: bool,
     visited: bool,
     distance: u32,
     steps: u32,
@@ -26,7 +25,6 @@ impl Grid {
             for (x, &cost) in row.iter().enumerate() {
                 nodes.insert([x, y], Node {
                     x, y, cost,
-                    enqueued: false,
                     visited: false,
                     distance: u32::MAX,
                     steps: 0,
@@ -57,7 +55,6 @@ impl Grid {
         let mut queue: Vec<[usize; 2]> = Vec::new();
         let start_node = self.nodes.get_mut(start).unwrap();
         start_node.distance = 0;
-        start_node.enqueued = true;
         queue.push(*start);
 
         while queue.len() > 0 {
@@ -69,8 +66,8 @@ impl Grid {
             });
 
             // Get the nearest node from the queue
-            let nearest: &mut Node = self.nodes.get_mut(&queue.pop().unwrap()).unwrap();
-            nearest.enqueued = false;
+            let key: &[usize; 2] = &queue.pop().unwrap();
+            let nearest: &mut Node = self.nodes.get_mut(key).unwrap();
             let nearest = nearest.clone();
 
             for coords in self.get_neighbours(&nearest) {
@@ -90,9 +87,8 @@ impl Grid {
                 }
 
                 // Add the neighbour to the queue, if it's not in there yet
-                if neighbour.enqueued == false {
+                if !queue.contains(&coords) {
                     queue.push(coords);
-                    neighbour.enqueued = true;
                 }
             }
 

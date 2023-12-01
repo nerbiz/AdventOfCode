@@ -1,4 +1,5 @@
 Target row: 2000000
+Max coordinate: 4000000
 Sensor at x=655450, y=2013424: closest beacon is at x=967194, y=2000000
 Sensor at x=1999258, y=1017714: closest beacon is at x=3332075, y=572515
 Sensor at x=2159800, y=3490958: closest beacon is at x=2145977, y=3551728

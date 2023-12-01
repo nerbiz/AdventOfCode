@@ -53,4 +53,16 @@ impl Rock {
             });
         }
     }
+
+    pub fn debug_show(&self) {
+        println!("\nRock:");
+
+        self.rows().iter().rev().for_each(|row| {
+            let row: String = format!("{:09b}", row)
+                .replace("0", ".")
+                .replace("1", "#");
+
+            println!("{}", row);
+        });
+    }
 }

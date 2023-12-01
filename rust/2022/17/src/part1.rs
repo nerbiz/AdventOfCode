@@ -5,6 +5,8 @@ pub fn solve(tower: &mut Vec<u16>, directions: &Vec<i8>, rocks: &Vec<Rock>) -> u
     let mut direction_iter = directions.iter().cycle();
     let mut rock_iter = rocks.iter().cycle();
 
+    // println!("Total directions: {}", directions.len());
+
     // An empty tower row, for adding and checking
     let empty_row: u16 = (1 << 8) + 1;
 
