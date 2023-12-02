@@ -11,8 +11,10 @@ pub fn solve(games: &Vec<Game>) -> u32 {
                 ("blue".to_string(), 1),
             ].into_iter().collect();
 
+            let colors: Vec<String> = maximums.keys().cloned().collect();
+
             game.sets.iter().for_each(|set| {
-                for color in vec!["red", "green", "blue"] {
+                for color in &colors {
                     if let Some(amount) = set.get(color) {
                         let maximum: &u32 = maximums
                             .get(color)
@@ -24,9 +26,10 @@ pub fn solve(games: &Vec<Game>) -> u32 {
                 }
             });
 
-            maximums.get("red").unwrap()
-                * maximums.get("green").unwrap()
-                * maximums.get("blue").unwrap()
+            colors
+                .iter()
+                .map(|color| maximums.get(color).unwrap())
+                .product::<u32>()
         })
         .sum()
 }
