@@ -8,7 +8,6 @@ fn main() {
     let timing: Timing = Timing::start();
 
     println!("Part 1 answer: {}", part1::solve(&input));
-    // 55216 is too low
     println!("Part 2 answer: {}", part2::solve(&input));
     timing.output();
 }
