@@ -1,3 +1,8 @@
+body {
+    background-color: #222;
+    color: white;
+}
+
 .answer {
     font-size: 25px;
 }
