@@ -368,4 +368,22 @@ export default class ArrayPrototype
             writable: false,
         });
     }
+
+    static registerToObject()
+    {
+        Object.defineProperty(Array.prototype, 'toObject', {
+            /**
+             * Turn an array of [key, value] arrays into an object
+             * @returns {object}
+             */
+            value: function toObject() {
+                return this.reduce((obj, [key, value]) => {
+                    obj[key] = value;
+                    return obj;
+                }, {});
+            },
+            enumerable: false,
+            writable: false,
+        });
+    }
 }
