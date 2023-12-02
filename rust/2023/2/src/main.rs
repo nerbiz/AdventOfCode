@@ -1,4 +1,5 @@
 mod part1;
+mod part2;
 mod game;
 use aoc_utils::input::input_as_lines;
 use aoc_utils::timing::Timing;
@@ -14,5 +15,6 @@ fn main() {
         .collect();
 
     println!("Part 1 answer: {}", part1::solve(&games));
+    println!("Part 2 answer: {}", part2::solve(&games));
     timing.output();
 }
