@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerSum();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const calibrationValues = await fileReader.parse();
+            console.time('Time elapsed');
+
+            document.querySelector('.answer').innerText = calibrationValues
+                .map(value => {
+                    const numbersOnly = value.replace(/\D/g, '');
+                    return (numbersOnly[0] + numbersOnly.at(-1)) - 0;
+                })
+                .sum();
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>

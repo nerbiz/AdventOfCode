@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+            import StringPrototype from '../../classes/StringPrototype.js';
+
+            ArrayPrototype.registerSum();
+            StringPrototype.registerIndexesOf();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const calibrationValues = await fileReader.parse();
+            console.time('Time elapsed');
+
+            const translations = {
+                'one': '1',
+                'two': '2',
+                'three': '3',
+                'four': '4',
+                'five': '5',
+                'six': '6',
+                'seven': '7',
+                'eight': '8',
+                'nine': '9',
+            };
+
+            const allDigits = Object.keys(translations)
+                .concat(Object.values(translations));
+
+            document.querySelector('.answer').innerText = calibrationValues
+                .map(value => {
+                    const foundDigits = allDigits
+                        // Find all occurrences of a digit
+                        .flatMap(digit => value.indexesOf(digit).map(location => [location, digit]))
+                        .filter(([location]) => location > -1)
+                        // Translate digit names to digits
+                        .map(([location, digit]) => {
+                            return digit.match(/\d/)
+                                ? [location, digit]
+                                : [location, translations[digit]];
+                        })
+                        .sort((a, b) => a[0] - b[0]);
+
+                    return (foundDigits[0][1] + foundDigits.at(-1)[1]) - 0;
+                })
+                .sum();
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
