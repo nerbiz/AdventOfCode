@@ -14,10 +14,13 @@
 
             const fileReader = new FileReader('./datatest.txt', new Parser());
             const data = await fileReader.parse();
+            console.time('Time elapsed');
 
             console.log(data);
 
             // document.querySelector('.answer').innerText =
+
+            console.timeEnd('Time elapsed');
         </script>
     </body>
 </html>
