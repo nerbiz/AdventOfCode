@@ -42,11 +42,10 @@
                         .flatMap(digit => value.indexesOf(digit).map(location => [location, digit]))
                         .filter(([location]) => location > -1)
                         // Translate digit names to digits
-                        .map(([location, digit]) => {
-                            return digit.match(/\d/)
-                                ? [location, digit]
-                                : [location, translations[digit]];
-                        })
+                        .map(([location, digit]) => digit.match(/\d/)
+                            ? [location, digit]
+                            : [location, translations[digit]]
+                        )
                         .sort((a, b) => a[0] - b[0]);
 
                     return (foundDigits[0][1] + foundDigits.at(-1)[1]) - 0;
