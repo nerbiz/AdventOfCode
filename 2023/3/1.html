@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            ArrayPrototype.registerSum();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const schematic = new Array2d(await fileReader.parse());
+            console.time('Time elapsed');
+
+            // All the collected part numbers
+            const partNumbers = [];
+
+            // Number currently being constructed
+            // and whether it's a part number
+            let currentNumber = '';
+            let constructing = false;
+            let isPartNumber = false;
+
+            schematic.forEach2d(location => {
+                // If it's a number, construct the part number
+                if (location.value.match(/\d/)) {
+                    constructing ||= true;
+                    currentNumber += location.value;
+                    isPartNumber ||= location.getSurroundingItems(false)
+                        .filter(item => item?.value.match(/[^\d.]/))
+                        .length > 0;
+                }
+
+                // If not a number and a number was being constructed,
+                // add it to the list and reset variables,
+                else if (constructing === true) {
+                    if (isPartNumber === true) {
+                        partNumbers.push(currentNumber - 0);
+                    }
+
+                    constructing = false;
+                    currentNumber = '';
+                    isPartNumber = false;
+                }
+            });
+
+            document.querySelector('.answer').innerText = partNumbers.sum();
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
