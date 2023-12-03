@@ -19,36 +19,46 @@
             const schematic = new Array2d(await fileReader.parse());
             console.time('Time elapsed');
 
-            // All the collected part numbers
-            const partNumbers = [];
+            // All the found gears, as location:[numbers] pairs
+            const gears = {};
 
             // The number currently being constructed
-            // and whether it's a part number
+            // and the gear it's connected to
             let currentNumber = '';
-            let isPartNumber = false;
+            let currentGear = undefined;
 
             schematic.forEach2d(location => {
                 // If it's a number, construct the part number
                 if (location.value.match(/\d/)) {
                     currentNumber += location.value;
-                    isPartNumber ||= location.getSurroundingItems(false)
-                        .filter(item => item?.value.match(/[^\d.]/))
-                        .length > 0;
+
+                    if (currentGear === undefined) {
+                        // See if there's an adjacent gear
+                        currentGear ||= location.getSurroundingItems(false)
+                            .filter(item => item?.value === '*')
+                            .at(0);
+                    }
                 }
 
                 // If not a number and a number was being constructed,
                 // add it to the list and reset variables,
                 else if (currentNumber !== '') {
-                    if (isPartNumber) {
-                        partNumbers.push(currentNumber - 0);
-                        isPartNumber = false;
+                    if (currentGear !== undefined) {
+                        const gearLocation = currentGear.x + ',' + currentGear.y;
+                        gears[gearLocation] ||= [];
+                        // Add the part number to the gear
+                        gears[gearLocation].push(currentNumber - 0);
+                        currentGear = undefined;
                     }
 
                     currentNumber = '';
                 }
             });
 
-            document.querySelector('.answer').innerText = partNumbers.sum();
+            document.querySelector('.answer').innerText = Object.values(gears)
+                .filter(numbers => numbers.length === 2)
+                .map(numbers => numbers[0] * numbers[1])
+                .sum();
 
             console.timeEnd('Time elapsed');
         </script>
