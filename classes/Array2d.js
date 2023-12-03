@@ -898,7 +898,7 @@ export default class Array2d extends Array
         }
 
         return this.map((row, y) =>
-            row.reduce((string, item, x) => string += callback(item, x, y, this), '')
+            row.reduce((string, item, x) => string + callback(item, x, y, this), '')
         ).join('\n');
     }
 }
