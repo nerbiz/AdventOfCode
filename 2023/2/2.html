@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerSum();
+            ArrayPrototype.registerProduct();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const games = await fileReader.parse();
+            console.time('Time elapsed');
+
+            const colors = ['red', 'green', 'blue'];
+
+            document.querySelector('.answer').innerText = games
+                .map(game => {
+                    const maximums = {
+                        red: 1,
+                        green: 1,
+                        blue: 1,
+                    };
+
+                    game.sets.forEach(set => {
+                        for (const color of colors) {
+                            if (color in set) {
+                                maximums[color] = Math.max(maximums[color], set[color]);
+                            }
+                        }
+                    });
+
+                    return colors.map(color => maximums[color]).product();
+                })
+                .sum();
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
