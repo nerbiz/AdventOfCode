@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerSum();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const scratchCards = await fileReader.parse();
+            console.time('Time elapsed');
+
+            document.querySelector('.answer').innerText = scratchCards
+                .map(([winningNumbers, ownNumbers]) => {
+                    let matches = 0;
+                    for (const number of ownNumbers) {
+                        const location = winningNumbers.indexOf(number);
+
+                        if (location > -1) {
+                            winningNumbers.splice(location, 1);
+                            matches++;
+                        }
+                    }
+
+                    return (matches > 0)
+                        ? 2 ** (matches - 1)
+                        : 0;
+                })
+                .sum();
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>

@@ -33,8 +33,9 @@
                     currentNumber += location.value;
 
                     if (currentGear === undefined) {
-                        // See if there's an adjacent gear
-                        currentGear ||= location.getSurroundingItems(false)
+                        // See if there's an adjacent gear,
+                        // could still be undefined after this
+                        currentGear = location.getSurroundingItems(false)
                             .filter(item => item?.value === '*')
                             .at(0);
                     }
