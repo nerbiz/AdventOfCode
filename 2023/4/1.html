@@ -20,15 +20,8 @@
 
             document.querySelector('.answer').innerText = scratchCards
                 .map(([winningNumbers, ownNumbers]) => {
-                    let matches = 0;
-                    for (const number of ownNumbers) {
-                        const location = winningNumbers.indexOf(number);
-
-                        if (location > -1) {
-                            winningNumbers.splice(location, 1);
-                            matches++;
-                        }
-                    }
+                    const matches = ownNumbers
+                        .reduce((matches, number) => matches + Number(winningNumbers.indexOf(number) > -1), 0);
 
                     return (matches > 0)
                         ? 2 ** (matches - 1)
