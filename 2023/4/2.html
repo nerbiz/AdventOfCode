@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerSum();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const scratchCards = await fileReader.parse();
+            console.time('Time elapsed');
+
+            const getCardMatches = card => card[1]
+                .reduce((matches, number) => matches + Number(card[0].indexOf(number) > -1), 0);
+
+            // Convert cards to {amount, matches} objects
+            const cardObjects = [];
+            for (let i = 0; i < scratchCards.length; i++) {
+                // Create the object if it doesn't exist yet
+                if (cardObjects[i]?.amount === undefined) {
+                    cardObjects[i] = {
+                        amount: 1,
+                        matches: getCardMatches(scratchCards[i]),
+                    };
+                }
+
+                // Loop over cards after the current (if there are matches)
+                for (let j = 1; j <= cardObjects[i].matches; j++) {
+                    // Prevent reading from non-existing cards
+                    if (i + j >= scratchCards.length) {
+                        break;
+                    }
+
+                    // Create the object if it doesn't exist yet
+                    if (cardObjects[i + j]?.amount === undefined) {
+                        cardObjects[i + j] = {
+                            amount: 1,
+                            matches: getCardMatches(scratchCards[i + j]),
+                        };
+                    }
+
+                    // Increase the amount of cards after the current,
+                    // by the amount of the current card
+                    cardObjects[i + j].amount += cardObjects[i].amount;
+                }
+            }
+
+            document.querySelector('.answer').innerText = cardObjects
+                .reduce((total, card) => total + card.amount, 0);
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
