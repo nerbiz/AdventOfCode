@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser(), false);
+            let { seeds, mappings, connections } = await fileReader.parse();
+            console.time('Time elapsed');
+
+            // Determine the increase/decrease per range in the mappings
+            mappings = Object.fromEntries(
+                Object.entries(mappings)
+                    .map(([name, mapping]) => [
+                        name,
+                        mapping.map(range => [
+                            // Range minimum
+                            range[1],
+                            // Range maximum
+                            range[1] + range[2] - 1,
+                            // Increase amount (negative = decrease)
+                            range[0] - range[1],
+                        ]),
+                    ])
+            );
+
+            const traverse = (number, fromType = 'seed') => {
+                const mapping = mappings[fromType];
+
+                // If the number is within any range, increase/decrease the number
+                for (const [rangeFrom, rangeTo, increment] of mapping) {
+                    if (number >= rangeFrom && number <= rangeTo) {
+                        number += increment;
+                        break;
+                    }
+                }
+
+                // Move to the next type, unless it's the last
+                const toType = connections[fromType];
+                return (toType === 'location') ? number : traverse(number, toType);
+            };
+
+            // Show the lowest location number
+            document.querySelector('.answer').innerText = Math.min(...seeds.map(seed => traverse(seed)))
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
