@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerChunk();
+            const fileReader = new FileReader('./data.txt', new Parser(), false);
+            let { seeds, mappings, connections } = await fileReader.parse();
+            console.time('Time elapsed');
+
+            // Determine the increase/decrease per range in the mappings
+            mappings = Object.fromEntries(
+                Object.entries(mappings)
+                    .map(([name, mapping]) => [
+                        name,
+                        mapping
+                            .map(range => [
+                                // Range minimum
+                                range[1],
+                                // Range maximum
+                                range[1] + range[2] - 1,
+                                // Increase amount (negative = decrease)
+                                range[0] - range[1],
+                            ])
+                            .sort((a, b) => a[0] - b[0]),
+                    ])
+            );
+
+            // Take [min, max] pairs from the seeds
+            seeds = seeds.chunk(2)
+                .map(([min, length]) => [min, min + length - 1]);
+
+            const traverse = (pairs, fromType = 'seed') => {
+                const ranges = mappings[fromType];
+
+                // All the pairs to process, queue can grow while processing
+                const pairsQueue = pairs;
+
+                // Will contain all new pairs to pass on to the next type
+                const nextPairs = [];
+
+                while (pairsQueue.length > 0) {
+                    let [min, max] = pairsQueue.shift();
+
+                    // The pair is outside all ranges
+                    if (max < ranges[0][0] || min > ranges.at(-1)[1]) {
+                        nextPairs.push([min, max]);
+                        continue;
+                    }
+
+                    for (const [rangeFrom, rangeTo, increment] of ranges) {
+                        // The pair is higher than this range, continue looking
+                        if (min > rangeTo) {
+                            continue;
+                        }
+
+                        if (min < rangeFrom) {
+                            // Add a pair for the part before the range
+                            nextPairs.push([min, rangeFrom - 1]);
+
+                            if (max <= rangeTo) {
+                                // Min is lower, but max fits in this range
+                                nextPairs.push([rangeFrom + increment, max + increment]);
+                                break;
+                            } else {
+                                // Otherwise cut up to the end of the range, enqueue the remainder
+                                nextPairs.push([rangeFrom + increment, rangeTo + increment]);
+                                pairsQueue.push([rangeTo + 1, max]);
+                                break;
+                            }
+                        } else {
+                            if (max <= rangeTo) {
+                                // The min and max fit in one range
+                                nextPairs.push([min + increment, max + increment]);
+                                break;
+                            } else {
+                                // Otherwise cut up to the end of the range, enqueue the remainder
+                                nextPairs.push([min + increment, rangeTo + increment]);
+                                pairsQueue.push([rangeTo + 1, max]);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Return the location numbers when reached, or move to the next type
+                const toType = connections[fromType];
+                return (toType === 'location')
+                    ? nextPairs.flat()
+                    : traverse(nextPairs, toType);
+            };
+
+            document.querySelector('.answer').innerText = Math.min(...traverse(seeds));
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
