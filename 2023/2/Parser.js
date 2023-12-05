@@ -1,7 +1,3 @@
-import ArrayPrototype from '../../classes/ArrayPrototype.js';
-
-ArrayPrototype.registerToObject();
-
 export default class Parser
 {
     /**
@@ -19,13 +15,13 @@ export default class Parser
                 return {
                     id: gameId - 0,
                     sets: sets.split('; ')
-                        .map(set => set.split(', ')
-                            .map(content => {
-                                const [amount, color] = content.split(' ');
-                                return [color, amount - 0];
-                            })
-                            .toObject()
-                        ),
+                        .map(set => Object.fromEntries(
+                            set.split(', ')
+                                .map(content => {
+                                    const [amount, color] = content.split(' ');
+                                    return [color, amount - 0];
+                                })
+                        )),
                 };
             });
     }
