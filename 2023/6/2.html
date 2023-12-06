@@ -18,22 +18,16 @@
 
             const time = times.join('') - 0;
             const distance = distances.join('') - 0;
+            let holdTime = -1;
 
-            let holdTime;
-            let travelTime;
-            for (
-                holdTime = 0, travelTime = time;
-                holdTime <= travelTime;
-                holdTime++, travelTime--
-            ) {
-                if (holdTime * travelTime > distance) {
+            while (true) {
+                if (++holdTime * (time - holdTime) > distance) {
                     break;
                 }
             }
 
             document.querySelector('.answer').innerText = (Math.ceil(time / 2) - holdTime)
-                * 2
-                + (~time & 1);
+                * 2 + (~time & 1);
 
             console.timeEnd('Time elapsed');
         </script>

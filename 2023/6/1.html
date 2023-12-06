@@ -17,19 +17,15 @@
             console.time('Time elapsed');
 
             let holdTime;
-            let travelTime;
             let possibilities = 1;
 
             for (let i = 0; i < times.length; i++) {
                 // Calculate race distances, which is holdTime * travelTime
                 // Each holdTime + 1, means travelTime - 1
-                for (
-                    holdTime = 0, travelTime = times[i];
-                    holdTime <= travelTime;
-                    holdTime++, travelTime--
-                ) {
-                    // Stop looping when a win is found
-                    if (holdTime * travelTime > distances[i]) {
+                // Stop looping when a win is found
+                holdTime = -1;
+                while (true) {
+                    if (++holdTime * (times[i] - holdTime) > distances[i]) {
                         break;
                     }
                 }
