@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const { times, distances } = await fileReader.parse();
+            console.time('Time elapsed');
+
+            const time = times.join('') - 0;
+            const distance = distances.join('') - 0;
+
+            let wins = 0;
+            for (
+                let holdTime = 0, travelTime = time;
+                holdTime <= travelTime;
+                holdTime++, travelTime--
+            ) {
+                wins += Number(holdTime * travelTime > distance);
+            }
+
+            document.querySelector('.answer').innerText = (wins * 2) - (~time & 1);
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
