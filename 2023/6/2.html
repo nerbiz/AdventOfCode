@@ -19,16 +19,21 @@
             const time = times.join('') - 0;
             const distance = distances.join('') - 0;
 
-            let wins = 0;
+            let holdTime;
+            let travelTime;
             for (
-                let holdTime = 0, travelTime = time;
+                holdTime = 0, travelTime = time;
                 holdTime <= travelTime;
                 holdTime++, travelTime--
             ) {
-                wins += Number(holdTime * travelTime > distance);
+                if (holdTime * travelTime > distance) {
+                    break;
+                }
             }
 
-            document.querySelector('.answer').innerText = (wins * 2) - (~time & 1);
+            document.querySelector('.answer').innerText = (Math.ceil(time / 2) - holdTime)
+                * 2
+                + (~time & 1);
 
             console.timeEnd('Time elapsed');
         </script>

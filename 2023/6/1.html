@@ -11,34 +11,40 @@
         <script type="module">
             import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
-            import ArrayPrototype from '../../classes/ArrayPrototype.js';
 
-            ArrayPrototype.registerProduct();
             const fileReader = new FileReader('./data.txt', new Parser());
             const { times, distances } = await fileReader.parse();
             console.time('Time elapsed');
 
-            document.querySelector('.answer').innerText = times
-                .map((time, index) => {
-                    // Calculate race distances, which is hold time * travel time
-                    // Each hold time + 1, means travel time - 1
-                    // Stop in the middle (where they meet)
-                    let wins = 0;
-                    for (
-                        let holdTime = 0, travelTime = time;
-                        holdTime <= travelTime;
-                        holdTime++, travelTime--
-                    ) {
-                        wins += Number(holdTime * travelTime > distances[index]);
-                    }
+            let holdTime;
+            let travelTime;
+            let possibilities = 1;
 
-                    // Results are symmetrical, so multiply by 2
-                    // Remove 1 if the time is an even number, because:
-                    // 4 including 0 is 5, which has a middle (2)
-                    // 5 including 0 is 6, which has two middles (2 and 3)
-                    return (wins * 2) - (~time & 1);
-                })
-                .product();
+            for (let i = 0; i < times.length; i++) {
+                // Calculate race distances, which is holdTime * travelTime
+                // Each holdTime + 1, means travelTime - 1
+                for (
+                    holdTime = 0, travelTime = times[i];
+                    holdTime <= travelTime;
+                    holdTime++, travelTime--
+                ) {
+                    // Stop looping when a win is found
+                    if (holdTime * travelTime > distances[i]) {
+                        break;
+                    }
+                }
+
+                // Get the difference to the middle
+                possibilities *= (Math.ceil(times[i] / 2) - holdTime)
+                    // Times 2, because results are symmetrical
+                    * 2
+                    // Add 1 if time is even, because of the different middles:
+                    // 0 1 (2) 3 4
+                    // 0 1 (2) (3) 4 5
+                    + (~times[i] & 1);
+            }
+
+            document.querySelector('.answer').innerText = possibilities;
 
             console.timeEnd('Time elapsed');
         </script>
