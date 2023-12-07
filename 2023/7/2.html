@@ -23,38 +23,38 @@
             // These represent occurrences of each card
             const typeScores = ['11111', '2111', '221', '311', '32', '41', '5'];
 
-            // The mapping of how jokers can make a stronger type,
-            // for different amounts of jokers
-            const jokerIncreases = {
-                '11111': {1: '2111'},
-                '2111': {1: '311', 2: '311'},
-                '221': {1: '32', 2: '41'},
-                '311': {1: '41', 3: '41'},
-                '32': {2: '5', 3: '5'},
-                '41': {1: '5', 4: '5'},
-                '5': {5: '5'},
+            const adjustWithJokers = (type, jokerAmount) => {
+                // Can't transform a 'five of a kind', or if there are no jokers
+                if (jokerAmount === 0 || jokerAmount === 5) {
+                    return type;
+                }
+
+                // Each type has 2 different numbers, so a joker amount is either at
+                // the start or end of the type. Remove the joker amount from start/end,
+                // then add it to the highest (leftmost) number
+                return type.startsWith(jokerAmount)
+                    ? (jokerAmount + (type[1] - 0)) + type.slice(2)
+                    : (jokerAmount + (type[0] - 0)) + type.substring(1, type.length - 1);
             };
 
             document.querySelector('.answer').innerText = rounds
                 .map(([cards, bid]) => {
                     // Convert face cards to numeric values and accumulate occurrences and jokers
-                    let occurrences = [];
-                    let jokerCount = 0;
+                    const occurrences = [];
+                    let jokerAmount = 0;
                     cards = cards.map(card => {
                         const value = cardValues[card] ?? card - 0;
                         occurrences[value] ||= 0;
                         occurrences[value]++;
-                        jokerCount += Number(card === 'J');
+                        jokerAmount += Number(card === 'J');
 
                         return value;
                     });
 
                     // Get the score for the type, maybe increased by jokers
-                    occurrences = occurrences.sort((a, b) => b - a).join('');
-                    if (jokerCount > 0) {
-                        occurrences = jokerIncreases[occurrences][jokerCount];
-                    }
-                    const score = typeScores.indexOf(occurrences);
+                    let type = occurrences.sort((a, b) => b - a).join('');
+                    type = adjustWithJokers(type, jokerAmount);
+                    const score = typeScores.indexOf(type);
 
                     return { cards, bid, score };
                 })
