@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let { instructions, network } = await fileReader.parse();
+            console.time('Time elapsed');
+
+            instructions = instructions.map(letter => letter === 'L' ? 0 : 1);
+
+            let steps = 0;
+            let currentNode = 'AAA';
+            while (currentNode !== 'ZZZ') {
+                const nextNodes = network[currentNode];
+                const nextInstruction = instructions[steps % instructions.length];
+                currentNode = nextNodes[nextInstruction];
+                steps++;
+            }
+
+            document.querySelector('.answer').innerText = steps;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
