@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerSum();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let histories = await fileReader.parse();
+            console.time('Time elapsed');
+
+            document.querySelector('.answer').innerText = histories
+                .map(sequence => {
+                    const sequences = [sequence];
+                    let needsResolving = true;
+
+                    while (needsResolving) {
+                        // Create a new sequence and determine if it needs to be resolved next
+                        const newSequence = [];
+                        needsResolving = false;
+                        for (let i = 0; i < sequence.length - 1; i++) {
+                            // The sequence needs resolving if at least 1 number is not 0
+                            const difference = sequence[i + 1] - sequence[i];
+                            needsResolving ||= (difference !== 0);
+                            newSequence.push(difference);
+                        }
+
+                        // Add the sequence
+                        sequences.push(newSequence);
+                        sequence = newSequence;
+                    }
+
+                    // Add a new number to each sequence
+                    let addedNumber = null;
+                    for (let i = sequences.length - 2; i >= 0; i--) {
+                        addedNumber = sequences[i].at(-1) + sequences[i + 1].at(-1);
+                        sequences[i].push(addedNumber);
+                    }
+
+                    return addedNumber;
+                })
+                .sum();
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
