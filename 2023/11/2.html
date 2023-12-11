@@ -32,22 +32,20 @@
 
             let xExpansion = 0;
             let yExpansion = 0;
-            const expandedGalaxies = [];
-            let currentPoint = galaxies.shift();
+            let galaxyIndex = 0;
             expand: for (let y = 0; y < space.length; y++) {
+                // Reset X expansion for each row
                 xExpansion = 0;
 
                 for (let x = 0; x < space[0].length; x++) {
                     // Increase the coordinates based on the expansion so far
-                    if (currentPoint[0] === x && currentPoint[1] === y) {
-                        currentPoint[0] += xExpansion;
-                        currentPoint[1] += yExpansion;
+                    if (galaxies[galaxyIndex][0] === x && galaxies[galaxyIndex][1] === y) {
+                        galaxies[galaxyIndex][0] += xExpansion;
+                        galaxies[galaxyIndex][1] += yExpansion;
 
-                        // Take the next coordinates to check
-                        expandedGalaxies.push(currentPoint);
-                        currentPoint = galaxies.shift();
-
-                        if (currentPoint === undefined) {
+                        // Set the index to the next galaxy to check, stop after the last one
+                        galaxyIndex++;
+                        if (galaxyIndex === galaxies.length) {
                             break expand;
                         }
                     }
@@ -60,8 +58,8 @@
                 yExpansion += Number(yIndexes[y] !== 1) * (1e6 - 1);
             }
 
-            document.querySelector('.answer').innerText = expandedGalaxies
-                .map((current, index) => expandedGalaxies
+            document.querySelector('.answer').innerText = galaxies
+                .map((current, index) => galaxies
                     .slice(index + 1)
                     // Get the Manhattan distance to other galaxies
                     .reduce((total, other) => total
