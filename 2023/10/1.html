@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import Array2d from '../../classes/Array2d.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const maze = new Array2d(await fileReader.parse());
+            console.time('Time elapsed');
+
+            // The sides (directions) of all pipes
+            const pipeConnections = {
+                '|': [0, 2],
+                '-': [1, 3],
+                'L': [0, 1],
+                'J': [0, 3],
+                '7': [2, 3],
+                'F': [2, 1],
+            };
+
+            let currentTile = maze.find2d(tile => tile.value === 'S');
+            currentTile.steps = 0;
+            let farthestTile = currentTile;
+
+            // Add the pipe connections of the start tile
+            pipeConnections['S'] = [];
+            const {up, right, down, left} = currentTile.getAdjacentItems(true);
+            const adjacent = [up, right, down, left];
+            for (let direction = 0; direction < 4; direction++) {
+                const oppositeDirection = (direction + 2) % 4;
+                const nextTile = adjacent[direction];
+                if (nextTile !== undefined && nextTile.value !== '.'
+                    && pipeConnections[nextTile.value].includes(oppositeDirection)
+                ) {
+                    pipeConnections['S'].push(direction);
+                }
+            }
+
+            findFarthest: while (true) {
+                currentTile.visited = true;
+                const {up, right, down, left} = currentTile.getAdjacentItems(true);
+                const adjacent = [up, right, down, left];
+
+                for (let direction = 0; direction < 4; direction++) {
+                    // Skip directions that the current tile is not connected to
+                    if (currentTile.value !== 'S' && ! pipeConnections[currentTile.value].includes(direction)) {
+                        continue;
+                    }
+
+                    const nextTile = adjacent[direction];
+
+                    // Stop when back at the starting point
+                    if (nextTile.value === 'S') {
+                        break findFarthest;
+                    }
+
+                    // Skip empty and visited tiles
+                    if (nextTile === undefined || nextTile.value === '.' || nextTile.visited === true) {
+                        continue;
+                    }
+
+                    const oppositeDirection = (direction + 2) % 4;
+                    if (pipeConnections[nextTile.value].includes(oppositeDirection)) {
+                        // Set the steps amount in the next tile
+                        nextTile.steps = currentTile.steps + 1;
+
+                        // Update the farthest tile if needed
+                        if (nextTile.steps > farthestTile.steps) {
+                            farthestTile = nextTile;
+                        }
+
+                        currentTile = nextTile;
+                        continue findFarthest;
+                    }
+                }
+            }
+
+            // The farthest distance is half of the steps when completing the loop
+            document.querySelector('.answer').innerText = (farthestTile.steps + 1) / 2;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
