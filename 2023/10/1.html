@@ -29,7 +29,6 @@
 
             let currentTile = maze.find2d(tile => tile.value === 'S');
             currentTile.steps = 0;
-            let farthestTile = currentTile;
 
             // Add the pipe connections of the start tile
             pipeConnections['S'] = [];
@@ -38,54 +37,50 @@
             for (let direction = 0; direction < 4; direction++) {
                 const oppositeDirection = (direction + 2) % 4;
                 const nextTile = adjacent[direction];
-                if (nextTile !== undefined && nextTile.value !== '.'
-                    && pipeConnections[nextTile.value].includes(oppositeDirection)
-                ) {
+
+                if (pipeConnections[nextTile?.value]?.includes(oppositeDirection)) {
                     pipeConnections['S'].push(direction);
                 }
             }
 
-            findFarthest: while (true) {
-                currentTile.visited = true;
-                const {up, right, down, left} = currentTile.getAdjacentItems(true);
-                const adjacent = [up, right, down, left];
-
-                for (let direction = 0; direction < 4; direction++) {
-                    // Skip directions that the current tile is not connected to
-                    if (currentTile.value !== 'S' && ! pipeConnections[currentTile.value].includes(direction)) {
-                        continue;
-                    }
-
-                    const nextTile = adjacent[direction];
-
-                    // Stop when back at the starting point
-                    if (nextTile.value === 'S') {
-                        break findFarthest;
-                    }
-
-                    // Skip empty and visited tiles
-                    if (nextTile === undefined || nextTile.value === '.' || nextTile.visited === true) {
-                        continue;
-                    }
-
-                    const oppositeDirection = (direction + 2) % 4;
-                    if (pipeConnections[nextTile.value].includes(oppositeDirection)) {
-                        // Set the steps amount in the next tile
-                        nextTile.steps = currentTile.steps + 1;
-
-                        // Update the farthest tile if needed
-                        if (nextTile.steps > farthestTile.steps) {
-                            farthestTile = nextTile;
-                        }
-
-                        currentTile = nextTile;
-                        continue findFarthest;
-                    }
+            // Get a neighbour tile, based on direction
+            const getNextTile = (current, direction) => {
+                switch (direction) {
+                    case 0:
+                        return maze.getItem(current.x, current.y - 1);
+                    case 1:
+                        return maze.getItem(current.x + 1, current.y);
+                    case 2:
+                        return maze.getItem(current.x, current.y + 1);
+                    case 3:
+                        return maze.getItem(current.x - 1, current.y);
                 }
             }
 
+            while (true) {
+                // The next direction is not the one it just came from
+                const nextDirection = pipeConnections[currentTile.value]
+                    .filter(direction => direction !== currentTile.previousDirection)
+                    .at(0);
+
+                const nextTile = getNextTile(currentTile, nextDirection);
+
+                // Stop when back at the starting point
+                if (nextTile.value === 'S') {
+                    break;
+                }
+
+                // Set the steps amount in the next tile
+                nextTile.steps = currentTile.steps + 1;
+                // Set the 'came from' direction, to prevent going back
+                const oppositeDirection = (nextDirection + 2) % 4;
+                nextTile.previousDirection = oppositeDirection;
+
+                currentTile = nextTile;
+            }
+
             // The farthest distance is half of the steps when completing the loop
-            document.querySelector('.answer').innerText = (farthestTile.steps + 1) / 2;
+            document.querySelector('.answer').innerText = (currentTile.steps + 1) / 2;
 
             console.timeEnd('Time elapsed');
         </script>
