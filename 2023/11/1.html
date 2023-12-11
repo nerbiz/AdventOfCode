@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const space = await fileReader.parse();
+            console.time('Time elapsed');
+
+            // Get all row and column indexes, to see which ones are missing
+            const yIndexes = [];
+            const xIndexes = [];
+            const galaxies = [];
+            for (let y = 0; y < space.length; y++) {
+                for (let x = 0; x < space[0].length; x++) {
+                    if (space[y][x] === '#') {
+                        xIndexes[x] = 1;
+                        yIndexes[y] = 1;
+                        galaxies.push([x, y]);
+                    }
+                }
+            }
+
+            let xExpansion = 0;
+            let yExpansion = 0;
+            const expandedGalaxies = [];
+            let currentPoint = galaxies.shift();
+            expand: for (let y = 0; y < space.length; y++) {
+                xExpansion = 0;
+
+                for (let x = 0; x < space[0].length; x++) {
+                    // Increase the coordinates based on the expansion so far
+                    if (currentPoint[0] === x && currentPoint[1] === y) {
+                        currentPoint[0] += xExpansion;
+                        currentPoint[1] += yExpansion;
+
+                        // Take the next coordinates to check
+                        expandedGalaxies.push(currentPoint);
+                        currentPoint = galaxies.shift();
+
+                        if (currentPoint === undefined) {
+                            break expand;
+                        }
+                    }
+
+                    // Increase the X expansion if an index is missing
+                    xExpansion += Number(xIndexes[x] !== 1);
+                }
+
+                // Increase the Y expansion if an index is missing
+                yExpansion += Number(yIndexes[y] !== 1);
+            }
+
+            document.querySelector('.answer').innerText = expandedGalaxies
+                .map((current, index) => expandedGalaxies
+                    .slice(index + 1)
+                    // Get the Manhattan distance to other galaxies
+                    .reduce((total, other) => total
+                        + Math.abs(other[0] - current[0])
+                        + Math.abs(other[1] - current[1]),
+                    0)
+                )
+                // Sum up all distances
+                .reduce((total, current) => total + current, 0);
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
