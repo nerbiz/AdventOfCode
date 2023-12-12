@@ -79,7 +79,7 @@ export default class ArrayPrototype
              * @returns {number}
              */
             value: function sum() {
-                return this.reduce((sum, item) => (sum + item), 0);
+                return this.reduce((sum, item) => (sum + (item - 0)), 0);
             },
             enumerable: false,
             writable: false,
