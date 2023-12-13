@@ -13,68 +13,75 @@
             import Parser from './Parser.js';
 
             const fileReader = new FileReader('./data.txt', new Parser(), false);
-            const valleys = await fileReader.parse();
+            let valleys = await fileReader.parse();
             console.time('Time elapsed');
+
+            // Convert ./# in each row and column to 0/1, then make it a number
+            valleys = valleys.map(valley => {
+                const rows = [];
+                const columns = new Array(valley[0].length).fill('');
+
+                for (let y = 0; y < valley.length; y++) {
+                    rows.push(parseInt(valley[y].replaceAll('.', '0').replaceAll('#', '1'), 2));
+
+                    for (let x = 0; x < valley[0].length; x++) {
+                        columns[x] += valley[y][x];
+                    }
+                }
+
+                return {
+                    rows,
+                    columns: columns.map(column => parseInt(column.replaceAll('.', '0').replaceAll('#', '1'), 2)),
+                };
+            });
+
+            const getDifference = (items, index1, index2) => {
+                let bitsDifference = (items[index1] ^ items[index2]);
+
+                // Count the amount of set bits in the difference
+                let bitsCount = 0;
+                while (bitsDifference > 0) {
+                    bitsDifference &= (bitsDifference - 1);
+                    bitsCount++;
+                }
+
+                // If there are items in between, add their difference bits count
+                if (index2 - index1 > 1) {
+                    bitsCount += getDifference(items, index1 + 1, index2 - 1);
+                }
+
+                return bitsCount;
+            };
 
             let score = 0;
 
             for (const valley of valleys) {
-                let topSide;
-                let bottomSide;
-                let leftSide;
-                let rightSide;
-
-                // Check for mirrored rows
-                for (let rowIndex = 0; rowIndex < valley.length - 1; rowIndex++) {
-                    if (valley[rowIndex] === valley[rowIndex + 1]) {
-                        if (rowIndex + 1 > valley.length / 2) {
-                            // Top side is larger, so it must be limited to the size of bottom side
-                            const startIndex = (rowIndex + 1) - (valley.length - 1 - rowIndex);
-                            topSide = valley.slice(startIndex, rowIndex + 1).reverse().join('');
-                            bottomSide = valley.slice(rowIndex + 1).join('');
-                            if (topSide === bottomSide) {
-                                score += (rowIndex + 1) * 100;
-                            }
-                        } else {
-                            // Bottom side is larger, so it must be limited to the size of top side
-                            const endIndex = (rowIndex + 1) * 2;
-                            topSide = valley.slice(0, rowIndex + 1).reverse().join('');
-                            bottomSide = valley.slice(rowIndex + 1, endIndex).join('');
-                            if (topSide === bottomSide) {
-                                score += (rowIndex + 1) * 100;
-                            }
-                        }
+                // Mirroring goes all the way to the sides,
+                // so only check the from the first and last row/column
+                // Skip 2 in each loop, even numbers are needed because of mirroring
+                for (let rowIndex = 1; rowIndex < valley.rows.length; rowIndex += 2) {
+                    if (getDifference(valley.rows, 0, rowIndex) === 0) {
+                        score += (0 + rowIndex + 1) / 2 * 100;
                     }
                 }
 
-                // Get the valley columns, as strings
-                const columns = new Array(valley[0].length).fill('');
-                for (const row of valley) {
-                    for (let columnIndex = 0; columnIndex < row.length; columnIndex++) {
-                        columns[columnIndex] += row[columnIndex];
+                let lastIndex = valley.rows.length - 1;
+                for (let rowIndex = lastIndex - 1; rowIndex >= 0; rowIndex -= 2) {
+                    if (getDifference(valley.rows, rowIndex, lastIndex) === 0) {
+                        score += (lastIndex + rowIndex + 1) / 2 * 100;
                     }
                 }
 
-                // Check for mirrored columns
-                for (let columnIndex = 0; columnIndex < columns.length - 1; columnIndex++) {
-                    if (columns[columnIndex] === columns[columnIndex + 1]) {
-                        if (columnIndex + 1 > columns.length / 2) {
-                            // Left side is larger, so it must be limited to the size of right side
-                            const startIndex = (columnIndex + 1) - (columns.length - 1 - columnIndex);
-                            leftSide = columns.slice(startIndex, columnIndex + 1).reverse().join('');
-                            rightSide = columns.slice(columnIndex + 1).join('');
-                            if (leftSide === rightSide) {
-                                score += columnIndex + 1;
-                            }
-                        } else {
-                            // Right side is larger, so it must be limited to the size of left side
-                            const endIndex = (columnIndex + 1) * 2;
-                            leftSide = columns.slice(0, columnIndex + 1).reverse().join('');
-                            rightSide = columns.slice(columnIndex + 1, endIndex).join('');
-                            if (leftSide === rightSide) {
-                                score += columnIndex + 1;
-                            }
-                        }
+                for (let columnIndex = 1; columnIndex < valley.columns.length; columnIndex += 2) {
+                    if (getDifference(valley.columns, 0, columnIndex) === 0) {
+                        score += (0 + columnIndex + 1) / 2;
+                    }
+                }
+
+                lastIndex = valley.columns.length - 1;
+                for (let columnIndex = lastIndex - 1; columnIndex >= 0; columnIndex -= 2) {
+                    if (getDifference(valley.columns, columnIndex, lastIndex) === 0) {
+                        score += (lastIndex + columnIndex + 1) / 2;
                     }
                 }
             }
