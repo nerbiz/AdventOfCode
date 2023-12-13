@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser(), false);
+            let valleys = await fileReader.parse();
+            console.time('Time elapsed');
+
+            // Convert ./# in each row and column to 0/1, then make it a number
+            valleys = valleys.map(valley => {
+                const rows = [];
+                const columns = new Array(valley[0].length).fill('');
+
+                for (let y = 0; y < valley.length; y++) {
+                    rows.push(parseInt(valley[y].replaceAll('.', '0').replaceAll('#', '1'), 2));
+
+                    for (let x = 0; x < valley[0].length; x++) {
+                        columns[x] += valley[y][x];
+                    }
+                }
+
+                return {
+                    rows,
+                    columns: columns.map(column => parseInt(column.replaceAll('.', '0').replaceAll('#', '1'), 2)),
+                };
+            });
+
+            const getDifference = (items, index1, index2) => {
+                let bitsDifference = (items[index1] ^ items[index2]);
+
+                // Count the amount of set bits in the difference
+                let bitsCount = 0;
+                while (bitsDifference > 0) {
+                    bitsDifference &= (bitsDifference - 1);
+                    bitsCount++;
+                }
+
+                // If there are items in between, add their difference bits count
+                if (index2 - index1 > 1) {
+                    bitsCount += getDifference(items, index1 + 1, index2 - 1);
+                }
+
+                return bitsCount;
+            };
+
+            let score = 0;
+
+            for (const valley of valleys) {
+                // Mirroring goes all the way to the sides,
+                // so only check the from the first and last row/column
+                // Skip 2 in each loop, even numbers are needed because of mirroring
+                for (let rowIndex = 1; rowIndex < valley.rows.length; rowIndex += 2) {
+                    if (getDifference(valley.rows, 0, rowIndex) === 1) {
+                        score += (0 + rowIndex + 1) / 2 * 100;
+                    }
+                }
+
+                let lastIndex = valley.rows.length - 1;
+                for (let rowIndex = lastIndex - 1; rowIndex >= 0; rowIndex -= 2) {
+                    if (getDifference(valley.rows, rowIndex, lastIndex) === 1) {
+                        score += (lastIndex + rowIndex + 1) / 2 * 100;
+                    }
+                }
+
+                for (let columnIndex = 1; columnIndex < valley.columns.length; columnIndex += 2) {
+                    if (getDifference(valley.columns, 0, columnIndex) === 1) {
+                        score += (0 + columnIndex + 1) / 2;
+                    }
+                }
+
+                lastIndex = valley.columns.length - 1;
+                for (let columnIndex = lastIndex - 1; columnIndex >= 0; columnIndex -= 2) {
+                    if (getDifference(valley.columns, columnIndex, lastIndex) === 1) {
+                        score += (lastIndex + columnIndex + 1) / 2;
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = score;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
