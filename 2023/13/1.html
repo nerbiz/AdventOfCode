@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser(), false);
+            const valleys = await fileReader.parse();
+            console.time('Time elapsed');
+
+            let score = 0;
+
+            for (const valley of valleys) {
+                let topSide;
+                let bottomSide;
+                let leftSide;
+                let rightSide;
+
+                // Check for mirrored rows
+                for (let rowIndex = 0; rowIndex < valley.length - 1; rowIndex++) {
+                    if (valley[rowIndex] === valley[rowIndex + 1]) {
+                        if (rowIndex + 1 > valley.length / 2) {
+                            // Left side is larger, so it must be limited to the size of right side
+                            const startIndex = (rowIndex + 1) - (valley.length - 1 - rowIndex);
+                            topSide = valley.slice(startIndex, rowIndex + 1).reverse().join('');
+                            bottomSide = valley.slice(rowIndex + 1).join('');
+                            if (topSide === bottomSide) {
+                                score += (rowIndex + 1) * 100;
+                            }
+                        } else {
+                            // Right side is larger, so it must be limited to the size of left side
+                            const endIndex = (rowIndex + 1) * 2;
+                            topSide = valley.slice(0, rowIndex + 1).reverse().join('');
+                            bottomSide = valley.slice(rowIndex + 1, endIndex).join('');
+                            if (topSide === bottomSide) {
+                                score += (rowIndex + 1) * 100;
+                            }
+                        }
+                    }
+                }
+
+                // Get the valley columns, as strings
+                const columns = new Array(valley[0].length).fill('');
+                for (const row of valley) {
+                    for (let columnIndex = 0; columnIndex < row.length; columnIndex++) {
+                        columns[columnIndex] += row[columnIndex];
+                    }
+                }
+
+                // Check for mirrored columns
+                for (let columnIndex = 0; columnIndex < columns.length - 1; columnIndex++) {
+                    if (columns[columnIndex] === columns[columnIndex + 1]) {
+                        if (columnIndex + 1 > columns.length / 2) {
+                            // Left side is larger, so it must be limited to the size of right side
+                            const startIndex = (columnIndex + 1) - (columns.length - 1 - columnIndex);
+                            leftSide = columns.slice(startIndex, columnIndex + 1).reverse().join('');
+                            rightSide = columns.slice(columnIndex + 1).join('');
+                            if (leftSide === rightSide) {
+                                score += columnIndex + 1;
+                            }
+                        } else {
+                            // Right side is larger, so it must be limited to the size of left side
+                            const endIndex = (columnIndex + 1) * 2;
+                            leftSide = columns.slice(0, columnIndex + 1).reverse().join('');
+                            rightSide = columns.slice(columnIndex + 1, endIndex).join('');
+                            if (leftSide === rightSide) {
+                                score += columnIndex + 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = score;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
