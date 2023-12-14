@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const reflectorDish = await fileReader.parse();
+            console.time('Time elapsed');
+
+            const states = [];
+            let duplicateFound = false;
+
+            // For the load calculation at the end of each cycle
+            let totalLoad;
+
+            // Make the target amount of cycles 0-based
+            const totalCycles = 1e9 - 1;
+            let cyclesRemaining = totalCycles;
+
+            while (--cyclesRemaining >= 0) {
+                // Tilt north
+                for (let x = 0; x < reflectorDish[0].length; x++) {
+                    // The index at which the next rounded rock will stop moving
+                    let stopAt = 0;
+
+                    for (let y = 0; y < reflectorDish.length; y++) {
+                        if (reflectorDish[y][x] === '#') {
+                            stopAt = y + 1;
+                        } else if (reflectorDish[y][x] === 'O') {
+                            reflectorDish[y][x] = '.';
+                            reflectorDish[stopAt][x] = 'O';
+                            stopAt++;
+                        }
+                    }
+                }
+
+                // Tilt west
+                for (let y = 0; y < reflectorDish.length; y++) {
+                    // The index at which the next rounded rock will stop moving
+                    let stopAt = 0;
+
+                    for (let x = 0; x < reflectorDish[0].length; x++) {
+                        if (reflectorDish[y][x] === '#') {
+                            stopAt = x + 1;
+                        } else if (reflectorDish[y][x] === 'O') {
+                            reflectorDish[y][x] = '.';
+                            reflectorDish[y][stopAt] = 'O';
+                            stopAt++;
+                        }
+                    }
+                }
+
+                // Tilt south
+                for (let x = 0; x < reflectorDish[0].length; x++) {
+                    // The index at which the next rounded rock will stop moving
+                    let stopAt = reflectorDish.length - 1;
+
+                    for (let y = reflectorDish.length - 1; y >= 0; y--) {
+                        if (reflectorDish[y][x] === '#') {
+                            stopAt = y - 1;
+                        } else if (reflectorDish[y][x] === 'O') {
+                            reflectorDish[y][x] = '.';
+                            reflectorDish[stopAt][x] = 'O';
+                            stopAt--;
+                        }
+                    }
+                }
+
+                let currentState = '';
+                totalLoad = 0;
+
+                // Tilt east
+                for (let y = 0; y < reflectorDish.length; y++) {
+                    // The index at which the next rounded rock will stop moving
+                    let stopAt = reflectorDish[0].length - 1;
+
+                    for (let x = reflectorDish[0].length - 1; x >= 0; x--) {
+                        if (reflectorDish[y][x] === '#') {
+                            stopAt = x - 1;
+                        } else if (reflectorDish[y][x] === 'O') {
+                            reflectorDish[y][x] = '.';
+                            reflectorDish[y][stopAt] = 'O';
+                            stopAt--;
+
+                            currentState += x + ',' + y + '|';
+                            totalLoad += reflectorDish.length - y;
+                        }
+                    }
+                }
+
+                if (! duplicateFound) {
+                    // See if the current state is a duplicate of another
+                    const firstOccurrenceIndex = states.indexOf(currentState);
+
+                    if (firstOccurrenceIndex > -1) {
+                        // Indicates that checking is not needed anymore
+                        duplicateFound = true;
+
+                        // The amount of completed cycles for the calculation below
+                        const cyclesDone = totalCycles - cyclesRemaining;
+
+                        // Reduce the amount of remaining cycles, by removing as many repeating parts as possible
+                        // First remove the amount of cycles before recurrence happened
+                        cyclesRemaining = (totalCycles - firstOccurrenceIndex)
+                            // Then use a modulo with the size of the repeating part
+                            % (cyclesDone - (firstOccurrenceIndex + 1));
+
+                        continue;
+                    }
+
+                    // Add the current state for duplicate checking
+                    states.push(currentState);
+                }
+            }
+
+            document.querySelector('.answer').innerText = totalLoad;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
