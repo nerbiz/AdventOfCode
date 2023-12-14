@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const reflectorDish = await fileReader.parse();
+            console.time('Time elapsed');
+
+            let totalLoad = 0;
+
+            for (let x = 0; x < reflectorDish[0].length; x++) {
+                // The index at which the next rounded rock will stop moving
+                let stopAt = 0;
+
+                for (let y = 0; y < reflectorDish.length; y++) {
+                    switch (reflectorDish[y][x]) {
+                        case '#':
+                            stopAt = y + 1;
+                            break;
+                        case 'O':
+                            totalLoad += reflectorDish.length - stopAt;
+                            stopAt++;
+                            break;
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = totalLoad;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
