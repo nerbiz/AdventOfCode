@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const sequence = await fileReader.parse();
+            console.time('Time elapsed');
+
+            const hash = string => {
+                let hashed = 0;
+                for (const letter of string) {
+                    hashed = ((hashed + letter.charCodeAt(0)) * 17) % 256;
+                }
+
+                return hashed;
+            };
+
+            // Store label:index pairs for reuse (index is the hash)
+            const labelIndexMap = {};
+
+            // The same sequence, but with a reduced amount of steps
+            const newSequence = {};
+
+            // First reduce the amount of steps by keeping only 1 per label
+            // Example: pc=4,pc-,pc=6 results in pc=6
+            // Example: ot=9,ot=7 results in ot=7
+            for (const string of sequence) {
+                // Split the string by = or -
+                const [label, focalLength] = string.split(/[-=]/);
+
+                // Store the index of the label, for reuse
+                labelIndexMap[label] ||= hash(label);
+
+                // Add/replace or remove from the new sequence
+                (focalLength === '')
+                    ? delete newSequence[label]
+                    : newSequence[label] = focalLength - 0;
+            }
+
+            // Keeps track of amount of lens slots per box (index=box, value=amount)
+            const boxSlotAmounts = [];
+
+            document.querySelector('.answer').innerText = Object.entries(newSequence)
+                .reduce((total, [label, focalLength]) => {
+                    // Increase the amount of slots of the box
+                    const boxNumber = labelIndexMap[label] + 1;
+                    boxSlotAmounts[boxNumber] ||= 0;
+                    boxSlotAmounts[boxNumber]++;
+                    const slotNumber = boxSlotAmounts[boxNumber];
+
+                    return total + (boxNumber * slotNumber * focalLength);
+                }, 0);
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
