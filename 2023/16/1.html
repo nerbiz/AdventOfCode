@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const contraption = await fileReader.parse();
+            console.time('Time elapsed');
+
+            /*
+            Direction numbers are 0:up, 1:right, 2:down, 3:left
+            */
+
+            // Get the next coordinates from a current point and direction
+            const nextCoordinates = (x, y, direction) => [
+                [x, y - 1],
+                [x + 1, y],
+                [x, y + 1],
+                [x - 1, y],
+            ][direction];
+
+            // The change of direction when encountering a mirror
+            // Indexes are current directions
+            const mirrorDirectionMapping = {
+                '\\': [3, 2, 1, 0],
+                '/': [1, 0, 3, 2],
+            };
+
+            const beamsQueue = [
+                {x: 0, y: 0, direction: 1},
+            ];
+
+            const energizedTiles = new Set();
+            const visitedSplitters = new Set();
+
+            moveBeams: while (beamsQueue.length > 0) {
+                // Move each beam 1 step
+                for (let i = beamsQueue.length - 1; i >= 0; i--) {
+                    const {x, y, direction} = beamsQueue[i];
+                    const tile = contraption[y]?.[x];
+
+                    // Remove the beam when leaving the contraption
+                    if (tile === undefined) {
+                        beamsQueue.splice(i, 1);
+                        continue moveBeams;
+                    }
+
+                    // Add the current tile to the energized list
+                    energizedTiles.add(x + ',' + y);
+
+                    if (tile === '-' && (direction & 1) === 0) {
+                        beamsQueue.splice(i, 1);
+                        const coordinates = x + ',' + y;
+                        if (visitedSplitters.has(coordinates)) {
+                            continue moveBeams;
+                        }
+                        let [nextX, nextY] = nextCoordinates(x, y, 1);
+                        beamsQueue.push({x: nextX, y: nextY, direction: 1});
+                        [nextX, nextY] = nextCoordinates(x, y, 3);
+                        beamsQueue.push({x: nextX, y: nextY, direction: 3});
+                        visitedSplitters.add(coordinates);
+                        continue moveBeams;
+                    } else if (tile === '|' && (direction & 1) === 1) {
+                        beamsQueue.splice(i, 1);
+                        const coordinates = x + ',' + y;
+                        if (visitedSplitters.has(coordinates)) {
+                            continue moveBeams;
+                        }
+                        let [nextX, nextY] = nextCoordinates(x, y, 0);
+                        beamsQueue.push({x: nextX, y: nextY, direction: 0});
+                        [nextX, nextY] = nextCoordinates(x, y, 2);
+                        beamsQueue.push({x: nextX, y: nextY, direction: 2});
+                        visitedSplitters.add(coordinates);
+                        continue moveBeams;
+                    }
+
+                    // Change the direction of the beam
+                    if (tile === '\\' || tile === '/') {
+                        beamsQueue[i].direction = mirrorDirectionMapping[tile][direction];
+                    }
+
+                    // Update the X and Y of the beam for the next iteration
+                    const [nextX, nextY] = nextCoordinates(x, y, beamsQueue[i].direction);
+                    beamsQueue[i].x = nextX;
+                    beamsQueue[i].y = nextY;
+                }
+            }
+
+            document.querySelector('.answer').innerText = energizedTiles.size;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
