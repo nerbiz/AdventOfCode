@@ -32,7 +32,7 @@
             const endPoint = riskMap.getItem(riskMap.length - 1, riskMap[0].length - 1);
             const path = Pathfinding.dijkstra(riskMap, startPoint, endPoint);
 
-            document.querySelector('.answer').innerText = endPoint.distance;
+            document.querySelector('.answer').innerText = endPoint.dijkstra.distance;
         </script>
     </body>
 </html>
