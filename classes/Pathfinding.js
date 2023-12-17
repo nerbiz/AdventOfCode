@@ -94,30 +94,35 @@ export default class Pathfinding
     {
         // Reset pathfinding properties of all nodes
         grid.forEach2d(node => {
-            node.distance = Infinity;
-            node.previous = undefined;
-            node.visited = false;
+            // Group pathfinding values in a separate property
+            node.dijkstra = {
+                distance: Infinity,
+                previous: undefined,
+                visited: false,
+                isEnqueued: false,
+            };
         });
 
-        startNode.distance = 0;
+        startNode.dijkstra.distance = 0;
         const unvisitedQueue = new PriorityQueue();
-        unvisitedQueue.enqueue(startNode.distance, startNode);
+        unvisitedQueue.enqueue(startNode.dijkstra.distance, startNode);
 
         findTarget: while (! unvisitedQueue.isEmpty()) {
             // Get the next nearest node from the unvisited queue
             const nearestNode = unvisitedQueue.dequeue();
+            nearestNode.dijkstra.isEnqueued = false;
 
             for (const adjacent of nearestNode.getAdjacentItems()) {
                 // The adjacent node should not be visited yet
-                if (adjacent === undefined || adjacent.visited === true) {
+                if (adjacent === undefined || adjacent.dijkstra.visited === true) {
                     continue;
                 }
 
                 // Update the distance in the adjacent node, if the distance is smaller
-                const newDistance = nearestNode.distance + adjacent.value;
-                if (newDistance < adjacent.distance) {
-                    adjacent.distance = newDistance;
-                    adjacent.previous = nearestNode;
+                const newDistance = nearestNode.dijkstra.distance + adjacent.value;
+                if (newDistance < adjacent.dijkstra.distance) {
+                    adjacent.dijkstra.distance = newDistance;
+                    adjacent.dijkstra.previous = nearestNode;
                 }
 
                 // Stop searching after the target node is reached
@@ -125,21 +130,22 @@ export default class Pathfinding
                     break findTarget;
                 }
 
-                // Add the adjacent node to the queue, if it's not in there yet
-                if (! unvisitedQueue.has(adjacent)) {
-                    unvisitedQueue.enqueue(adjacent.distance, adjacent);
+                // Add the adjacent node to the queue, if it's in the queue yet
+                if (adjacent.dijkstra.isEnqueued === false) {
+                    adjacent.dijkstra.isEnqueued = true;
+                    unvisitedQueue.enqueue(adjacent.dijkstra.distance, adjacent);
                 }
             }
 
-            nearestNode.visited = true;
+            nearestNode.dijkstra.visited = true;
         }
 
         // Construct the path
         const path = [];
         let currentNode = targetNode;
-        while (currentNode.previous !== undefined) {
+        while (currentNode.dijkstra.previous !== undefined) {
             path.push(currentNode);
-            currentNode = currentNode.previous;
+            currentNode = currentNode.dijkstra.previous;
         }
 
         // Reverse the path, to go from start to end
