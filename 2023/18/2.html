@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const digPlan = await fileReader.parse();
+            console.time('Time elapsed');
+
+            const directions = ['R', 'D', 'L', 'U'];
+
+            let currentX = 0;
+            let currentY = 0;
+            let lowestX = currentX;
+            let lowestY = currentY;
+            const path = [
+                [currentX, currentY],
+            ];
+            let perimeterLength = 0;
+
+            for (const [,, hexadecimal] of digPlan) {
+                // Convert the hexadecimal to amount and direction
+                const amount = parseInt(hexadecimal.slice(0, 5), 16);
+                const direction = directions[hexadecimal.slice(5) - 0];
+
+                switch (direction) {
+                    case 'U':
+                        currentY -= amount;
+                        lowestY = Math.min(lowestY, currentY);
+                        break;
+                    case 'D':
+                        currentY += amount;
+                        break;
+                    case 'L':
+                        currentX -= amount;
+                        lowestX = Math.min(lowestX, currentX);
+                        break;
+                    case 'R':
+                        currentX += amount;
+                        break;
+                }
+
+                perimeterLength += amount;
+                path.push([currentX, currentY]);
+            }
+
+            // Use the Shoelace formula to calculate the area of the loop
+            function getArea(points) {
+                // The lowest X/Y could be negative, increase every coordinate by that,
+                // to get positive coordinates only
+                const increaseX = Math.abs(lowestX);
+                const increaseY = Math.abs(lowestY);
+
+                let area = 0;
+                for (let i = 0; i < points.length - 1; i++) {
+                    // Add the cross product of the current vertex and the next vertex
+                    area += (points[i][0] + increaseX) * (points[i + 1][1] + increaseY);
+                    // Subtract the cross product of the next vertex and the current vertex
+                    area -= (points[i][1] + increaseY) * (points[i + 1][0] + increaseX);
+                }
+
+                // Closing the loop: include the product of the last and first points
+                area += (points.at(-1)[0] + increaseX) * (points[0][1] + increaseY);
+                area -= (points.at(-1)[1] + increaseY) * (points[0][0] + increaseX);
+
+                return Math.abs(area / 2);
+            }
+
+            document.querySelector('.answer').innerText = getArea(path)
+                + (perimeterLength / 2) + 1;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>

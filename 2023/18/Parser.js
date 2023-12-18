@@ -8,7 +8,7 @@ export default class Parser
     parse(linesArray)
     {
         return linesArray.map(line => {
-            let [direction, amount, color] = line.replace(/[()]/g, '').split(' ');
+            let [direction, amount, color] = line.replace(/[()#]/g, '').split(' ');
             amount -= 0;
             return [direction, amount, color];
         });
