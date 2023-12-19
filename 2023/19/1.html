@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const { workflows, parts } = await fileReader.parse();
+            console.time('Time elapsed');
+
+            const isAccepted = (part, workflow = 'in') => {
+                for (const rule of workflows[workflow]) {
+                    if (
+                        rule.compare === '<' && part[rule.category] < rule.value
+                        || rule.compare === '>' && part[rule.category] > rule.value
+                    ) {
+                        // See if the part is accepted or rejected
+                        if (rule.next === 'A' || rule.next === 'R') {
+                            return (rule.next === 'A');
+                        }
+
+                        // Otherwise check with the next workflow
+                        return isAccepted(part, rule.next);
+                    }
+                }
+            };
+
+            document.querySelector('.answer').innerText = parts
+                .filter(part => isAccepted(part))
+                .map(part => part.x + part.m + part.a + part.s, 0)
+                .reduce((sum, current) => sum + current, 0);
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
