@@ -23,81 +23,58 @@
                     .map(([name, minMax]) => [name, minMax.slice(0)])
             );
 
-            const acceptedParts = [];
-
-            const findAcceptedParts = (workflowName, amounts) => {
-                // Treat every rule as a filter, changing min/max of the amounts
+            const findAcceptedParts = (workflowName, amounts, accepted = []) => {
+                // Treat every rule as a filter, changing the min/max values
                 for (const rule of workflows[workflowName]) {
                     const minMax = amounts[rule.category];
+                    let matchedMinMax = null;
+                    let unmatchedMinMax = null;
 
+                    // See if the min/max completely, completely not, or partially matches the rule
                     if (rule.compare === '<') {
-                        // Min/max completely matches the rule, go to next workflow
                         if (minMax[1] < rule.value) {
-                            if (rule.next === 'A') {
-                                acceptedParts.push(cloneAmounts(amounts));
-                            } else if (rule.next !== 'R') {
-                                findAcceptedParts(rule.next, cloneAmounts(amounts));
-                            }
-                            break;
+                            matchedMinMax = minMax;
+                        } else if (minMax[0] >= rule.value) {
+                            unmatchedMinMax = minMax;
+                        } else {
+                            matchedMinMax = [minMax[0], rule.value - 1];
+                            unmatchedMinMax = [rule.value, minMax[1]];
                         }
-
-                        // Min/max completely doesn't match the rule, continue to next rule
-                        else if (minMax[0] >= rule.value) {
-                            continue;
-                        }
-
-                        // Min/max partly matches, split up for the next steps
-                        else {
-                            const maxBackup = minMax[1];
-                            minMax[1] = rule.value - 1;
-                            if (rule.next === 'A') {
-                                acceptedParts.push(cloneAmounts(amounts));
-                            } else if (rule.next !== 'R') {
-                                findAcceptedParts(rule.next, cloneAmounts(amounts));
-                            }
-
-                            minMax[0] = rule.value;
-                            minMax[1] = maxBackup;
-                            continue;
+                    } else if (rule.compare === '>') {
+                        if (minMax[0] > rule.value) {
+                            matchedMinMax = minMax;
+                        } else if (minMax[1] <= rule.value) {
+                            unmatchedMinMax = minMax;
+                        } else {
+                            matchedMinMax = [rule.value + 1, minMax[1]];
+                            unmatchedMinMax = [minMax[0], rule.value];
                         }
                     }
 
-                    else if (rule.compare === '>') {
-                        // Min/max completely matches the rule, go to next workflow
-                        if (minMax[0] > rule.value) {
-                            if (rule.next === 'A') {
-                                acceptedParts.push(cloneAmounts(amounts));
-                            } else if (rule.next !== 'R') {
-                                findAcceptedParts(rule.next, cloneAmounts(amounts));
-                            }
-                            break;
-                        }
+                    if (matchedMinMax !== null) {
+                        minMax[0] = matchedMinMax[0];
+                        minMax[1] = matchedMinMax[1];
 
-                        // Min/max completely doesn't match the rule, continue to next rule
-                        else if (minMax[1] <= rule.value) {
-                            continue;
+                        // Add if accepted, or go to the next workflow (skip when rejected)
+                        if (rule.next === 'A') {
+                            accepted.push(cloneAmounts(amounts));
+                        } else if (rule.next !== 'R') {
+                            findAcceptedParts(rule.next, cloneAmounts(amounts), accepted);
                         }
+                    }
 
-                        // Min/max partly matches, split up for the next steps
-                        else {
-                            const minBackup = minMax[0];
-                            minMax[0] = rule.value + 1;
-                            if (rule.next === 'A') {
-                                acceptedParts.push(cloneAmounts(amounts));
-                            } else if (rule.next !== 'R') {
-                                findAcceptedParts(rule.next, cloneAmounts(amounts));
-                            }
-
-                            minMax[0] = minBackup;
-                            minMax[1] = rule.value;
-                            continue;
-                        }
+                    if (unmatchedMinMax !== null) {
+                        // Update the min/max for the next rule
+                        minMax[0] = unmatchedMinMax[0];
+                        minMax[1] = unmatchedMinMax[1];
                     }
                 }
+
+                return accepted;
             };
 
             // Start with all categories with a min/max of 1/4000
-            findAcceptedParts('in', {
+            const acceptedParts = findAcceptedParts('in', {
                 x: [1, 4000],
                 m: [1, 4000],
                 a: [1, 4000],
