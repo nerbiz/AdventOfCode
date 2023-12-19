@@ -16,8 +16,8 @@
             const { workflows, parts } = await fileReader.parse();
             console.time('Time elapsed');
 
-            const isAccepted = (part, workflow = 'in') => {
-                for (const rule of workflows[workflow]) {
+            const isAccepted = (part, workflowName = 'in') => {
+                for (const rule of workflows[workflowName]) {
                     if (
                         rule.compare === '<' && part[rule.category] < rule.value
                         || rule.compare === '>' && part[rule.category] > rule.value

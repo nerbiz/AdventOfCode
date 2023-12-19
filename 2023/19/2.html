@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerSum();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const { workflows } = await fileReader.parse();
+            console.time('Time elapsed');
+
+            const cloneAmounts = amounts => Object.fromEntries(
+                Object.entries(amounts)
+                    .map(([name, minMax]) => [name, minMax.slice(0)])
+            );
+
+            const acceptedParts = [];
+
+            const findAcceptedParts = (workflowName, amounts) => {
+                // Treat every rule as a filter, changing min/max of the amounts
+                for (const rule of workflows[workflowName]) {
+                    const minMax = amounts[rule.category];
+
+                    if (rule.compare === '<') {
+                        // Min/max completely matches the rule, go to next workflow
+                        if (minMax[1] < rule.value) {
+                            if (rule.next === 'A') {
+                                acceptedParts.push(cloneAmounts(amounts));
+                            } else if (rule.next !== 'R') {
+                                findAcceptedParts(rule.next, cloneAmounts(amounts));
+                            }
+                            break;
+                        }
+
+                        // Min/max completely doesn't match the rule, continue to next rule
+                        else if (minMax[0] >= rule.value) {
+                            continue;
+                        }
+
+                        // Min/max partly matches, split up for the next steps
+                        else {
+                            const maxBackup = minMax[1];
+                            minMax[1] = rule.value - 1;
+                            if (rule.next === 'A') {
+                                acceptedParts.push(cloneAmounts(amounts));
+                            } else if (rule.next !== 'R') {
+                                findAcceptedParts(rule.next, cloneAmounts(amounts));
+                            }
+
+                            minMax[0] = rule.value;
+                            minMax[1] = maxBackup;
+                            continue;
+                        }
+                    }
+
+                    else if (rule.compare === '>') {
+                        // Min/max completely matches the rule, go to next workflow
+                        if (minMax[0] > rule.value) {
+                            if (rule.next === 'A') {
+                                acceptedParts.push(cloneAmounts(amounts));
+                            } else if (rule.next !== 'R') {
+                                findAcceptedParts(rule.next, cloneAmounts(amounts));
+                            }
+                            break;
+                        }
+
+                        // Min/max completely doesn't match the rule, continue to next rule
+                        else if (minMax[1] <= rule.value) {
+                            continue;
+                        }
+
+                        // Min/max partly matches, split up for the next steps
+                        else {
+                            const minBackup = minMax[0];
+                            minMax[0] = rule.value + 1;
+                            if (rule.next === 'A') {
+                                acceptedParts.push(cloneAmounts(amounts));
+                            } else if (rule.next !== 'R') {
+                                findAcceptedParts(rule.next, cloneAmounts(amounts));
+                            }
+
+                            minMax[0] = minBackup;
+                            minMax[1] = rule.value;
+                            continue;
+                        }
+                    }
+                }
+            };
+
+            // Start with all categories with a min/max of 1/4000
+            findAcceptedParts('in', {
+                x: [1, 4000],
+                m: [1, 4000],
+                a: [1, 4000],
+                s: [1, 4000],
+            });
+
+            document.querySelector('.answer').innerText = acceptedParts
+                // Multiply all possibilities
+                .map(part => (part.x[1] - part.x[0] + 1)
+                    * (part.m[1] - part.m[0] + 1)
+                    * (part.a[1] - part.a[0] + 1)
+                    * (part.s[1] - part.s[0] + 1)
+                )
+                // Sum up all possibilities
+                .sum();
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
