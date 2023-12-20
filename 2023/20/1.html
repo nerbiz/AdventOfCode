@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let modules = await fileReader.parse();
+            console.time('Time elapsed');
+
+            // Create a list of {type, name, next, power} modules, keyed by name
+            // Also make a list of occurrences (for destinations)
+            const occurrences = {};
+            modules = Object.fromEntries(
+                modules.map(([from, next]) => {
+                    let type = '';
+                    let name = from;
+
+                    if (from.startsWith('&') || from.startsWith('%')) {
+                        type = from.slice(0, 1);
+                        name = from.slice(1);
+                    }
+
+                    for (const nextName of next) {
+                        occurrences[nextName] ||= [];
+                        occurrences[nextName].push([name, 0]);
+                    }
+
+                    return (type === '%')
+                        ? [name, { type, name, next, power: 0 }]
+                        : [name, { type, name, next }];
+                })
+            );
+
+            // Add the 'inputs' property to conjunction modules
+            for (const name in modules) {
+                if (modules[name].type === '&') {
+                    modules[name].inputs = Object.fromEntries(occurrences[name]);
+                }
+            }
+
+            // Keeps track of sent pulses, index 0 = low, index 1 = high
+            const pulsesSent = [0, 0];
+
+            for (let buttonPress = 0; buttonPress < 1000; buttonPress++) {
+                const pulseQueue = [['button', 'broadcaster', 0]];
+
+                while (pulseQueue.length > 0) {
+                    const [fromName, moduleName, pulse] = pulseQueue.shift();
+                    const module = modules[moduleName];
+                    pulsesSent[pulse]++;
+
+                    // A valid module is needed to send pulses
+                    if (module === undefined) {
+                        continue;
+                    }
+
+                    switch (module.type) {
+                        case '':
+                            pulseQueue.push(...module.next.map(nextName => [moduleName, nextName, pulse]));
+                            break;
+                        case '%':
+                            // Flip-flop modules ignore high pulses
+                            if (pulse === 0) {
+                                module.power = Number(! module.power);
+                                pulseQueue.push(...module.next.map(nextName => [moduleName, nextName, module.power]));
+                            }
+                            break;
+                        case '&':
+                            // Update the pulse type with the received type
+                            module.inputs[fromName] = pulse;
+                            // Send a low pulse if all pulses are high, send a high pulse otherwise
+                            const allHigh = Object.values(module.inputs).every(status => status);
+                            pulseQueue.push(...module.next.map(nextName => [moduleName, nextName, Number(! allHigh)]));
+                            break;
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = pulsesSent[0] * pulsesSent[1];
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
