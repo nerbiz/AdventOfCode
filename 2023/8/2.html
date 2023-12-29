@@ -11,9 +11,9 @@
         <script type="module">
             import FileReader from '../../classes/FileReader.js';
             import Parser from './Parser.js';
-            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+            import MathExtension from '../../classes/MathExtension.js';
 
-            ArrayPrototype.registerProduct();
+            MathExtension.registerLcm();
             const fileReader = new FileReader('./data.txt', new Parser());
             let { instructions, network } = await fileReader.parse();
             console.time('Time elapsed');
@@ -37,47 +37,7 @@
                     return steps;
                 });
 
-            // Used for prime factorization
-            const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47,
-                53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
-
-            // The 'least common multiple' calculation needs prime factors and their occurrences
-            const mostOccurrences = {};
-
-            for (let steps of allSteps) {
-                const occurrences = {};
-
-                // Get prime factors of the amount of steps
-                for (let i = 0; i < primes.length; i++) {
-                    const prime = primes[i];
-
-                    if (steps % prime === 0) {
-                        // Increase the prime factor occurrence
-                        occurrences[prime] ||= 0;
-                        occurrences[prime]++;
-
-                        // Reduce the number and reset the loop,
-                        // check from first prime again
-                        steps /= prime;
-                        i = -1;
-                    }
-                }
-
-                // The number left over wasn't divisible by primes 2..97,
-                // so it's *probably* a prime. Add it to the occurrences
-                occurrences[steps] ||= 0;
-                occurrences[steps]++;
-
-                // Update the highest number of occurrences
-                for (const prime in occurrences) {
-                    mostOccurrences[prime] ||= 0;
-                    mostOccurrences[prime] = Math.max(mostOccurrences[prime], occurrences[prime]);
-                }
-            }
-
-            document.querySelector('.answer').innerText = Object.entries(mostOccurrences)
-                .map(([prime, occurrences]) => prime * occurrences)
-                .product();
+            document.querySelector('.answer').innerText = Math.lcm(...allSteps);
 
             console.timeEnd('Time elapsed');
         </script>
