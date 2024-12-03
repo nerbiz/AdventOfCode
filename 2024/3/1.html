@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const memory = await fileReader.parse();
+            console.time('Time elapsed');
+
+            const instructions = memory.matchAll(/mul\((\d{1,3}),(\d{1,3})\)/g);
+
+            document.querySelector('.answer').innerText = instructions
+                .map(instruction => (instruction[1] - 0) * (instruction[2] - 0))
+                .reduce((sum, multiplication) => sum + multiplication, 0);
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
