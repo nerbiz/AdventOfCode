@@ -22,15 +22,16 @@
                     const direction = report[1] > report[0];
 
                     return report.every((level, index) => {
+                        if (index === 0) {
+                            return true;
+                        }
+
                         const difference = Math.abs(level - report[index - 1]);
 
-                        return (index === 0) || (
-                            // The direction (asc/desc) needs to match
-                            (level > report[index - 1]) === direction
+                        return (level > report[index - 1]) === direction
                             && difference >= 1
-                            && difference <= 3
-                        )
-                    })
+                            && difference <= 3;
+                    });
                 })
                 .length;
 

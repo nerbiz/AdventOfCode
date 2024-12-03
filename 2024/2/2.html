@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const reports = await fileReader.parse();
+            console.time('Time elapsed');
+
+            function checkReport(report, skipIndex = null) {
+                // Determine the first indexes based on whether to skip them
+                const firstIndex = (skipIndex === 0) ? 1 : 0;
+                let secondIndex = firstIndex + 1;
+                secondIndex = (secondIndex === skipIndex) ? secondIndex + 1 : secondIndex;
+
+                // Determine direction (asc/desc) for comparing
+                const direction = report[secondIndex] > report[firstIndex];
+
+                return report.every((level, index) => {
+                    let previousIndex = index - 1;
+                    previousIndex = (previousIndex === skipIndex) ? previousIndex - 1 : previousIndex;
+
+                    if (index === skipIndex || previousIndex < 0) {
+                        return true;
+                    }
+
+                    const difference = Math.abs(level - report[previousIndex]);
+
+                    return (level > report[previousIndex]) === direction
+                        && difference >= 1
+                        && difference <= 3;
+                });
+            }
+
+            document.querySelector('.answer').innerText = reports
+                .filter(report => {
+                    if (checkReport(report)) {
+                        return true;
+                    }
+
+                    // If the report is unsafe, try again by skipping each level
+                    for (let skipIndex = 0; skipIndex < report.length; skipIndex++) {
+                        if (checkReport(report, skipIndex)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                })
+                .length;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
