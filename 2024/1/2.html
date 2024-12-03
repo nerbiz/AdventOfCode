@@ -14,16 +14,16 @@
             import ArrayPrototype from '../../classes/ArrayPrototype.js';
 
             ArrayPrototype.registerSum();
+            ArrayPrototype.registerCountValues();
             const fileReader = new FileReader('./data.txt', new Parser());
             const locationIds = await fileReader.parse();
             console.time('Time elapsed');
 
-            const rightList = locationIds.map(([, right]) => right).toSorted((a, b) => a - b);
+            const occurrences = locationIds.map(([, right]) => right).countValues(true);
 
             document.querySelector('.answer').innerText = locationIds
                 .map(([left]) => left)
-                .toSorted((a, b) => a - b)
-                .map((locationId, index) => Math.abs(rightList[index] - locationId))
+                .map(locationId => locationId * (occurrences[locationId] ?? 0))
                 .sum();
 
             console.timeEnd('Time elapsed');
