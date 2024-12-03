@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const reports = await fileReader.parse();
+            console.time('Time elapsed');
+
+            document.querySelector('.answer').innerText = reports
+                .filter(report => {
+                    // Determine direction (asc/desc) for comparing
+                    const direction = report[1] > report[0];
+
+                    return report.every((level, index) => {
+                        const difference = Math.abs(level - report[index - 1]);
+
+                        return (index === 0) || (
+                            // The direction (asc/desc) needs to match
+                            (level > report[index - 1]) === direction
+                            && difference >= 1
+                            && difference <= 3
+                        )
+                    })
+                })
+                .length;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
