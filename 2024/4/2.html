@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const wordSearch = await fileReader.parse();
+            console.time('Time elapsed');
+
+            let foundAmount = 0;
+
+            // Loop over all rows and columns
+            for (let y = 0; y < wordSearch.length; y++) {
+                for (let x = 0; x < wordSearch[y].length; x++) {
+                    if (
+                        // If an 'A' is found,
+                        wordSearch[y][x] === 'A'
+                        // See if the diagonals are 'M' and 'S' (can be in reverse)
+                        && (
+                            (wordSearch[y - 1]?.[x - 1] === 'M' && wordSearch[y + 1]?.[x + 1] === 'S')
+                            || (wordSearch[y - 1]?.[x - 1] === 'S' && wordSearch[y + 1]?.[x + 1] === 'M')
+                        )
+                        && (
+                            (wordSearch[y - 1]?.[x + 1] === 'M' && wordSearch[y + 1]?.[x - 1] === 'S')
+                            || (wordSearch[y - 1]?.[x + 1] === 'S' && wordSearch[y + 1]?.[x - 1] === 'M')
+                        )
+                    ) {
+                        foundAmount++;
+                    }
+                }
+            }
+
+            document.querySelector('.answer').innerText = foundAmount;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
