@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const wordSearch = await fileReader.parse();
+            console.time('Time elapsed');
+
+            // [x, y] pairs for getting surrounding coordinates
+            const directions = [
+                [-1, -1], // top-left
+                [0, -1],  // top
+                [1, -1],  // top-right
+                [-1, 0],  // left
+                [1, 0],   // right
+                [-1, 1],  // bottom-left
+                [0, 1],   // bottom
+                [1, 1],   // bottom-right
+            ];
+
+            const words = {
+                X: 'MAS'.split(''),
+                S: 'AMX'.split(''),
+            };
+
+            let foundAmount = 0;
+
+            // Loop over all rows and columns
+            for (let y = 0; y < wordSearch.length; y++) {
+                for (let x = 0; x < wordSearch[y].length; x++) {
+                    const letter = wordSearch[y][x];
+
+                    // See if the current letter is a starting letter
+                    if (letter in words) {
+                        // Try to find the word in all directions
+                        // By looking for 3 steps in the same direction
+                        for (const [dX, dY] of directions) {
+                            if (
+                                wordSearch[y + dY]?.[x + dX] === words[letter][0]
+                                && wordSearch[y + (dY * 2)]?.[x + (dX * 2)] === words[letter][1]
+                                && wordSearch[y + (dY * 3)]?.[x + (dX * 3)] === words[letter][2]
+                            ) {
+                                foundAmount++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Half, because each word is counted double (in reverse)
+            document.querySelector('.answer').innerText = foundAmount / 2;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
