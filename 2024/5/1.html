@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+            import ArrayPrototype from '../../classes/ArrayPrototype.js';
+
+            ArrayPrototype.registerSum();
+            const fileReader = new FileReader('./data.txt', new Parser());
+            let { pageOrdering, updates } = await fileReader.parse();
+            console.time('Time elapsed');
+
+            const tempPageOrdering = {};
+            for (const [before, after] of pageOrdering) {
+                tempPageOrdering[before] ??= [];
+                tempPageOrdering[before].push(after);
+            }
+            pageOrdering = tempPageOrdering;
+
+            document.querySelector('.answer').innerText = updates
+                .filter(pageNumbers => {
+                    for (let i = pageNumbers.length - 2; i >= 0; i--) {
+                        const currentNumber = pageNumbers[i];
+
+                        // If the number isn't in the list, it means it never goes before any other
+                        if (! (currentNumber in pageOrdering)) {
+                            return false;
+                        }
+
+                        // Check if all the following numbers are supposed to follow the current one
+                        const correct = pageNumbers
+                            .slice(i + 1)
+                            .every(number => pageOrdering[currentNumber].includes(number));
+
+                        if (! correct) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                })
+                .map(pageNumbers => {
+                    const middleIndex = Math.floor(pageNumbers.length / 2);
+                    return pageNumbers[middleIndex] - 0;
+                })
+                .sum();
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
