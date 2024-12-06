@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const map = await fileReader.parse();
+            console.time('Time elapsed');
+
+            // [x, y] pairs for top, right, bottom, left directions
+            const directions = [
+                [0, -1],
+                [1, 0],
+                [0, 1],
+                [-1, 0],
+            ];
+
+            let guardPosition = [0, 0];
+            let guardDirectionIndex = 0;
+
+            // Find the starting position of the guard
+            findGuard: for (let y = 0; y < map.length; y++) {
+                for (let x = 0; x < map[y].length; x++) {
+                    if (map[y][x] !== '.' && map[y][x] !== '#') {
+                        guardDirectionIndex = ['^', '>', 'v', '<'].findIndex(character => character === map[y][x]);
+                        guardPosition = [x, y];
+                        break findGuard;
+                    }
+                }
+            }
+
+            const visitedLocations = new Set([guardPosition.join(',')]);
+
+            // Loop while the guard isn't going off-map
+            while (true) {
+                const [dX, dY] = directions[guardDirectionIndex];
+                const newX = guardPosition[0] + dX;
+                const newY = guardPosition[1] + dY;
+                const tile = map[newY]?.[newX];
+
+                if (tile === undefined) {
+                    // Stop when the guard goes off-map
+                    break;
+                } else if (tile === '#') {
+                    // Change direction when reaching an obstacle
+                    guardDirectionIndex = (guardDirectionIndex + 1) % directions.length;
+                } else {
+                    // Otherwise move forward
+                    guardPosition = [newX, newY];
+                    visitedLocations.add(guardPosition.join(','));
+                }
+            }
+
+            document.querySelector('.answer').innerText = visitedLocations.size;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
