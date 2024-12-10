@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Advent of Code</title>
+        <link rel="stylesheet" href="../../style.css">
+    </head>
+    <body>
+        <p class="answer"></p>
+
+        <script type="module">
+            import FileReader from '../../classes/FileReader.js';
+            import Parser from './Parser.js';
+
+            const fileReader = new FileReader('./data.txt', new Parser());
+            const diskMap = await fileReader.parse();
+            console.time('Time elapsed');
+
+            let leftIdNumber = -1;
+            let newDiskMap = [];
+
+            let rightIndex = diskMap.length - 1;
+            let rightIdNumber = Math.floor(diskMap.length / 2);
+
+            function moveFromRightSide(freeSizeIndex) {
+                if (rightIndex < 0) {
+                    return [];
+                }
+
+                let freeSize = diskMap[freeSizeIndex];
+                let fileSize = diskMap[rightIndex];
+                let diskPart = [];
+
+                // See if the free space can be filled with a file
+                if (fileSize <= freeSize) {
+                    // The file fits entirely
+                    diskPart.push(...Array(fileSize).fill(rightIdNumber));
+
+                    freeSize -= fileSize;
+                    diskMap[rightIndex] = 0;
+
+                    rightIndex -= 2;
+                    rightIdNumber--;
+                } else {
+                    // The file is larger than the free space
+                    diskPart.push(...Array(freeSize).fill(rightIdNumber));
+
+                    diskMap[rightIndex] -= freeSize;
+                    freeSize = 0;
+                }
+
+                diskMap[freeSizeIndex] = freeSize;
+                if (freeSize > 0) {
+                    // There's still space left
+                    diskPart.push(...moveFromRightSide(freeSizeIndex));
+                }
+
+                return diskPart;
+            }
+
+            for (let leftIndex = 0; leftIndex < diskMap.length; leftIndex += 2) {
+                // Add the file ID as many times as the length of the file
+                leftIdNumber++;
+                const leftFileSize = diskMap[leftIndex];
+                newDiskMap.push(...Array(leftFileSize).fill(leftIdNumber));
+                diskMap[leftIndex] = 0;
+
+                // Fill the free space
+                newDiskMap.push(...moveFromRightSide(leftIndex + 1));
+            }
+
+            let sum = 0;
+            for (let i = 0; i < newDiskMap.length; i++) {
+                sum += i * newDiskMap[i];
+            }
+
+            document.querySelector('.answer').innerText = sum;
+
+            console.timeEnd('Time elapsed');
+        </script>
+    </body>
+</html>
